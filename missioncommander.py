@@ -10,6 +10,7 @@ import maths
 
 
 class main:
+
     def __init__( self ):
         self.shutdown = False
         self.initIVY()

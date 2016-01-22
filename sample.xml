@@ -12,16 +12,27 @@
   </waypoints>
 
   <commands>
-    <command name="MISSION_GOTO_WP_LLA"  id = "12" wp_lat="434622800" wp_lon="12729500" wp_alt="200" duration="30" />
+    <command name="MISSION_GOTO_WP_LLA"  id = "12" wp_lat="434622800" wp_lon="12729500" wp_alt="200" duration="30" geolock="1"/>
 
-    <command name="MISSION_CIRCLE_LLA"   id = "13" center_lat="434622800" center_lon="12729500" center_alt="200" radius="80" duration="30" />
+    <command name="MISSION_CIRCLE_LLA"   id = "13" center_lat="434622800" center_lon="12729500" center_alt="200" radius="80" duration="30" geolock="1"/>
 
-    <command name="MISSION_SEGMENT_LLA"  id = "21" segment_lat_1="434622100" segment_lon_1="12727500" segment_lat_2="434622800" segment_lon_2="12729500" segment_alt="200" duration="30" />
+    <command name="MISSION_SEGMENT_LLA"  id = "21" segment_lat_1="434622100" segment_lon_1="12727500" segment_lat_2="434622800" segment_lon_2="12729500" segment_alt="200" duration="30" geolock="1"/>
 
-    <command name="MISSION_PATH_LLA"     id = "3" point_lat_1="434622800" point_lon_1="12729500" point_lat_2="434623800" point_lon_2="12726500" point_lat_3="434629800" point_lon_3="12721500" point_lat_4="434622800" point_lon_4="12729500" point_lat_5="434622800" point_lon_5="12729500" path_alt="200" duration="30" nb="3"/>
+    <command name="MISSION_PATH_LLA"     id = "3" point_lat_1="434622800" point_lon_1="12729500" point_lat_2="434623800" point_lon_2="12726500" point_lat_3="434629800" point_lon_3="12721500" point_lat_4="434622800" point_lon_4="12729500" point_lat_5="434622800" point_lon_5="12729500" path_alt="200" duration="30" nb="3" geolock="1"/>
 
-    <command name="MISSION_SURVEY_LLA"   id = "1" survey_lat_1="434622800" survey_lon_1="12729500" survey_lat_2="434629800" survey_lon_2="12721500" survey_alt="200" duration="30"/>
+    <command name="MISSION_SURVEY_LLA"   id = "1" survey_lat_1="434622800" survey_lon_1="12729500" survey_lat_2="434629800" survey_lon_2="12721500" survey_alt="200" duration="30" geolock="1" />
   </commands>
+
+  <staged_commands>
+    <staged id="12"/>
+    <staged id="13"/>
+    <staged id="21"/>
+    <staged id="12"/>
+    <staged id="3"/>
+    <staged id="1"/>
+  </staged_commands>
+
+
   <exceptions/>
   <blocks>
     <block name="Wait GPS">
