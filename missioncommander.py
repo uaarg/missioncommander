@@ -4,7 +4,6 @@ from time import clock, sleep
 
 import threading
 import gui
-import ivylinker
 import interopclient
 import maths
 
@@ -13,7 +12,7 @@ class main:
 
     def __init__( self ):
         self.shutdown = False
-        self.initIVY()
+        self.newmissionstatus = False
         self.initGUI()
         self.initINTEROP()
         if self.interoplink.loginsucess == True:
@@ -23,7 +22,6 @@ class main:
 
     def initIVY( self):
         print("Initializing ivylink")
-        self.newmissionstatus = False
         self.lastmissionmsg = None
         self.lastgps = None
         self.lastattitude = None
@@ -46,7 +44,6 @@ class main:
         print("Initializing GUI")
         self.win = gui.MissionGUI(shutdowncb = self.shutdownprog)
         self.win.window.show_all()
-        self.win.ivybind(self.ivylink)
 
     def guihandler(self):
         print("Opening GUI")

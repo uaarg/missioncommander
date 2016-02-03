@@ -1,4 +1,3 @@
-import pyproj
 
 def utm_to_DD( easting, northing, zone, hemisphere="northern"):
     """
