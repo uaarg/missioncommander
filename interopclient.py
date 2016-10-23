@@ -1,21 +1,21 @@
 import requests
 import ast
 from time import time
-baseurl = "http://localhost:8000"
-username = "testuser"
-password = "testpass"
 
 
 class Connection():
 
-    def __init__(self):
+    def __init__(self, baseurl, username, password):
+        self.baseurl = baseurl
+        self.username = username
+        self.password = password
         self.loginsucess = False
         self.s = requests.Session()
-	self.lasttele = 0
-        data = {"username":username, "password":password}
+        self.lasttele = 0
+        data = {"username":self.username, "password":self.password}
         loginurl = "/api/login"
         try:
-            self.login = self.s.post(baseurl+loginurl, data=data)
+            self.login = self.s.post(self.baseurl+loginurl, data=data)
             self.loginsucess = True
             pass
         except Exception as e:
@@ -24,10 +24,10 @@ class Connection():
 
 
     def getobstacleinfo(self):
-        ob = self.s.get(baseurl+"/api/obstacles")
+        ob = self.s.get(self.baseurl+"/api/obstacles")
         objects = ast.literal_eval(ob.text)
         return objects
 
     def updatetelemetry(self, tele):
-        tl = self.s.post(baseurl+"/api/telemetry", tele )
-        return tl.status_code    
+        tl = self.s.post(self.baseurl+"/api/telemetry", tele )
+        return tl.status_code

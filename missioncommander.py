@@ -2,19 +2,15 @@
 from time import clock, sleep, time
 import signal
 import ivylinker
-import interopclient
 import maths
-
-vb = 0
+import threading
 
 class main:
     def __init__( self ):
         self.shutdown = False
         self.initIVY()
         self.initINTEROP()
-        signal.signal(signal.SIGINT, self.ctrlcshutdown)
-        if self.interoplink.loginsucess == True:
-            self.interophandler()
+        #signal.signal(signal.SIGINT, self.ctrlcshutdown)
 
     def ctrlcshutdown(self, signum, fram):
         self.shutdown = True
@@ -30,16 +26,22 @@ class main:
         self.telinfoavailable = False
         self.ivylink = ivylinker.CommandSender(verbose=True, callback = self.msg_handler)
         self.lastmissionmessagetime = clock()
+        self.interopSD = True
 
     def initINTEROP(self):
         print("Initializing interop")
-        self.interoplink = interopclient.Connection()
         self.lastmoveobjecttime = time()-10
         self.laststationojecttime = time()-10
         self.bypassinghashtable = 0
         self.bypassinghashtable1 = 0
         self.lastupdatetelemetry = time()-10
         self.objecttable = {}
+
+    def startINTEROP(self, interopobject):
+        self.interoplink = interopobject
+        self.interopSD = False
+        self.intTH = threading.Thread(target=self.interophandler, args=[])
+        self.intTH.start()
 
     def interophandler(self):
         print("waiting for full telemetry message")
@@ -58,15 +60,14 @@ class main:
             if ((self.lastupdatetelemetry + .05) < time()):
                 self.telemetryhandler()
                 tmp = time()
-                if (vb ==1 ):
-                    print(1/(tmp - self.lastupdatetelemetry))
+                #self.update_freq(1/(tmp - self.lastupdatetelemetry))
                 self.lastupdatetelemetry = tmp
 
-            if self.shutdown == True:
+            if self.interopSD == True:
                 print("shutting down interoperability")
                 self.objectdeletion()
                 return 0
-            sleep(0.002)
+            sleep(0.05)
 
     def msg_handler(self, acid, msg):
         if (msg.name == "MISSION_STATUS" and (self.lastmissionmessagetime + .1) < (clock())):
@@ -110,7 +111,6 @@ class main:
         for k in self.objecttable.keys():
             self.ivylink.add_shape("delete",k, self.objecttable[k])
         sleep(0.1)
-        self.ivylink.shutdown()
 
 
     def telemetryhandler(self):
