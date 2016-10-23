@@ -9,25 +9,26 @@ import wx
 # begin wxGlade: dependencies
 import gettext
 import interopclient
+from time import sleep
 # end wxGlade
 
 # begin wxGlade: extracode
 # end wxGlade
-baseurl = "http://localhost:8000"
-username = "testuser"
-password = "testpass"
+
 
 
 class MyFrame(wx.Frame):
-    def __init__(self, *args, **kwds):
+    def __init__(self,*args, **kwds):
         # begin wxGlade: MyFrame.__init__
         wx.Frame.__init__(self, *args, **kwds)
+
+    def load_data(self, passw="", usern="", url=""):
         self.label_1 = wx.StaticText(self, wx.ID_ANY, "IP Address")
-        self.text_baseurl = wx.TextCtrl(self, wx.ID_ANY, baseurl)
+        self.text_baseurl = wx.TextCtrl(self, wx.ID_ANY, url)
         self.label_2 = wx.StaticText(self, wx.ID_ANY, "Username")
-        self.text_username = wx.TextCtrl(self, wx.ID_ANY, username)
+        self.text_username = wx.TextCtrl(self, wx.ID_ANY, usern)
         self.label_3 = wx.StaticText(self, wx.ID_ANY, "password")
-        self.text_password = wx.TextCtrl(self, wx.ID_ANY, password)
+        self.text_password = wx.TextCtrl(self, wx.ID_ANY, passw)
         self.connect_btn = wx.ToggleButton(self, wx.ID_ANY, "connect")
         self.disconnect_btn = wx.ToggleButton(self, wx.ID_ANY, "disconnect")
         self.Status = wx.StaticText(self, wx.ID_ANY, "DISCONNECTED", style=wx.ALIGN_CENTER_HORIZONTAL)
@@ -39,13 +40,17 @@ class MyFrame(wx.Frame):
         self.Bind(wx.EVT_TOGGLEBUTTON, self.dcnt_hdlr, self.disconnect_btn)
         self.Bind(wx.EVT_CLOSE, self._when_closed)
         # end wxGlade
+        self.interopavail = False
         self.Centre()
         self.Show()
 
 
     def _when_closed(self, event):
         self.mc.interopSD = True
+        self.mc.telinfoavailable = True
+        sleep(.25)
         self.mc.ivylink.shutdown()
+        self.mc.objectdeletion()
         self.Destroy()
 
 
@@ -85,11 +90,13 @@ class MyFrame(wx.Frame):
         # end wxGlade
 
     def cnt_hdlr(self, event):  # wxGlade: MyFrame.<event_handler>
+        self.mc.telinfoavailable = False
         self.connect_to_interop()
         event.Skip()
 
     def dcnt_hdlr(self, event):  # wxGlade: MyFrame.<event_handler>
         self.mc.interopSD = True
+        self.mc.telinfoavailable = True
         self.Status.SetLabelText("Disconnected")
         self.connect_btn.SetValue(False)
         self.disconnect_btn.SetValue(True)
@@ -97,25 +104,22 @@ class MyFrame(wx.Frame):
 
     def bindmc(self,mcobject):
         self.mc = mcobject
-        self.mc.update_freq = self.update_freq
-
-    def update_freq(self, freq):
-        frstr = "Connected Freq" + str(int(freq))
-        #self.Status.SetLabelText(frstr)
 
     def connect_to_interop(self):
         self.connect_btn.SetValue(True)
         self.disconnect_btn.SetValue(False)
         self.Status.SetLabelText("Connecting")
         self.Status.SetBackgroundColour("ORANGE")
-        self.interoplink = interopclient.Connection(self.text_baseurl.GetValue(),self.text_username.GetValue(),self.text_password.GetValue())
-        if self.interoplink.loginsucess == True:
+        if self.interopavail == False:
+            self.interoplink = interopclient.Connection(self.text_baseurl.GetValue(),self.text_username.GetValue(),self.text_password.GetValue())
+            self.interopavail = self.interoplink.loginsucess
+        if self.interopavail == True:
             self.Status.SetLabelText("Connected")
             self.Status.SetOwnBackgroundColour("GREEN")
             self.mc.startINTEROP(self.interoplink)
         else:
             self.Status.SetLabelText("Failed")
-            self.self.connect_btn.SetValue(False)
-            self.self.disconnect_btn.SetValue(True)
+            self.connect_btn.SetValue(False)
+            self.disconnect_btn.SetValue(True)
 
 # end of class MyFrame

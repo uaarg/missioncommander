@@ -8,6 +8,7 @@ import threading
 class main:
     def __init__( self ):
         self.shutdown = False
+        self.interoprunning = False
         self.initIVY()
         self.initINTEROP()
         #signal.signal(signal.SIGINT, self.ctrlcshutdown)
@@ -38,17 +39,19 @@ class main:
         self.objecttable = {}
 
     def startINTEROP(self, interopobject):
-        self.interoplink = interopobject
-        self.interopSD = False
-        self.intTH = threading.Thread(target=self.interophandler, args=[])
-        self.intTH.start()
+        if self.interoprunning == False:
+            self.interoplink = interopobject
+            self.interopSD = False
+            self.intTH = threading.Thread(target=self.interophandler, args=[])
+            self.intTH.start()
 
     def interophandler(self):
+        self.interoprunning = True
         print("waiting for full telemetry message")
         while self.telinfoavailable==False:
             sleep(.02)
         print("Communicating with Interop Server")
-        while True:
+        while self.interopSD == False:
             if self.lastmoveobjecttime + .1 < time():
                 self.movinghandler()
                 self.lastmoveobjecttime = time()
@@ -63,11 +66,12 @@ class main:
                 #self.update_freq(1/(tmp - self.lastupdatetelemetry))
                 self.lastupdatetelemetry = tmp
 
-            if self.interopSD == True:
-                print("shutting down interoperability")
-                self.objectdeletion()
-                return 0
             sleep(0.05)
+        self.interoprunning = False
+
+        print("shutting down interoperability")
+        self.objectdeletion()
+
 
     def msg_handler(self, acid, msg):
         if (msg.name == "MISSION_STATUS" and (self.lastmissionmessagetime + .1) < (clock())):

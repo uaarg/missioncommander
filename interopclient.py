@@ -16,7 +16,10 @@ class Connection():
         loginurl = "/api/login"
         try:
             self.login = self.s.post(self.baseurl+loginurl, data=data)
-            self.loginsucess = True
+            if (self.login.status_code == 200):
+                self.loginsucess = True
+            else:
+                self.loginsucess = False
             pass
         except Exception as e:
             print("Failed to login to interop server")
