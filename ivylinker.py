@@ -8,16 +8,20 @@ from os import path, getenv
 # if PAPARAZZI_SRC not set, then assume the tree containing this
 # file is a reasonable substitute
 PPRZ_SRC = getenv("PAPARAZZI_SRC", path.normpath(path.join(path.dirname(path.abspath(__file__)), '../../../../')))
-sys.path.append(PPRZ_SRC + "/sw/lib/python")
+sys.path.append(PPRZ_SRC + "/sw/ext/pprzlink/lib/v1.0/python/")
 
-from ivy_msg_interface import IvyMessagesInterface
-from pprz_msg.message import PprzMessage
+print(PPRZ_SRC + "/sw/ext/pprzlink/lib/v1.0/python/pprzlink")
 
-class CommandSender(object):
+from pprzlink.ivy  import IvyMessagesInterface
+from pprzlink.message   import PprzMessage
+
+class CommandSender(IvyMessagesInterface):
     def __init__(self, verbose=False, callback = None):
         self.verbose = verbose
         self.callback = callback
-        self._interface = IvyMessagesInterface(self.message_recv)
+        self._interface = IvyMessagesInterface("Mission Commander", start_ivy=False)
+        self._interface.subscribe(self.message_recv)
+        self._interface.start()
 
     def message_recv(self, ac_id, msg):
         if (self.verbose and self.callback != None):
@@ -80,17 +84,19 @@ class CommandSender(object):
 #        print("Sending message: %s" % msg)
         self._interface.send(msg)
 
-
-    def add_obstacle_dict(self, status, obstacle_id, obmsg):
-        msg = PprzMessage("ground", "OBSTACLE")
-        msg['id'] = obstacle_id
-        msg['color'] = "red" if obstacle_id > 19 else "orange"
-        msg['status'] = 0 if status=="create" else (1 if status=="update" else 2)
-        msg['lat'] = int(obmsg.get("latitude") * 10000000.)
-        msg['lon'] = int(obmsg.get("longitude") * 10000000.)
+    def add_shape(self, status, obstacle_id, obmsg):
+        msg = PprzMessage("ground", "SHAPE")
+        msg['id'] = int(obstacle_id)
+        msg['fillcolor'] = "red" if obstacle_id > 19 else "orange"
+        msg['linecolor'] = "red" if obstacle_id > 19 else "orange"
+        msg['status'] = 0 if status=="create" else 1
+        msg['shape'] = 0
+        msg['latarr'] = [int(obmsg.get("latitude")*10000000.),int(obmsg.get("latitude")*10000000.)]
+        msg['lonarr'] = [int(obmsg.get("longitude")*10000000.),int(obmsg.get("longitude")*10000000.)]
         msg['radius'] = int(obmsg.get("sphere_radius") if "sphere_radius" in obmsg else obmsg.get("cylinder_radius"))
-        msg['alt'] = int(obmsg.get("altitude_msl")*1000 if "altitude_msl" in obmsg else obmsg.get("cylinder_height") *1000)
-#        print("Sending message: %s" % msg)
+        msg['text'] = "NULL"
+        msg['opacity'] = 2
         self._interface.send(msg)
+
 
 # add_mission_command(msg_id = "MISSION_GOTO_WP_LLA", ac_id=5, insert = "0", wp_lat=434624607, wp_lon=12723454, wp_alt=700, duration =60)

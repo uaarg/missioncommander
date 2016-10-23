@@ -5,6 +5,7 @@ import ivylinker
 import interopclient
 import maths
 
+vb = 0
 
 class main:
     def __init__( self ):
@@ -14,10 +15,10 @@ class main:
         signal.signal(signal.SIGINT, self.ctrlcshutdown)
         if self.interoplink.loginsucess == True:
             self.interophandler()
- 
+
     def ctrlcshutdown(self, signum, fram):
         self.shutdown = True
-        
+
 
     def initIVY( self):
         print("Initializing ivylink")
@@ -57,7 +58,8 @@ class main:
             if ((self.lastupdatetelemetry + .05) < time()):
                 self.telemetryhandler()
                 tmp = time()
-                print(1/(tmp - self.lastupdatetelemetry))
+                if (vb ==1 ):
+                    print(1/(tmp - self.lastupdatetelemetry))
                 self.lastupdatetelemetry = tmp
 
             if self.shutdown == True:
@@ -91,7 +93,7 @@ class main:
 
         for ob in station:
             self.objecttable[i] = ob
-            self.ivylink.add_obstacle_dict("create",i, ob)
+            self.ivylink.add_shape("create",i, ob)
             i= i+1
 
     def movinghandler(self):
@@ -101,12 +103,12 @@ class main:
 
         for ob in moving:
             self.objecttable[i] = ob
-            self.ivylink.add_obstacle_dict("update",i, ob)
+            self.ivylink.add_shape("create",i, ob)
             i= i+1
 
     def objectdeletion(self):
         for k in self.objecttable.keys():
-            self.ivylink.add_obstacle_dict("delete",k, self.objecttable[k])
+            self.ivylink.add_shape("delete",k, self.objecttable[k])
         sleep(0.1)
         self.ivylink.shutdown()
 
@@ -121,4 +123,3 @@ class main:
 
 if __name__ == "__main__":
     main()
-
