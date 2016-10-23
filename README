@@ -4,10 +4,10 @@ sudo pip install pyproj requests
 
 
 set paparazzi path
-gedit ~/.bashrc
+sudo gedit /etc/environment
 ```
-export PAPARAZZI_SRC=/home/rijesh/paparazzi
-export PAPARAZZI_HOME=/home/rijesh/paparazzi
+PAPARAZZI_SRC="/home/rijesh/paparazzi"
+PAPARAZZI_HOME="/home/rijesh/paparazzi"
 
 ```
 
