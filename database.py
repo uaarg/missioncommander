@@ -1,6 +1,6 @@
 from utils import *
 from config import *
-import math
+import config
 import maths
 
 class bagOfHolding(object):
@@ -44,7 +44,7 @@ class AirplaneTelemetry(object):
     def updateFromWaldo(self, msg):
         self.position = maths.utm_to_DD((msg.fieldvalues[4]), (msg.fieldvalues[5] ), msg.fieldvalues[6])
         self.altitude = msg.fieldvalues[10]
-        self.heading = float(msg.fieldvalues[1]) * 180 / math.pi() + 90
+        self.heading = float(msg.fieldvalues[1]) * 180 / PI + 90
         if TELEM_DEBUG:
             print(self.position)
 
