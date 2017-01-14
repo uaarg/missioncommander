@@ -11,7 +11,7 @@ sys.path.append(PPRZ_SRC + "/sw/ext/pprzlink/lib/v1.0/python/")
 from pprzlink.ivy  import IvyMessagesInterface
 from pprzlink.message   import PprzMessage
 
-class CommandSender(IvyMessagesInterface):
+class IvySender(IvyMessagesInterface):
     def __init__(self, verbose=False, callback = None):
         self.verbose = verbose
         self.callback = callback

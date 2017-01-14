@@ -9,13 +9,16 @@ class bagOfHolding(object):
         self.missions = fancyList()
         self.tasks = fancyList()
 
+    def updateTelemetry(self, msg):
+        self.airplane.updateFromWaldo(msg)
+
     def addWaypoint(self, wp):
         self.waypoints.add(wp)
 
     def updateWaypoint(self, wp):
         self.waypoints.update(wp)
     
-    def getWaypoint(self, index)
+    def getWaypoint(self, index):
         return self.waypoints.get(index)
 
 
@@ -33,6 +36,12 @@ class AirplaneTelemetry(object):
         self.positionFlag = False
         self.altitideFlag = False
         self.headingFlag = False
+
+    def updateFromWaldo(self, msg):
+        self.position = maths.utm_to_DD((msg.fieldvalues[4]), (msg.fieldvalues[5] ), msg.fieldvalues[6])
+        self.altitude = msg.fieldvalues[10]
+        self.heading = float(msg.fieldvalues[1]) * 180 / 3.14 + 90
+
 
     # Updates each variable
     def newPosition(self, newPos):
