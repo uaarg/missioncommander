@@ -1,10 +1,11 @@
 from utils import *
-# from config import *
+from config import *
+import maths
 
 class bagOfHolding(object):
 
     def __init__(self):
-        self.airplane = airplaneTelemetry()
+        self.airplane = AirplaneTelemetry()
         self.waypoints = fancyList()
         self.missions = fancyList()
         self.tasks = fancyList()
@@ -25,7 +26,10 @@ class bagOfHolding(object):
 
 class AirplaneTelemetry(object):
     '''
-    Fancy mission list object that is fancy
+    Stores the airplane's position, altitude and current heading.
+    This is meant to be updated from the Ivybus and updating the Interop Server
+    when any value is updated.
+    We need to submit at a minimum of 1 Hz to the server to recieve points
     '''
 
     def __init__(self):
@@ -40,7 +44,8 @@ class AirplaneTelemetry(object):
         self.position = maths.utm_to_DD((msg.fieldvalues[4]), (msg.fieldvalues[5] ), msg.fieldvalues[6])
         self.altitude = msg.fieldvalues[10]
         self.heading = float(msg.fieldvalues[1]) * 180 / 3.14 + 90
-
+        if TELEM_DEBUG:
+            print(self.position)
 
     # Updates each variable
     def newPosition(self, newPos):

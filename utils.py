@@ -1,7 +1,7 @@
 
 class fancyList(object):
     '''
-    Fancy waypoint list object that is fancy
+    Fancy list object that is fancy
     '''
     def __init__(self):
         self.lst = list()
@@ -20,4 +20,3 @@ class fancyList(object):
 
     def get(self, wp):
         return self.lst[wp.index]
-
