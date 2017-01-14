@@ -1,6 +1,6 @@
 
 
-class airplaneTelemetry(object):
+class AirplaneTelemetry(object):
     '''
     Stores the airplane's position, altitude and current heading.
     This is meant to be updated from the Ivybus and updating the Interop Server
@@ -43,10 +43,15 @@ class airplaneTelemetry(object):
             return False
 
     # Interop server code will call this when new data is recieved
-    def sendTelemetry(self):
+    def getTelemetry(self):
         if (self.positionFlag | self.altitideFlag | self.headingFlag):
             self.positionFlag = self.altitideFlag = self.headingFlag = False
-            tele = {'latitude':float(position(0)), 'longitude':float(position(1)), 'altitude_msl':float(altitude), 'uas_heading':float(heading0}
+            tele = {
+                'latitude':float(self.position[0]),
+                'longitude':float(self.position[1]),
+                'altitude_msl':float(self.altitude),
+                'uas_heading':float(self.heading)
+            }
             return tele
         else:
             return False
