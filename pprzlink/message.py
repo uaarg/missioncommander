@@ -4,10 +4,11 @@ Paparazzi message representation
 """
 
 from __future__ import division, print_function
+
 import sys
 import json
 import struct
-import messages_xml_map
+from pprzlink import messages_xml_map
 
 
 class PprzMessageError(Exception):
