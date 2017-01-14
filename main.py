@@ -1,4 +1,5 @@
 import sys, getopt
+from xmlparser import *
 from config import *
 from ivylinker import *
 
@@ -30,6 +31,8 @@ def argparser(argv):
 class MissionCommander(object):
     def __init__(self):
         self.initDatabase()
+        importxml('sampleflightplan.xml', self.db)
+        # Do XML loading stuff
         bindIvyMsgHandler(self.ivyMsgHandler)
 
     def initDatabase(self):

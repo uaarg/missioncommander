@@ -17,6 +17,9 @@ class bagOfHolding(object):
     def addWaypoint(self, wp):
         self.waypoints.add(wp)
 
+    def addWaypointToIndex(self, wp):
+        self.waypoints.addToIndex(wp)
+
     def updateWaypoint(self, wp):
         self.waypoints.update(wp)
 
