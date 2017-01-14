@@ -30,22 +30,14 @@ class TelemetryThread(Thread):
             except InteropError as error:
                 print(error.message)
 
-def main():
-    config = {
-        'url': "http://127.0.0.1:8000",
-        'username': 'testuser',
-        'password': 'testpass'
-    }
-    plane = AirplaneTelemetry()
-    plane.positionFlag = plane.altitudeFlag = plane.headingFlag = True
-    plane.newPosition((57.0, -128.0))
-    plane.newAltitude(45.0)
-    plane.newHeading(180.0)
-    interop = AsyncClient(config['url'], config['username'], config['password'])
-    telem = TelemetryThread(interop, plane)
+    def getDataSendFrequency():
+        """
+        Returns the rate, in Hz, that the interoperability server
+        is being updated with telemetry at.
+        """
 
-    telem.start()
-    telem.join()
+def main():
+    print("lol")
 
 if __name__ == "__main__":
     main()
