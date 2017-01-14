@@ -1,9 +1,7 @@
-from pprzlink.message import PprzMessage
+from config import *
 
 def gen_mission_msg(self, ac_id, insert = "APPEND"):
-
-
-        msg = PprzMessage("datalink", msg_id)
+        msg = pprzmsg("datalink", msg_id)
 
         msg['ac_id'] = ac_id
         msg['insert'] = insert

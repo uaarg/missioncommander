@@ -1,7 +1,7 @@
-  from pprzlink.message import PprzMessage
-  
+from config import *
+
     def add_shape(self, status, obstacle_id, obmsg):
-        msg = PprzMessage("ground", "SHAPE")
+        msg = pprzmsg("ground", "SHAPE")
         msg['id'] = int(obstacle_id)
 
         if obstacle_id >= (maxTargets/2 -1 ):
