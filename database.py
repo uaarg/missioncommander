@@ -17,11 +17,16 @@ class bagOfHolding(object):
     def addWaypoint(self, wp):
         self.waypoints.add(wp)
 
-    def addWaypointToIndex(self, wp):
-        self.waypoints.addToIndex(wp)
+    def updateWaypoint(self, msg):
+        east = msg.fieldvalues[1]
+        north = msg.fieldvalues[2]
+        alt = msg.fieldvalues[3]
+        zone = msg.fieldvalues[4]
 
-    def updateWaypoint(self, wp):
-        self.waypoints.update(wp)
+        wp = self.waypoints.getFromIndex(int(msg.fieldvalues[0]))
+        if wp != None:
+            wp.update_utm(east, north, zone, northern=True, alt=alt, name=None)
+
 
     def getWaypoint(self, index):
         return self.waypoints.get(index)
@@ -50,7 +55,7 @@ class AirplaneTelemetry(object):
 
     def updateFromWaldo(self, msg):
         easting = msg.fieldvalues[4]
-        northing = msg.fieldvalues[5] 
+        northing = msg.fieldvalues[5]
         zone_num = msg.fieldvalues[6]
         self.position = utm.to_latlon(easting, northing, zone_num, northern=UTM_NORTHERN_HEMISPHERE)
         self.altitude = msg.fieldvalues[10]

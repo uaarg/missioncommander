@@ -18,10 +18,22 @@ class fancyList(object):
             self.lst.append(None)
         self.lst[ind] = wp
 
-    def update(self, wp):
-        self.lst[wp.index] = wp
+    def replace(self, wp):
+        try:
+            self.lst[wp.index] = wp
+            return True
+        except:
+            print("The WP Index is out of Range!! Use add or addToIndex")
+            return False
 
-    def get(self, wp):
-        return self.lst[wp.index]
 
-        
+
+    def getFromIndex(self, ind):
+        try:
+            return self.lst[ind]
+        except:
+            print("The WP Index is out of Range!! Use add or addToIndex")
+            return None
+
+
+
