@@ -1,8 +1,9 @@
 import sys, getopt
 from config import *
-from ivylinker import IvySender
-from database import bagOfHolding
+from ivylinker import *
+
 from interop.client import AsyncClient
+
 
 def argparser(argv):
     url = "http://localhost:8000"
@@ -28,12 +29,17 @@ def argparser(argv):
 
 class MissionCommander(object):
     def __init__(self):
+        self.initDatabase()
+        bindIvyMsgHandler(self.ivyMsgHandler)
+
+    def initDatabase(self):
+        from database import bagOfHolding
         self.db = bagOfHolding()
-        self.ivy = IvySender(verbose=True, callback = self.ivyMsgHandler)
 
     def ivyMsgHandler(self, ac_id, msg):
         if (msg.name == "WALDO_MSG"):
             self.db.updateTelemetry(msg)
+
 
 if __name__ == '__main__':
     password, username, url = argparser(sys.argv[1:])

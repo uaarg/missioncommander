@@ -9,6 +9,9 @@ class IvySender(ivyint):
         self._interface.subscribe(self.message_recv)
         self._interface.start()
 
+    def bindCallBack(self, cb):
+        self.callback = cb
+
     def message_recv(self, ac_id, msg):
         if (self.verbose and self.callback != None):
             self.callback(ac_id, msg)
@@ -21,5 +24,19 @@ class IvySender(ivyint):
     def __del__(self):
         self.shutdown()
 
-    def send_msg(self, msg):
+    def sendMSG(self, msg):
         self._interface.send(msg)
+
+def sendMSG(msg):
+    glbivy.sendMSG(msg)
+
+def shutdown():
+    glbivy.shutdown()
+
+def bindIvyMsgHandler(cb):
+    glbivy.bindCallBack(cb)
+
+global glbivy
+glbivy = IvySender(verbose = True)
+if DEBUG:
+    print("starting IVY")
