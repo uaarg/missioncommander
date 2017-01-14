@@ -45,6 +45,7 @@ class AirplaneTelemetry(object):
         self.position = maths.utm_to_DD((msg.fieldvalues[4]), (msg.fieldvalues[5] ), msg.fieldvalues[6])
         self.altitude = msg.fieldvalues[10]
         self.heading = float(msg.fieldvalues[1]) * 180 / PI + 90
+        self.positionFlag = self.altitudeFlag = self.headingFlag = True
         if TELEM_DEBUG:
             print(self.position)
 

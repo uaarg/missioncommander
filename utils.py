@@ -23,3 +23,5 @@ class fancyList(object):
 
     def get(self, wp):
         return self.lst[wp.index]
+
+        
