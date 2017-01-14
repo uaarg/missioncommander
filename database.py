@@ -1,7 +1,7 @@
 from utils import *
 from config import *
 import config
-import maths
+import utm
 
 class bagOfHolding(object):
 
@@ -53,7 +53,10 @@ class AirplaneTelemetry(object):
         self.headingFlag = False
 
     def updateFromWaldo(self, msg):
-        self.position = maths.utm_to_DD((msg.fieldvalues[4]), (msg.fieldvalues[5] ), msg.fieldvalues[6])
+        easting = msg.fieldvalues[4]
+        northing = msg.fieldvalues[5] 
+        zone_num = msg.fieldvalues[6]
+        self.position = utm.to_latlon(easting, northing, zone_num, northern=UTM_NORTHERN_HEMISPHERE)
         self.altitude = msg.fieldvalues[10]
         self.heading = float(msg.fieldvalues[1]) * 180 / PI + 90
         self.positionFlag = self.altitudeFlag = self.headingFlag = True

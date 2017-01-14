@@ -25,7 +25,7 @@ class Obstacle:
         if shape == 'cylinder':
             geom_data = {'radius': None, 'height': None}
         if shape == 'sphere':
-            geom_data = {'radius': None, 'altitude', None}
+            geom_data = {'radius': None, 'altitude': None}
 
         return geom_data
 

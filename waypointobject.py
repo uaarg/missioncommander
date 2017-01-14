@@ -91,6 +91,19 @@ class Waypoint(object):
         result['east'] = self.east
         result['north'] = self.north
         return result
+        
+    def gen_move_waypoint_msg(self, ac_id, ):
+        """
+        Returns an Ivy bus message for moving the waypoint.
+        """
+        msg = pprzmsg("datalink", "MOVE_WP")
+        #msg['wp_id'] = self.wp_id
+        msg['ac_id'] = ac_id
+        latlon = self.get_latlon()
+        msg['lat'] = latlon['lat']
+        msg['lon'] = latlon['lon']
+        msg['alt'] = latlon['alt']
+        return msg
 
     def addMission(self, mission):
         missions.append(mission)
