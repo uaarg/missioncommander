@@ -23,7 +23,11 @@ class bagOfHolding(object):
     def getWaypoint(self, index):
         return self.waypoints.get(index)
 
+class task(object):
 
+    def __init__(self, name, missions):
+        self.name = name
+        self.missions = missions
 
 class AirplaneTelemetry(object):
     '''
@@ -48,6 +52,7 @@ class AirplaneTelemetry(object):
         self.position = utm.to_latlon(easting, northing, zone_num, northern=UTM_NORTHERN_HEMISPHERE)
         self.altitude = msg.fieldvalues[10]
         self.heading = float(msg.fieldvalues[1]) * 180 / PI + 90
+        self.positionFlag = self.altitudeFlag = self.headingFlag = True
         if TELEM_DEBUG:
             print(self.position)
 

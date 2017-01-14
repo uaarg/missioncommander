@@ -20,9 +20,11 @@ class NavPattern(Enum):
     MISSION_SURVEY = 9
     MISSION_SURVEY_LLA = 10
 
-class Mission:
+class Mission(object):
     """class to define missions applying to 1 or more waypoints"""
     
+    nav_pattern = property(get_nav_pattern, set_nav_pattern)
+
     def __init__(self, name, index, duration, nav_pattern, waypoints, radius = None):
         assert isinstance(nav_pattern, NavPattern)
         assert nav_pattern != NavPattern.MISSION_CIRCLE and nav_pattern != NavPattern.MISSION_CIRCLE_LLA or radius is not None
@@ -33,6 +35,7 @@ class Mission:
         self._nav_pattern = nav_pattern
         self.waypoints = waypoints
         self.radius = radius
+        self.wpUpdated = False
         
     def get_nav_pattern(self):
         return self._nav_pattern
@@ -42,9 +45,10 @@ class Mission:
         print("setting nav pattern")
         self._nav_pattern = nav_pattern
     
-    nav_pattern = property(get_nav_pattern, set_nav_pattern)
-    
     def gen_mission_msg(self, ac_id, insert_mode = InsertMode.Append):
+
+
+
         assert isinstance(insert_mode, InsertMode)
         msg = pprzmsg("datalink", self._nav_pattern.name)
 
@@ -149,3 +153,5 @@ class Mission:
         
         return msg
         
+    def flagForUpdate(self):
+        self.wpUpdated = True
