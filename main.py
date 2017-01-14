@@ -39,6 +39,10 @@ class MissionCommander(object):
     def ivyMsgHandler(self, ac_id, msg):
         if (msg.name == "WALDO_MSG"):
             self.db.updateTelemetry(msg)
+        
+        if (msg.name == "WP_MOVED"):
+            self.db.updateWaypoint(msg)
+        
 
 
 if __name__ == '__main__':
