@@ -20,7 +20,7 @@ class NavPattern(Enum):
     MISSION_SURVEY = 9
     MISSION_SURVEY_LLA = 10
 
-class Mission:
+class Mission(object):
     """class to define missions applying to 1 or more waypoints"""
     
     def __init__(self, name, index, duration, nav_pattern, waypoints, radius = None):
