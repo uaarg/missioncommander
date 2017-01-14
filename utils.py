@@ -3,7 +3,7 @@ class fancyList(object):
     '''
     Fancy waypoint list object that is fancy
     '''
-    def __init__(self)
+    def __init__(self):
         self.lst = list()
 
     def add(self, wp):
