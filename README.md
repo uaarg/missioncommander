@@ -3,17 +3,9 @@ Mission Commander
 
 Installation
 ---
-sudo apt-get install python-pip
-sudo pip install pyproj requests
+sudo apt-get install python3-pip
+sudo pip3 install pyproj requests
 
-
-set paparazzi path
-sudo gedit /etc/environment
-```
-PAPARAZZI_SRC="/home/rijesh/paparazzi"
-PAPARAZZI_HOME="/home/rijesh/paparazzi"
-
-```
 
 You must also install a copy of the AUVSI SUAS Competition Interoperability server. The instructions for this can be found in the documentation for the server: https://auvsi-suas-competition-interoperability-system.readthedocs.io/en/latest/
 
