@@ -3,6 +3,7 @@ from config import *
 from ivylinker import *
 
 from interop.client import AsyncClient
+from interoperability import TelemetryThread, ObstacleThread
 
 
 def argparser(argv):
@@ -48,6 +49,9 @@ if __name__ == '__main__':
     mc = MissionCommander()
 
     if INTEROP_ENABLE:
-        telem = TelemetryThread(interop, db.airplane)
-        telem.start()
-        telem.join()
+        telem_thread = TelemetryThread(interop, mc.db.airplane)
+        obstacle_thread = ObstacleThread(interop, glbivy)
+        telem_thread.start()
+        obstacle_thread.start()
+        obstacle_thread.join()
+        telem_thread.join()
