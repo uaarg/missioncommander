@@ -1,10 +1,11 @@
 from utils import *
-# from config import *
+from config import *
+import maths
 
 class bagOfHolding(object):
 
     def __init__(self):
-        self.airplane = airplaneTelemetry()
+        self.airplane = AirplaneTelemetry()
         self.waypoints = fancyList()
         self.missions = fancyList()
         self.tasks = fancyList()
@@ -40,7 +41,8 @@ class AirplaneTelemetry(object):
         self.position = maths.utm_to_DD((msg.fieldvalues[4]), (msg.fieldvalues[5] ), msg.fieldvalues[6])
         self.altitude = msg.fieldvalues[10]
         self.heading = float(msg.fieldvalues[1]) * 180 / 3.14 + 90
-
+        if TELEM_DEBUG:
+            print(self.position)
 
     # Updates each variable
     def newPosition(self, newPos):

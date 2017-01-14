@@ -1,7 +1,8 @@
 import sys, getopt
+from config import *
 from ivylinker import IvySender
 from database import bagOfHolding
-import interop.client.AsyncClient
+from interop.client import AsyncClient
 
 def argparser(argv):
     url = "http://localhost:8000"
@@ -28,17 +29,19 @@ def argparser(argv):
 class MissionCommander(object):
     def __init__(self):
         self.db = bagOfHolding()
-        self.ivy = IvySender(verbose=True, callback = self.ivyCallBack)
+        self.ivy = IvySender(verbose=True, callback = self.ivyMsgHandler)
 
-    def ivyMsgHandler(self, msg):
-        if (msg.name == "WALDO"):
+    def ivyMsgHandler(self, ac_id, msg):
+        if (msg.name == "WALDO_MSG"):
             self.db.updateTelemetry(msg)
 
 if __name__ == '__main__':
     password, username, url = argparser(sys.argv[1:])
-    interop = interop.client.AsyncClient(url, username, password)
+    if INTEROP_ENABLE:
+        interop = AsyncClient(url, username, password)
     mc = MissionCommander()
 
-    telem = TelemetryThread(interop, db.airplane)
-    telem.start()
-    telem.join()
+    if INTEROP_ENABLE:
+        telem = TelemetryThread(interop, db.airplane)
+        telem.start()
+        telem.join()
