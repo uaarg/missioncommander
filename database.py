@@ -26,7 +26,10 @@ class bagOfHolding(object):
 
 class AirplaneTelemetry(object):
     '''
-    Fancy mission list object that is fancy
+    Stores the airplane's position, altitude and current heading.
+    This is meant to be updated from the Ivybus and updating the Interop Server
+    when any value is updated.
+    We need to submit at a minimum of 1 Hz to the server to recieve points
     '''
 
     def __init__(self):
