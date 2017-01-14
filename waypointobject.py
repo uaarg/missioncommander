@@ -5,7 +5,7 @@ class Waypoint(object):
     This object may take either latlon or UTM format as input; however, it stores them in UTM.
     """
     
-    def __init__(self, name, point_type, lat=None, lon=None, zone=None, northern=True, east=None, north=None, alt=None):
+    def __init__(self, name, point_type, lat=None, lon=None, zone=None, northern=True, east=None, north=None, alt=None, missions=None):
         """
         ARGUMENTS
         name: the name of the waypoint
@@ -38,6 +38,8 @@ class Waypoint(object):
         self.name = name
         self.northern = northern
 
+        self.missions = missions
+
 
     def update_latlon(self, lat, lon, name=None, alt=None):
         """
@@ -62,6 +64,8 @@ class Waypoint(object):
             self.alt = alt
         if name:
             self.name = name
+        
+        self.flagMissions()
 
 
     def get_latlon(self):
@@ -100,3 +104,13 @@ class Waypoint(object):
         msg['lon'] = latlon['lon']
         msg['alt'] = latlon['alt']
         return msg
+
+    def addMission(self, mission):
+        missions.append(mission)
+
+    def removeMission(self, mission):
+        missions.remove(mission)
+
+    def flagMissions(self):
+        for m in missions:
+            m.flagForUpdate()

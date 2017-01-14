@@ -14,6 +14,7 @@ ivyint = IvyMessagesInterface
 pprzmsg = PprzMessage
 
 PI = math.pi
+UTM_NORTHERN_HEMISPHERE = True
 
 DEBUG = False
 TELEM_DEBUG = False
