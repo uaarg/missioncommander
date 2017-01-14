@@ -23,7 +23,11 @@ class bagOfHolding(object):
     def getWaypoint(self, index):
         return self.waypoints.get(index)
 
+class task(object):
 
+    def __init__(self, name, missions):
+        self.name = name
+        self.missions = missions
 
 class AirplaneTelemetry(object):
     '''
