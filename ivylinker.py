@@ -13,6 +13,9 @@ sys.path.append(PPRZ_SRC + "/sw/ext/pprzlink/lib/v1.0/python/")
 from pprzlink.ivy  import IvyMessagesInterface
 from pprzlink.message   import PprzMessage
 
+maxTargets = 20 # /2 is the max number of eiether moving or stationary targets we can handle. SAME AS missioncommander.py's global var
+
+
 class CommandSender(IvyMessagesInterface):
     def __init__(self, verbose=False, callback = None):
         self.verbose = verbose
@@ -20,6 +23,7 @@ class CommandSender(IvyMessagesInterface):
         self._interface = IvyMessagesInterface("Mission Commander", start_ivy=False)
         self._interface.subscribe(self.message_recv)
         self._interface.start()
+        self.tooManyTargets = 0
 
     def message_recv(self, ac_id, msg):
         if (self.verbose and self.callback != None):
@@ -85,15 +89,35 @@ class CommandSender(IvyMessagesInterface):
     def add_shape(self, status, obstacle_id, obmsg):
         msg = PprzMessage("ground", "SHAPE")
         msg['id'] = int(obstacle_id)
-        msg['fillcolor'] = "red" if obstacle_id > 19 else "orange"
-        msg['linecolor'] = "red" if obstacle_id > 19 else "orange"
+
+        if obstacle_id >= (maxTargets/2 -1 ):
+            msg['fillcolor'] = "blue"
+            msg['linecolor'] = "blue"
+            msg['opacity'] = 2
+        elif obstacle_id >= (maxTargets -1):
+            msg['fillcolor'] = "red"
+            msg['linecolor'] = "red"
+            msg['opacity'] = 1
+        elif obstacle_id >= (3*maxTargets/2 -1):
+            msg['fillcolor'] = "orange"
+            msg['linecolor'] = "orange"
+            msg['opacity'] = 2
+        elif obstacle_id >= (2*maxTargets -1):
+            msg['fillcolor'] = "red"
+            msg['linecolor'] = "red"
+            msg['opacity'] = 1
+        else:
+            if (self.tooManyTargets< maxTargets):
+                print("TOO MANY OBSTACLES, things are failing")
+                self.tooManyTargets = self.tooManyTargets +1
+
         msg['status'] = 0 if status=="create" else 1
         msg['shape'] = 0
         msg['latarr'] = [int(obmsg.get("latitude")*10000000.),int(obmsg.get("latitude")*10000000.)]
         msg['lonarr'] = [int(obmsg.get("longitude")*10000000.),int(obmsg.get("longitude")*10000000.)]
         msg['radius'] = int(obmsg.get("sphere_radius") if "sphere_radius" in obmsg else obmsg.get("cylinder_radius"))
         msg['text'] = "NULL"
-        msg['opacity'] = 2
+
         self._interface.send(msg)
 
 
