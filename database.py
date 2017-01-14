@@ -1,11 +1,28 @@
+from utils import *
+from config import *
+
+class bagOfHolding(object):
+
+    def __init__(self):
+        self.airplane = airplaneTelemetry()
+        self.waypoints = fancyList()
+        self.missions = fancyList()
+        self.tasks = fancyList()
+
+    def addWaypoint(self, wp):
+        self.waypoints.add(wp)
+
+    def updateWaypoint(self, wp):
+        self.waypoints.update(wp)
+    
+    def getWaypoint(self, index)
+        return self.waypoints.get(index)
+
 
 
 class AirplaneTelemetry(object):
     '''
-    Stores the airplane's position, altitude and current heading.
-    This is meant to be updated from the Ivybus and updating the Interop Server
-    when any value is updated.
-    We need to submit at a minimum of 1 Hz to the server to recieve points
+    Fancy mission list object that is fancy
     '''
 
     def __init__(self, position = (0,0), alt_msl = 0, heading = 0 ):
