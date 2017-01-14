@@ -1,6 +1,8 @@
 import sys, getopt
+from xmlparser import *
 from config import *
 from ivylinker import *
+from ui import UI
 
 from interop.client import AsyncClient
 from interoperability import TelemetryThread, ObstacleThread
@@ -31,7 +33,12 @@ def argparser(argv):
 class MissionCommander(object):
     def __init__(self):
         self.initDatabase()
+        # Todo. Fix XML import
+        # importxml('sampleflightplan.xml', self.db)
+        # Do XML loading stuff
         bindIvyMsgHandler(self.ivyMsgHandler)
+        self.ui = UI()
+        self.ui.run()
 
     def initDatabase(self):
         from database import bagOfHolding
@@ -40,6 +47,10 @@ class MissionCommander(object):
     def ivyMsgHandler(self, ac_id, msg):
         if (msg.name == "WALDO_MSG"):
             self.db.updateTelemetry(msg)
+        
+        if (msg.name == "WP_MOVED"):
+            self.db.updateWaypoint(msg)
+        
 
 
 if __name__ == '__main__':

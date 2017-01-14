@@ -4,13 +4,14 @@ class Waypoint(object):
     """
     This object may take either latlon or UTM format as input; however, it stores them in UTM.
     """
-    
-    def __init__(self, name, point_type, lat=None, lon=None, zone=None, northern=True, east=None, north=None, alt=None, missions=None):
+
+    def __init__(self, name, wpID, point_type, lat=None, lon=None, zone=None, northern=True, east=None, north=None, alt=None, missions=None):
+
         """
         ARGUMENTS
         name: the name of the waypoint
         point_type: the type of the waypoint. Valid values are "latlon" or "utm".
-        
+
         KEYWORDS
         lat: the latitude. Mandatory if point_type is "latlon".
         lon: the longitude. Mandatory if point_type is "latlon".
@@ -36,6 +37,10 @@ class Waypoint(object):
             raise AttributeError("Waypoint initialization failed: invalid waypoint type given")
         self.alt = alt
         self.name = name
+        try:
+            self.wpID = wpID
+        except:
+            raise AttributeError(" Waypoint" + self.name + " requires a waypoint ID")
         self.northern = northern
 
         self.missions = missions
@@ -64,7 +69,7 @@ class Waypoint(object):
             self.alt = alt
         if name:
             self.name = name
-        
+
         self.flagMissions()
 
 
@@ -91,6 +96,19 @@ class Waypoint(object):
         result['east'] = self.east
         result['north'] = self.north
         return result
+
+    def gen_move_waypoint_msg(self, ac_id, ):
+        """
+        Returns an Ivy bus message for moving the waypoint.
+        """
+        msg = pprzmsg("datalink", "MOVE_WP")
+        msg['wp_id'] = self.wpID
+        msg['ac_id'] = ac_id
+        latlon = self.get_latlon()
+        msg['lat'] = latlon['lat']
+        msg['lon'] = latlon['lon']
+        msg['alt'] = latlon['alt']
+        return msg
 
     def addMission(self, mission):
         missions.append(mission)
