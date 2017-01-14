@@ -2,6 +2,7 @@ import sys, getopt
 from xmlparser import *
 from config import *
 from ivylinker import *
+from ui import UI
 
 from interop.client import AsyncClient
 
@@ -31,9 +32,12 @@ def argparser(argv):
 class MissionCommander(object):
     def __init__(self):
         self.initDatabase()
-        importxml('sampleflightplan.xml', self.db)
+        # Todo. Fix XML import
+        # importxml('sampleflightplan.xml', self.db)
         # Do XML loading stuff
         bindIvyMsgHandler(self.ivyMsgHandler)
+        self.ui = UI()
+        self.ui.run()
 
     def initDatabase(self):
         from database import bagOfHolding
