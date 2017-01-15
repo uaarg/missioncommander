@@ -125,10 +125,11 @@ class AirplaneTelemetry(object):
 
     # Interop server code will call this when new data is recieved
     def getTelemetry(self):
+        self.teleAvail.clear()
         tele = {
             'latitude':float(self.position[0]),
             'longitude':float(self.position[1]),
             'altitude_msl':float(self.altitude),
-            'uas_heading':float(self.heading - 4)
+            'uas_heading':float(self.heading)
         }
         return tele
