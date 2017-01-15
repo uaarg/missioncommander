@@ -1,3 +1,5 @@
+from interop.interop_types import StationaryObstacle, MovingObstacle
+
 class Obstacle:
     """
     An obstacle to be avoided by the UAV.
@@ -17,6 +19,7 @@ class Obstacle:
         lon: The longitude of the obstacle centre in decimal degrees.
     """
 
+    @staticmethod
     def _populateGeomData(shape):
         """
         Given a shape, returns a dictionary of the appropriate geometric
@@ -29,6 +32,7 @@ class Obstacle:
 
         return geom_data
 
+    @staticmethod
     def _feetToM(length):
         return length * 0.3048
 
@@ -40,7 +44,7 @@ class Obstacle:
         self.lat = lat
         self.lon = lon
         self.shape = shape
-        self.geom_data = _populateGeomData(self.shape)
+        self.geom_data = Obstacle._populateGeomData(self.shape)
 
     def __init__(self, obstacle):
         """
@@ -54,16 +58,16 @@ class Obstacle:
         self.lat = obstacle.latitude
         self.lon = obstacle.longitude
 
-        if type(obstacle) == 'StationaryObstacle':
+        if type(obstacle) is StationaryObstacle:
             self.moving = False
             self.shape = 'cylinder'
-            self.geom_data = _populateGeomData(self.shape)
-            self.geom_data['radius'] = _feetToM(obstacle.cylinder_radius)
-            self.geom_data['height'] = _feetToM(obstacle.cylinder_height)
+            self.geom_data = Obstacle._populateGeomData(self.shape)
+            self.geom_data['radius'] = Obstacle._feetToM(obstacle.cylinder_radius)
+            self.geom_data['height'] = Obstacle._feetToM(obstacle.cylinder_height)
 
-        if type(obstacle) == 'MovingObstacle':
+        if type(obstacle) is MovingObstacle:
             self.moving = True
             self.shape = 'sphere'
-            self.geom_data = _populateGeomData(self.shape)
-            self.geom_data['radius'] = _feetToM(obstacle.sphere_radius)
-            self.geom_data['altitude'] = _feetToM(obstacle.altitude_msl)
+            self.geom_data = Obstacle._populateGeomData(self.shape)
+            self.geom_data['radius'] = Obstacle._feetToM(obstacle.sphere_radius)
+            self.geom_data['altitude'] = Obstacle._feetToM(obstacle.altitude_msl)
