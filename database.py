@@ -8,8 +8,9 @@ class BagOfHolding(object):
     def __init__(self):
         self.airplane = AirplaneTelemetry()
         self.waypoints = fancyList()
-        self.missions = fancyList()
+        self.allMissions = fancyList()
         self.tasks = fancyList()
+        self.airMissionStatus = AirMissionStatus()
 
     def updateTelemetry(self, msg):
         self.airplane.updateFromWaldo(msg)
@@ -39,11 +40,33 @@ class BagOfHolding(object):
     def getWaypoint(self, index):
         return self.waypoints.get(index)
 
+    def updateAirMissionStatus(self, msg):
+        print("GOT new mission status MSG")
+        #self.airmissionstatus.remainingTime = msg.fieldvalues[0]
+        #self.airmissionstatus.missionInd = msg.fieldvalues[1]
+        #self.updateMissionList(self.allMissions)
+    
+        
+
 class task(object):
 
     def __init__(self, name, missions):
         self.name = name
         self.missions = missions
+
+class AirMissionStatus(fancyList):
+    '''
+    Stores the airplane's current Mission Status
+    '''
+    def __init__(self):
+        self.remainingTime = 0
+        self.airMissionInd = []
+        self.airMissionList = fancyList()
+
+    def updateAirMissionList(self, allMissions):
+        print("Finish writing this")
+
+
 
 class AirplaneTelemetry(object):
     '''

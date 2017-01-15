@@ -50,6 +50,9 @@ class MissionCommander(object):
         if (msg.name == "WP_MOVED"):
             self.db.updateWaypoint(msg)
         
+        if (msg.name == "MISSION_STATUS"):
+            self.db.updateAirMissionStatus(msg)
+
 
 
 if __name__ == '__main__':
