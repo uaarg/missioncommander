@@ -1,3 +1,5 @@
+#!/usr/bin/env python3
+
 import sys, getopt
 from xmlparser import *
 from config import *
@@ -36,8 +38,6 @@ class MissionCommander(object):
         importxml('webster_2016.xml', self.db)
         # Do XML loading stuff
         bindIvyMsgHandler(self.ivyMsgHandler)
-        self.ui = UI()
-        self.ui.run()
 
     def initDatabase(self):
         from database import bagOfHolding
@@ -65,3 +65,7 @@ if __name__ == '__main__':
         obstacle_thread.start()
         obstacle_thread.join()
         telem_thread.join()
+
+    if UI_ENABLE:
+        ui = UI()
+        ui.run()
