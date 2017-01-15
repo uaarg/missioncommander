@@ -1,8 +1,4 @@
-<<<<<<< HEAD
-#!/usr/bin/env python3
-=======
 #!/usr/bin/python3
->>>>>>> 66715aae9ba6f8e48d5f65877a7dcdf61fb1ce1c
 
 import sys, getopt
 from xmlparser import *
