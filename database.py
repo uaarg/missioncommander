@@ -27,7 +27,7 @@ class bagOfHolding(object):
             tmpest = str(wp.east)
             wp.update_utm(east, north, zone, northern=True, alt=alt, name=None)
 
-            if ((tmpest !=  str(wp.east))and(WP_DEBUG) :
+            if (tmpest !=  str(wp.east)) and (WP_DEBUG):
                 print(str(msg.fieldvalues[0]))
                 print(wp.name)
                 print('Updating a Waypoint!')
@@ -65,7 +65,6 @@ class AirplaneTelemetry(object):
         easting = msg.fieldvalues[4]
         northing = msg.fieldvalues[5]
         zone_num = msg.fieldvalues[6]
-        print(easting)
         self.position = utm.to_latlon(float(easting)/100, float(northing)/100, int(zone_num), northern=UTM_NORTHERN_HEMISPHERE)
         self.altitude = msg.fieldvalues[10]
         self.heading = float(msg.fieldvalues[1]) * 180 / PI + 90
