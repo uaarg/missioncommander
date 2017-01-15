@@ -28,10 +28,10 @@ class TelemetryThread(Thread):
                 t = self.plane.getTelemetry()
                 if t:
                     telem = Telemetry(t['latitude'], t['longitude'], t['altitude_msl'], t['uas_heading'])
-                    r = self.interopclient.post_telemetry(telem)
+                    r = self.interopclient.post_telemetry(telem).result()
 
             except InteropError as error:
-                print(error.message)
+                print(error)
 
     def getDataSendFrequency():
         """

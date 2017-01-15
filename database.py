@@ -102,7 +102,7 @@ class AirplaneTelemetry(object):
         if (self.positionFlag or self.altitudeFlag or self.headingFlag):
             self.positionFlag = self.altitudeFlag = self.headingFlag = False
             tele = {
-                'latitude':self.position[0],
+                'latitude':float(self.position[0]),
                 'longitude':float(self.position[1]),
                 'altitude_msl':float(self.altitude),
                 'uas_heading':float(self.heading)
