@@ -15,13 +15,13 @@ class UI(QtCore.QObject):
     def __init__(self):
         super().__init__()
         self.app = QtWidgets.QApplication(sys.argv)
-        self.mainWindow = mainWindow()
+        self.mainWindow = MainWindow()
 
     def run(self):
         self.mainWindow.show()
         return self.app.exec_()
 
-class mainWindow(QtWidgets.QMainWindow):
+class MainWindow(QtWidgets.QMainWindow):
     def __init__(self):
         # Initialize Members
         super().__init__()

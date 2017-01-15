@@ -3,7 +3,7 @@ from config import *
 import config
 import utm
 
-class bagOfHolding(object):
+class BagOfHolding(object):
 
     def __init__(self):
         self.airplane = AirplaneTelemetry()
@@ -62,10 +62,10 @@ class AirplaneTelemetry(object):
         self.headingFlag = False
 
     def updateFromWaldo(self, msg):
-        easting = msg.fieldvalues[4]
-        northing = msg.fieldvalues[5]
-        zone_num = msg.fieldvalues[6]
-        self.position = utm.to_latlon(float(easting)/100, float(northing)/100, int(zone_num), northern=UTM_NORTHERN_HEMISPHERE)
+        easting = float(msg.fieldvalues[4]) / 100
+        northing = float(msg.fieldvalues[5]) / 100
+        zone_num = int(msg.fieldvalues[6])
+        self.position = utm.to_latlon(easting, northing, zone_num, northern=UTM_NORTHERN_HEMISPHERE)
         self.altitude = msg.fieldvalues[10]
         self.heading = float(msg.fieldvalues[1]) * 180 / PI + 90
         self.positionFlag = self.altitudeFlag = self.headingFlag = True

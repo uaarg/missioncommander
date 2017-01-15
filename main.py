@@ -40,8 +40,8 @@ class MissionCommander(object):
         bindIvyMsgHandler(self.ivyMsgHandler)
 
     def initDatabase(self):
-        from database import bagOfHolding
-        self.db = bagOfHolding()
+        from database import BagOfHolding
+        self.db = BagOfHolding()
 
     def ivyMsgHandler(self, ac_id, msg):
         if (msg.name == "WALDO_MSG"):
