@@ -27,10 +27,10 @@ class IvySender(ivyint):
     def sendMSG(self, msg):
         self._interface.send(msg)
 
-def sendMSG(msg):
+def sendIvyMSG(msg):
     glbivy.sendMSG(msg)
 
-def shutdown():
+def shutdownIvyBus():
     glbivy.shutdown()
 
 def bindIvyMsgHandler(cb):

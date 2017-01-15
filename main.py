@@ -60,7 +60,7 @@ if __name__ == '__main__':
 
     if INTEROP_ENABLE:
         telem_thread = TelemetryThread(interop, mc.db.airplane)
-        obstacle_thread = ObstacleThread(interop, glbivy)
+        obstacle_thread = ObstacleThread(interop, sendIvyMSG)
         telem_thread.start()
         obstacle_thread.start()
         obstacle_thread.join()

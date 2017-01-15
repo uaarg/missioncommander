@@ -39,7 +39,7 @@ class TelemetryThread(Thread):
         is being updated with telemetry at.
         """
 
-def sendIvyShapeMessage(obstacle_id, obstacle, interface):
+def sendIvyShapeMessage(obstacle_id, obstacle, ivysender):
     """
     Send a shape message over the Ivy bus for a given obstacle.
 
@@ -63,7 +63,7 @@ def sendIvyShapeMessage(obstacle_id, obstacle, interface):
     if obstacle.shape == 'sphere':
         msg['text'] = "%.2fm" % (obstacle.geom_data['altitude'])
 
-    interface.sendMSG(msg)
+    ivysender(msg)
 
 class ObstacleThread(Thread):
     """

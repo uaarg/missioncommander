@@ -1,6 +1,6 @@
 import ivylinker
 
-sendMSG = ivylinker.sendMSG
+sendIvyMSG = ivylinker.sendIvyMSG
 
 class fancyList(object):
     '''
