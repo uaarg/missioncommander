@@ -17,15 +17,9 @@ class importxml(object):
 
         for e in root.iter('flight_plan'): # Only works on last msg with 'flight_plan'
             fancy = e.items()
-            flightParams = dict(fancy)
+        flightParams = self.floatize(dict(fancy))
         #print (flightParams)
         #print ('Home is at Lat:' + flightParams['lat0'] + 'deg Lon:' + flightParams['lon0'] + 'deg')
-
-        for key in flightParams:
-            try:
-                flightParams[key]= float(flightParams[key])
-            except:
-                pass
 
         utmHome = utm.from_latlon(flightParams['lat0'], flightParams['lon0'])
         #print(utmHome)
@@ -34,12 +28,16 @@ class importxml(object):
         flightParams['utmZoneNumber0'] = utmHome[2]
         flightParams['utmZoneLetter0'] = utmHome[3]
         #print(flightParams)
-
+        originWpObj = waypointobject.Waypoint('OrIgIn', '0','utm',flightParams['lat0'], flightParams['lon0'], flightParams['utmZoneNumber0'], True, flightParams['easting0'], flightParams['northing0'], flightParams['alt'])
+        self.db.addWaypoint(originWpObj)
+        
         # Get waypoints from XML
         waypoints = []
         for wpt in root.iter('waypoint'):
-            waypoints.append(dict(wpt.items()))
-        print(waypoints)
+            waypoints.append(self.floatize(dict(wpt.items())))
+
+        #print(waypoints)
+
         for waypoint in waypoints:
             wpTypeXY = False
             wpTypeUTM = False
@@ -55,8 +53,8 @@ class importxml(object):
                 if key is 'alt':
                     defaultAlt = False
             #print(dir(waypoint))
-            waypoint['wpID'] = int(wpID)
             wpID = wpID + 1
+            waypoint['wpID'] = int(wpID)
             if defaultAlt:
                 waypoint['alt'] = flightParams['alt']
 
@@ -78,5 +76,18 @@ class importxml(object):
             else:
                 waypoint['wpType'] = 'latlon'
 
-            wpobj = waypointobject.Waypoint(waypoint['name'], waypoint['wpID'],  waypoint['wpType'], waypoint['lat'],waypoint['lon'],waypoint['zone'],waypoint['northHemi'],waypoint['easting'],waypoint['northing'],waypoint['alt'])
-            self.db.addWaypointToIndex(wpobj)
+            #print(type(waypoint['lat']))
+            wpobj = waypointobject.Waypoint(waypoint['name'], waypoint['wpID'], waypoint['wpType'], waypoint['lat'],waypoint['lon'],waypoint['zone'],waypoint['northHemi'],waypoint['easting'],waypoint['northing'],waypoint['alt'])
+            self.db.addWaypoint(wpobj)
+
+    def floatize(self, dictionaryWithBadStrings):
+        '''
+        Makes dictionary entries floats if it can.
+        '''
+        goodDictionary = {}
+        for key in dictionaryWithBadStrings:
+            try:
+                goodDictionary[key]= float(dictionaryWithBadStrings[key])
+            except:
+                goodDictionary[key] = dictionaryWithBadStrings[key]
+        return goodDictionary

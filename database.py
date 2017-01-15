@@ -22,11 +22,19 @@ class bagOfHolding(object):
         north = msg.fieldvalues[2]
         alt = msg.fieldvalues[3]
         zone = msg.fieldvalues[4]
-
         wp = self.waypoints.getFromIndex(int(msg.fieldvalues[0]))
         if wp != None:
+            tmpest = str(wp.east)
             wp.update_utm(east, north, zone, northern=True, alt=alt, name=None)
 
+            if ((tmpest !=  str(wp.east))and(WP_DEBUG) :
+                print(str(msg.fieldvalues[0]))
+                print(wp.name)
+                print('Updating a Waypoint!')
+                print("Easting is :" + tmpest)
+
+                print("Easting is :" + str(wp.east))
+                print('------------------------------------------------------')
 
     def getWaypoint(self, index):
         return self.waypoints.get(index)
@@ -57,7 +65,8 @@ class AirplaneTelemetry(object):
         easting = msg.fieldvalues[4]
         northing = msg.fieldvalues[5]
         zone_num = msg.fieldvalues[6]
-        self.position = utm.to_latlon(easting, northing, zone_num, northern=UTM_NORTHERN_HEMISPHERE)
+        print(easting)
+        self.position = utm.to_latlon(float(easting)/100, float(northing)/100, int(zone_num), northern=UTM_NORTHERN_HEMISPHERE)
         self.altitude = msg.fieldvalues[10]
         self.heading = float(msg.fieldvalues[1]) * 180 / PI + 90
         self.positionFlag = self.altitudeFlag = self.headingFlag = True

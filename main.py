@@ -31,7 +31,7 @@ def argparser(argv):
 class MissionCommander(object):
     def __init__(self):
         self.initDatabase()
-        importxml('sampleflightplan.xml', self.db)
+        importxml('webster_2016.xml', self.db)
         # Do XML loading stuff
         bindIvyMsgHandler(self.ivyMsgHandler)
 
@@ -42,10 +42,10 @@ class MissionCommander(object):
     def ivyMsgHandler(self, ac_id, msg):
         if (msg.name == "WALDO_MSG"):
             self.db.updateTelemetry(msg)
-        
+
         if (msg.name == "WP_MOVED"):
             self.db.updateWaypoint(msg)
-        
+
 
 
 if __name__ == '__main__':

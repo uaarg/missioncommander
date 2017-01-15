@@ -5,7 +5,7 @@ class Waypoint(object):
     This object may take either latlon or UTM format as input; however, it stores them in UTM.
     """
 
-    def __init__(self, name, wpID, point_type, lat=None, lon=None, zone=None, northern=True, east=None, north=None, alt=None, missions=None):
+    def __init__(self, name, wpID, point_type, lat=None, lon=None, zone=None, northern=True, east=None, north=None, alt=None, missions=[]):
 
         """
         ARGUMENTS
@@ -117,5 +117,5 @@ class Waypoint(object):
         missions.remove(mission)
 
     def flagMissions(self):
-        for m in missions:
+        for m in self.missions:
             m.flagForUpdate()
