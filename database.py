@@ -2,6 +2,7 @@ from utils import *
 from config import *
 import config
 import utm
+import threading
 
 class BagOfHolding(object):
 
@@ -80,6 +81,8 @@ class AirplaneTelemetry(object):
         self.position = (0, 0) # Tuple of lat-lon
         self.altitude = 0
         self.heading = 0
+        self.teleAvail = threading.Event()
+        self.teleAvail.clear()
         self.positionFlag = False
         self.altitudeFlag = False
         self.headingFlag = False
@@ -91,7 +94,7 @@ class AirplaneTelemetry(object):
         self.position = utm.to_latlon(easting, northing, zone_num, northern=UTM_NORTHERN_HEMISPHERE)
         self.altitude = msg.fieldvalues[10]
         self.heading = float(msg.fieldvalues[1]) * 180 / PI + 90
-        self.positionFlag = self.altitudeFlag = self.headingFlag = True
+        self.teleAvail.set()
         if TELEM_DEBUG:
             print(self.position)
 
@@ -122,14 +125,10 @@ class AirplaneTelemetry(object):
 
     # Interop server code will call this when new data is recieved
     def getTelemetry(self):
-        if (self.positionFlag or self.altitudeFlag or self.headingFlag):
-            self.positionFlag = self.altitudeFlag = self.headingFlag = False
-            tele = {
-                'latitude':float(self.position[0]),
-                'longitude':float(self.position[1]),
-                'altitude_msl':float(self.altitude),
-                'uas_heading':float(self.heading)
-            }
-            return tele
-        else:
-            return False
+        tele = {
+            'latitude':float(self.position[0]),
+            'longitude':float(self.position[1]),
+            'altitude_msl':float(self.altitude),
+            'uas_heading':float(self.heading - 4)
+        }
+        return tele

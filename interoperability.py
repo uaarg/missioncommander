@@ -3,6 +3,7 @@ Queries interoperability server for relevant information,
 then passes that information to the rest of the program.
 """
 from threading import Thread
+from time import sleep
 
 from interop.client import AsyncClient
 from interop.exceptions import InteropError
@@ -24,6 +25,7 @@ class TelemetryThread(Thread):
 
     def run(self):
         while True:
+            self.plane.teleAvail.wait()
             try:
                 t = self.plane.getTelemetry()
                 if t:
@@ -94,6 +96,8 @@ class ObstacleThread(Thread):
 
             except InteropError as error:
                 print(error.message)
+            
+            sleep(0.1)
 
     
 
