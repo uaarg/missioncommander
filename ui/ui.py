@@ -2,6 +2,8 @@
 # Created by: PyQt5 UI code generator 5.5.1
 
 import sys
+from threading import Thread
+from time import sleep
 from PyQt5 import QtCore, QtGui, QtWidgets
 
 translate = QtCore.QCoreApplication.translate
@@ -10,21 +12,34 @@ translate = QtCore.QCoreApplication.translate
 def noop():
     pass
 
-class UI(QtCore.QObject):
+class UiThread(Thread):
+    """
+    Thread to update graphical user interface.
+    """
+    def __init__(self, waypointdb):
+        super(UiThread, self).__init__()
+        self.ui = UI(waypointdb)
+        self.ui.run()
 
-    def __init__(self):
+    def run(self):
+        while True:
+            sleep(0.1)
+
+class UI(QtCore.QObject):
+    def __init__(self, waypointdb):
         super().__init__()
         self.app = QtWidgets.QApplication(sys.argv)
-        self.mainWindow = MainWindow()
+        self.mainWindow = MainWindow(waypointdb)
 
     def run(self):
         self.mainWindow.show()
         return self.app.exec_()
 
 class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self):
+    def __init__(self, waypointdb):
         # Initialize Members
         super().__init__()
+        self.db = waypointdb
 
         # Define Layout, Font, and Size Policy
         self.showMaximized()
@@ -152,11 +167,24 @@ class MainWindow(QtWidgets.QMainWindow):
         self.leftLowerPane.addItem(spacerItem2, 3, 0, 1, 1)
         self.lowerPane.addLayout(self.leftLowerPane, 0, 3, 1, 1)
         self.scrollAreaGrid.addLayout(self.lowerPane, 1, 0, 1, 1)
+
+        # Upper Pane ( Contain ListViews )
         self.upperPane = QtWidgets.QGridLayout()
         self.upperPane.setObjectName("upperPane")
+
+        # LeftMost Column
+        unstagedListViewModel = QtGui.QStandardItemModel(self.upperPane)
+
+        for waypoint in self.db.lst:
+            item = QtGui.QStandardItem(waypoint.name)
+            item.setCheckable(True)
+            unstagedListViewModel.appendRow(item)
+
         self.unstagedListView = QtWidgets.QListView(self.scrollAreaWidgetContents)
         self.unstagedListView.setObjectName("unstagedListView")
+        self.unstagedListView.setModel(unstagedListViewModel)
         self.upperPane.addWidget(self.unstagedListView, 1, 1, 1, 1)
+
         self.uasWaypointsLabel = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
@@ -307,3 +335,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionClose_2.setText(translate("mainWindow", "Import Project"))
         self.actionClose_Project.setText(translate("mainWindow", "Close Project"))
         self.actionExit_Program.setText(translate("mainWindow", "Exit Program"))
+
+class MyListModel(QtCore.QAbstractListModel):
+    def __init__(self, datain, parent=None, *args):
+        """ datain: a list where each item is a row
+        """
+        QtCore.QAbstractListModel.__init__(self, parent, *args)
+        self.listdata = datain
+
+    def rowCount(self, parent=QtCore.QModelIndex()):
+        return len(self.listdata)
+
+    def data(self, index, role):
+        if index.isValid() and role == QtCore.DisplayRole:
+            return QVariant(self.listdata[index.row()])
+        else:
+            return QVariant()

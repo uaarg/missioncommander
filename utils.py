@@ -26,14 +26,9 @@ class fancyList(object):
             print("The WP Index is out of Range!! Use add or addToIndex")
             return False
 
-
-
     def getFromIndex(self, ind):
         try:
             return self.lst[ind]
         except:
             print("The WP Index is out of Range!! Use add or addToIndex")
             return None
-
-
-

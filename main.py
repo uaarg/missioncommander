@@ -4,11 +4,10 @@ import sys, getopt
 from xmlparser import *
 from config import *
 from ivylinker import *
-from ui import UI
+from ui import UiThread
 
 from interop.client import AsyncClient
 from interoperability import TelemetryThread, ObstacleThread
-
 
 def argparser(argv):
     url = "http://localhost:8000"
@@ -31,7 +30,6 @@ def argparser(argv):
             password = arg
     return password, username, url
 
-
 class MissionCommander(object):
     def __init__(self):
         self.initDatabase()
@@ -46,19 +44,18 @@ class MissionCommander(object):
     def ivyMsgHandler(self, ac_id, msg):
         if (msg.name == "WALDO_MSG"):
             self.db.updateTelemetry(msg)
-        
+
         if (msg.name == "WP_MOVED"):
             self.db.updateWaypoint(msg)
-        
+
         if (msg.name == "MISSION_STATUS"):
             self.db.updateAirMissionStatus(msg)
-
-
 
 if __name__ == '__main__':
     password, username, url = argparser(sys.argv[1:])
     if INTEROP_ENABLE:
         interop = AsyncClient(url, username, password)
+
     mc = MissionCommander()
 
     if INTEROP_ENABLE:
@@ -70,5 +67,6 @@ if __name__ == '__main__':
         telem_thread.join()
 
     if UI_ENABLE:
-        ui = UI()
-        ui.run()
+        ui_thread = UiThread(mc.db.waypoints)
+        ui_thread.start()
+        ui_thread.join()
