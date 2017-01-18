@@ -41,13 +41,16 @@ class BagOfHolding(object):
     def getWaypoint(self, index):
         return self.waypoints.get(index)
 
+    def addMission(self, missionObj):
+        self.allMissions.add(missionObj)
+
     def updateAirMissionStatus(self, msg):
         print("GOT new mission status MSG")
         #self.airmissionstatus.remainingTime = msg.fieldvalues[0]
         #self.airmissionstatus.missionInd = msg.fieldvalues[1]
         #self.updateMissionList(self.allMissions)
-    
-        
+
+
 
 class task(object):
 

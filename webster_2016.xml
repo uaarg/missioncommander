@@ -131,11 +131,11 @@
       <deroute block="Search_Sweep"/>
     </block>
     <block name="Search_Sweep">
-      <path approaching_time="5" wpts=" wp6, swp1"/>
+      <path approaching_time="5" wpts=" wp6, swp1" mID= "5" />
       <path approaching_time="5" wpts=" swp1, swp2"/>
       <path approaching_time="5" wpts=" swp2, swp3"/>
       <go wp="swp4"/>
-      <go wp="swp5"/>
+      <go wp="swp5" mID= '2'/>
       <go wp="swp6"/>
       <go wp="swp7"/>
       <go wp="swp8"/>
@@ -155,7 +155,7 @@
       <go approaching_time="0" wp="bLKN"/>
       <path approaching_time="2" wpts="bLKN, LKN"/>
       <while cond="TRUE">
-        <circle radius="nav_radius " until="stage_time > 43" wp="LKN"/>
+        <circle radius="nav_radius " until="stage_time > 43" wp="LKN" mID="3"/>
         <circle radius="nav_radius + 30" until="stage_time > 43+31.4193*5/13" wp="LKN"/>
       </while>
       <deroute block="Go aLKN"/>
@@ -262,9 +262,9 @@
     </block>
     <block name="Go swp16">
       <go wp="swp16"/>
+      <block name="Go swp17">
       <deroute block="Standby"/>
     </block>
-    <block name="Go swp17">
       <go wp="swp17"/>
       <deroute block="Standby"/>
     </block>

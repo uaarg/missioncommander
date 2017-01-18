@@ -1,6 +1,7 @@
 import xml.etree.ElementTree as ET
 import utm
 import waypointobject
+import mission
 
 class importxml(object):
     def __init__(self, filepath, datDatabase):
@@ -11,13 +12,13 @@ class importxml(object):
     def parseXML(self, filepath):
         wpID = 0
         tree = ET.parse(filepath)
-        root = tree.getroot()
+        self.root = tree.getroot()
 
         flightParams = {}
 
-        for e in root.iter('flight_plan'): # Only works on last msg with 'flight_plan'
+        for e in self.root.iter('flight_plan'):
             fancy = e.items()
-        flightParams = self.floatize(dict(fancy))
+        flightParams = self.__floatize(dict(fancy))
         #print (flightParams)
         #print ('Home is at Lat:' + flightParams['lat0'] + 'deg Lon:' + flightParams['lon0'] + 'deg')
 
@@ -30,11 +31,11 @@ class importxml(object):
         #print(flightParams)
         originWpObj = waypointobject.Waypoint('OrIgIn', '0','utm',flightParams['lat0'], flightParams['lon0'], flightParams['utmZoneNumber0'], True, flightParams['easting0'], flightParams['northing0'], flightParams['alt'])
         self.db.addWaypoint(originWpObj)
-        
+
         # Get waypoints from XML
         waypoints = []
-        for wpt in root.iter('waypoint'):
-            waypoints.append(self.floatize(dict(wpt.items())))
+        for wpt in self.root.iter('waypoint'):
+            waypoints.append(self.__floatize(dict(wpt.items())))
 
         #print(waypoints)
 
@@ -80,7 +81,33 @@ class importxml(object):
             wpobj = waypointobject.Waypoint(waypoint['name'], waypoint['wpID'], waypoint['wpType'], waypoint['lat'],waypoint['lon'],waypoint['zone'],waypoint['northHemi'],waypoint['easting'],waypoint['northing'],waypoint['alt'])
             self.db.addWaypoint(wpobj)
 
-    def floatize(self, dictionaryWithBadStrings):
+        missions = []
+        #print(type(root.iter('circle')))
+        #print(str(root.iter('circle')))
+        #print(dir(root.iter('circle')))
+
+        for missionType in ('go', 'path', 'circle', 'segment', 'survey'):
+            missions = missions + self.__getListofDictOfXMLtag(missionType)
+
+        # now I have all the missions, time to get them initializes in objects
+        # need to parse waypoints involved in missions and the name from that
+        #print(missions)
+        for miss in missions:
+            if 'wp' in miss.keys():
+                pass
+            elif 'wpts' in miss.keys():
+                miss['wp'] = miss['wpts'].replace(',','').split()
+                #print(miss['wpts'])
+            else:
+                raise AttributeError ('Mission ID:' + miss['mID']+ ' does not contain waypoints. ;(')
+
+            if not('radius' in miss.keys()):
+                miss['radius'] = None
+            print("About to make mission object")
+            missionObj = mission.Mission(miss['mID'], -1, mission.NavPattern(miss['NavPattern']), miss['wp'], miss['radius'])
+            self.db.addMission(missionObj)
+
+    def __floatize(self, dictionaryWithBadStrings):
         '''
         Makes dictionary entries floats if it can.
         '''
@@ -91,3 +118,17 @@ class importxml(object):
             except:
                 goodDictionary[key] = dictionaryWithBadStrings[key]
         return goodDictionary
+
+    def __getListofDictOfXMLtag(self, msg):
+        '''
+        Added this so I didnt have to write it 5 times.
+        gets missions by mission type (circle, go, path ect.) and only imports
+        ones with a mission id ['mID']
+        '''
+        detList = []
+        for testMission in self.root.iter(msg):
+            testMission = self.__floatize(dict(testMission.items()))
+            if 'mID' in testMission.keys():
+                testMission['NavPattern'] = msg
+                detList.append(testMission)
+        return detList

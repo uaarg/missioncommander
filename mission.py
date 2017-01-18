@@ -9,42 +9,84 @@ class InsertMode(Enum):
     ReplaceAll = 4
 
 class NavPattern(Enum):
-    MISSION_GOTO_WP = 1
-    MISSION_GOTO_WP_LLA = 2
-    MISSION_CIRCLE = 3
-    MISSION_CIRCLE_LLA = 4
-    MISSION_SEGMENT = 5
-    MISSION_SEGMENT_LLA = 6
-    MISSION_PATH = 7
-    MISSION_PATH_LLA = 8
-    MISSION_SURVEY = 9
-    MISSION_SURVEY_LLA = 10
+    MISSION_GOTO_WP = 'go'
+    MISSION_GOTO_WP_LLA = 'go'
+    MISSION_CIRCLE = 'circle'
+    MISSION_CIRCLE_LLA = 'circle'
+    MISSION_SEGMENT = 'segment'
+    MISSION_SEGMENT_LLA = 'segment'
+    MISSION_PATH = 'path'
+    MISSION_PATH_LLA = 'path'
+    MISSION_SURVEY = 'survey'
+    MISSION_SURVEY_LLA = 'survey'
+
 
 class Mission(object):
     """class to define missions applying to 1 or more waypoints"""
-    
-    nav_pattern = property(get_nav_pattern, set_nav_pattern)
 
-    def __init__(self, name, index, duration, nav_pattern, waypoints, radius = None):
+    def genName(self):
+        '''
+        Generate useable name for mission if one is not pre-made.
+        Uses waypoints involved and the nav_pattern.
+        '''
+        
+        nameStr = ''
+
+        if (self.nav_pattern.name is 'MISSION_GOTO_WP'):
+            nameStr = nameStr + 'Go to waypoint '
+        elif (self.nav_pattern.name is 'MISSION_CIRCLE'):
+            nameStr = nameStr + 'Circle waypoint '
+        elif (self.nav_pattern.name is 'MISSION_PATH'):
+            nameStr = nameStr + 'Make a path from '
+        elif (self.nav_pattern.name is 'MISSION_SEGMENT'):
+            nameStr = nameStr + 'Make a path between '
+        elif (self.nav_pattern.name is 'MISSION_SURVEY'):
+            nameStr = nameStr + 'Survey from waypoint '
+
+        oneWaypoit = True
+
+        if type(self.waypoints) is str: # if we only have 1 waypoint to deal with
+            nameStr = nameStr + self.waypoints
+        else:
+            for wp in self.waypoints:
+                if not(oneWaypoit):
+                    nameStr = nameStr + ' to ' + wp
+                else:
+                    nameStr = nameStr + wp
+                    oneWaypoit = False
+
+        print(nameStr)
+        return nameStr
+
+
+    def __init__(self, index, duration, nav_pattern, waypoints, radius = None, name = None):
         assert isinstance(nav_pattern, NavPattern)
         assert nav_pattern != NavPattern.MISSION_CIRCLE and nav_pattern != NavPattern.MISSION_CIRCLE_LLA or radius is not None
-        
-        self.name = name
+
+
         self.index = index
         self.duration = duration
         self._nav_pattern = nav_pattern
         self.waypoints = waypoints
         self.radius = radius
         self.wpUpdated = False
-        
+
+        if name is None:
+            self.name = self.genName()
+        else:
+            self.name = name
+
     def get_nav_pattern(self):
         return self._nav_pattern
-    
+
     def set_nav_pattern(self, nav_pattern, radius = None):
         assert isinstance(nav_pattern, NavPattern)
         print("setting nav pattern")
         self._nav_pattern = nav_pattern
-    
+
+
+    nav_pattern = property(get_nav_pattern, set_nav_pattern)
+
     def gen_mission_msg(self, ac_id, insert_mode = InsertMode.Append):
 
 
@@ -56,7 +98,7 @@ class Mission(object):
         msg['insert'] = insert_mode.name
         msg['duration'] = self.duration
         msg['index'] = self.index
-        
+
         if self._nav_pattern == NavPattern.MISSION_GOTO_WP:
             assert len(self.waypoints) == 1
             waypoint = self.waypoints[0].get_utm()
@@ -70,10 +112,10 @@ class Mission(object):
             msg['wp_lat'] = waypoint['lat']
             msg['wp_lon'] = waypoint['lon']
             msg['wp_alt'] = waypoint['alt']
-        
+
         elif self._nav_pattern == NavPattern.MISSION_CIRCLE:
             assert len(self.waypoints) == 1
-            if not self.radius: 
+            if not self.radius:
                 raise AttributeError("Circle requires radius")
             waypoint = self.waypoints[0].get_utm()
 
@@ -84,7 +126,7 @@ class Mission(object):
 
         elif self._nav_pattern == NavPattern.MISSION_CIRCLE_LLA:
             assert len(self.waypoints) == 1
-            if not self.radius: 
+            if not self.radius:
                 raise AttributeError("Circle requires radius")
             waypoint = self.waypoints[0].get_latlon()
 
@@ -92,7 +134,7 @@ class Mission(object):
             msg['center_lon'] = waypoint['lon']
             msg['center_alt'] = waypoint['alt']
             msg['radius'] = self.radius
-            
+
         elif self._nav_pattern == NavPattern.MISSION_SEGMENT:
             assert len(self.waypoints) == 2
             waypoint1 = self.waypoints[0].get_utm()
@@ -101,7 +143,7 @@ class Mission(object):
             msg['segment_north_1'] = waypoint1['north']
             msg['segment_east_2'] = waypoint2['east']
             msg['segment_north_2'] = waypoint2['north']
-            
+
         elif self._nav_pattern == NavPattern.MISSION_SEGMENT_LLA:
             assert len(self.waypoints) == 2
             waypoint1 = self.waypoints[0].get_latlon()
@@ -150,8 +192,8 @@ class Mission(object):
             msg['survey_lat_2'] = waypoint2['lat']
             msg['survey_lon_2'] = waypoint2['lon']
             msg['survey_alt'] = waypoint1['alt']
-        
+
         return msg
-        
+
     def flagForUpdate(self):
         self.wpUpdated = True
