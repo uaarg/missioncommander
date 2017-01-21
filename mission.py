@@ -54,8 +54,8 @@ class Mission(object):
                 else:
                     nameStr = nameStr + wp
                     oneWaypoit = False
-
-        print(nameStr)
+        if CBassFlag:
+            print(nameStr)
         return nameStr
 
 
@@ -81,7 +81,8 @@ class Mission(object):
 
     def set_nav_pattern(self, nav_pattern, radius = None):
         assert isinstance(nav_pattern, NavPattern)
-        print("setting nav pattern")
+        if CBassFlag:
+            print("setting nav pattern")
         self._nav_pattern = nav_pattern
 
 

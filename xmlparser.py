@@ -1,3 +1,5 @@
+from config import *
+
 import xml.etree.ElementTree as ET
 import utm
 import waypointobject
@@ -103,7 +105,8 @@ class importxml(object):
 
             if not('radius' in miss.keys()):
                 miss['radius'] = None
-            print("About to make mission object")
+            if CBassFlag:
+                print("About to make mission object")
             missionObj = mission.Mission(miss['mID'], -1, mission.NavPattern(miss['NavPattern']), miss['wp'], miss['radius'])
             self.db.addMission(missionObj)
 

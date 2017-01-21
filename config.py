@@ -22,3 +22,5 @@ WP_DEBUG = False
 INTEROP_ENABLE = True
 UI_ENABLE = False
 
+CBassFlag = False
+
