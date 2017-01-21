@@ -58,7 +58,7 @@ class task(object):
         self.name = name
         self.missions = missions
 
-class AirMissionStatus(fancyList):
+class AirMissionStatus(object):
     '''
     Stores the airplane's current Mission Status
     '''
