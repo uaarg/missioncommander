@@ -48,7 +48,7 @@ def sendIvyShapeMessage(obstacle_id, obstacle, ivysender):
     Args:
         obstacle_id: The ID of the obstacle.
         obstacle: An Obstacle object.
-        interface: An IvySender object to send the message.
+        ivysender: A callback to a function used to send Ivy messages, given a message dictionary.
     """
     msg = PprzMessage("ground", "SHAPE")
     msg['id'] = obstacle_id
@@ -73,11 +73,20 @@ class ObstacleThread(Thread):
     update the program's internal store of obstacles,
     and send obstacle information over the Ivy bus.
     """
-    def __init__(self, interopclient, ivysender):
+    def __init__(self, interopclient, ivysender, updateFrequency=2):
+        """
+        Constructor for an ObstacleThread.
+
+        Args:
+            interopclient: An interoperability client object to handle sending data to the interoperability server.
+            ivysender: A callback to a function used to send Ivy messages, given a message dictionary.
+            updatefrequency: The frequency, in Hz, at which this thread should send obstacle messages over the Ivy bus.
+        """
         super(ObstacleThread, self).__init__()
         self.interopclient = interopclient
         self.ivysender = ivysender
         self.obstacles = []
+        self.sleepDuration = 1.0 / updateFrequency
 
     def run(self):
         while True:
@@ -97,7 +106,7 @@ class ObstacleThread(Thread):
             except InteropError as error:
                 print(error.message)
             
-            sleep(0.1)
+            sleep(self.sleepDuration)
 
     
 
