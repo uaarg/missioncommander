@@ -3,6 +3,7 @@ from config import *
 import config
 import utm
 import threading
+import mission
 
 class BagOfHolding(object):
 
@@ -66,10 +67,13 @@ class AirMissionStatus(fancyList):
         self.remainingTime = 0
         self.airMissionInd = []
         self.airMissionList = fancyList()
+        newMission = mission.Mission( 5 ,-1, mission.NavPattern.MISSION_GOTO_WP, 'wp1')
+        print("got a new mission")
+        print(newMission.name)
 
     def updateAirMissionList(self, allMissions):
-        print("Finish writing this")
-
+        #I have no idea what should be
+        print("Finish writing this.")
 
 
 class AirplaneTelemetry(object):
