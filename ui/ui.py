@@ -257,7 +257,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menuBar.addAction(self.menuHelp.menuAction())
 
         # Translate text for all labels
-        self.translateUi(self)
+        self.translateUi()
 
         ################################################
         ###  END OF QT DESIGNER AUTO-GENERATED CODE  ###
@@ -335,41 +335,6 @@ class MainWindow(QtWidgets.QMainWindow):
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 print('Index %s with Mission: %s' % (item.row(), item.index().data()))
 
-    def replaceButtonAction(self):
-        print('Replace button Pressed')
-        model = self.unstagedListView.model()
-
-        #Find selected row
-        print('Replace mission:')
-        selectedIndexes = self.stagedlistView.selectedIndexes()
-        if len(selectedIndexes) == 1:
-            print(selectedIndexes[0].data())
-        else:
-            print('Select one and only one mission')
-            return
-
-        # Find Checkboxed Items
-        print('List of Selected Missions')
-        for index in range(model.rowCount()):
-            item = model.item(index)
-            if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
-                print('Index %s with Mission: %s' % (item.row(), item.index().data()))
-
-    def replaceAllButtonAction(self):
-        print('replace all button pressed')
-        print('List of Selected Missions')
-        model = self.unstagedListView.model()
-
-        # Find Checkboxed Items
-        for index in range(model.rowCount()):
-            item = model.item(index)
-            if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
-                print('Index %s with Mission: %s' % (item.row(), item.index().data()))
-
-
-    def updateListViews(self):
-        print("Needs to be completed")
-
 
     def replaceButtonAction(self):
         print('Replace button Pressed')
@@ -430,8 +395,8 @@ class MainWindow(QtWidgets.QMainWindow):
         print("Needs to be completed")
 
     # Used by Main Window Constructor
-    def translateUi(self, mainWindow):
-        mainWindow.setWindowTitle(translate("mainWindow", "Mission Commander"))
+    def translateUi(self):
+        self.setWindowTitle(translate("mainWindow", "Mission Commander"))
         self.derouteButton.setText(translate("mainWindow", "Quick Deroute"))
         self.sendMissionButton.setText(translate("mainWindow", "Send Mission"))
         self.missionTypeComboBox.setItemText(0, translate("mainWindow", "Path"))
