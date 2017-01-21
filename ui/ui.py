@@ -41,6 +41,10 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         self.db = waypointdb
 
+        ################################################
+        ### START OF QT DESIGNER AUTO-GENERATED CODE ###
+        ################################################
+
         # Define Layout, Font, and Size Policy
         self.showMaximized()
         self.setWindowTitle(translate("mainWindow", "Mission Commander"))
@@ -167,24 +171,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.leftLowerPane.addItem(spacerItem2, 3, 0, 1, 1)
         self.lowerPane.addLayout(self.leftLowerPane, 0, 3, 1, 1)
         self.scrollAreaGrid.addLayout(self.lowerPane, 1, 0, 1, 1)
-
-        # Upper Pane ( Contain ListViews )
         self.upperPane = QtWidgets.QGridLayout()
         self.upperPane.setObjectName("upperPane")
-
-        # LeftMost Column
-        unstagedListViewModel = QtGui.QStandardItemModel(self.upperPane)
-
-        for waypoint in self.db.lst:
-            item = QtGui.QStandardItem(waypoint.name)
-            item.setCheckable(True)
-            unstagedListViewModel.appendRow(item)
-
         self.unstagedListView = QtWidgets.QListView(self.scrollAreaWidgetContents)
         self.unstagedListView.setObjectName("unstagedListView")
-        self.unstagedListView.setModel(unstagedListViewModel)
         self.upperPane.addWidget(self.unstagedListView, 1, 1, 1, 1)
-
         self.uasWaypointsLabel = QtWidgets.QLabel(self.scrollAreaWidgetContents)
         font = QtGui.QFont()
         font.setFamily("Ubuntu")
@@ -306,6 +297,19 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Translate text for all labels
         self.translateUi(self)
+
+        ################################################
+        ###  END OF QT DESIGNER AUTO-GENERATED CODE  ###
+        ################################################
+
+        # Model for Unstaged Listview
+        unstagedListViewModel = QtGui.QStandardItemModel(self.upperPane)
+        for waypoint in self.db.lst:
+            item = QtGui.QStandardItem(waypoint.name)
+            item.setCheckable(True)
+            unstagedListViewModel.appendRow(item)
+
+        self.unstagedListView.setModel(unstagedListViewModel)
 
         # Connect all buttons
         QtCore.QMetaObject.connectSlotsByName(self)
