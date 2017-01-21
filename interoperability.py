@@ -14,6 +14,9 @@ from pprzlink.message import PprzMessage
 from database import AirplaneTelemetry
 from obstacle import Obstacle
 
+import logging
+logger = logging.getLogger(__name__)
+
 class MissionInformation():
     """
     Class for obtaining information about a mission from the interoperability server, then sending it over the Ivy bus.
@@ -30,8 +33,10 @@ class MissionInformation():
         """
         try:
             missions = self.interopclient.get_missions().result()
+            logger.info(
+                "Received mission information from interop server: %s", missions
+            )
             self.mission_info = missions[0]
-            print(self.mission_info)
         except InteropError as error:
             print(error.message)
         
