@@ -90,6 +90,47 @@
       <with from="Standby" to="Standby"/>
     </include>
   </includes>
+
+  <missions>
+    <path approaching_time="5" wpts=" wp6, swp1" mID= '1' />
+    <path approaching_time="5" wpts=" swp1, swp2" mID= '2' />
+    <path approaching_time="5" wpts=" swp2, swp3" mID= '3' />
+    <go wp="swp4" mID= '4' />
+    <go wp="swp5" mID= '5'/>
+    <go wp="swp6" mID= '6' />
+    <go wp="swp7" mID= '7'/>
+    <go wp="swp8" mID= '8'/>
+    <go wp="swp9" mID= '9'/>
+    <go wp="swp10" mID= '10'/>
+    <go wp="swp11" mID= '11'/>
+    <go wp="swp12" mID= '12'/>
+    <go wp="swp13" mID= '13'/>
+    <go wp="swp14" mID= '14'/>
+    <go wp="swp15" mID= '15'/>
+    <go wp="swp16" mID= '16'/>
+    <go wp="swp17" mID= '17'/>
+    <go wp="swp18" mID= '18'/>
+  </missions>
+
+  <tasks>
+    <task tskid= "1" name="search_survey" >
+        <miss mID="4, 5, 2, 3, 1, 6, 17, 18, 19"/>
+
+    </task>
+
+    <task tskid= "3" name="task_2" >
+        <miss mID="4"/>
+        <miss mID="1"/>
+        <miss mID="1"/>
+        <miss mID="17"/>
+        <miss mID="18"/>
+        <miss mID="19"/>
+    </task>
+
+
+
+  </tasks>
+
   <blocks>
     <block name="Wait GPS">
       <while cond="!GpsFixValid()"/>
@@ -126,36 +167,36 @@
       <go wp="bwp5"/>
       <go wp="awp4"/>
       <path approaching_time="2" wpts=" wp4, wp5"/>
-      <go wp="awp5"/>
+      <go wp="awp5" mID= '20'/>
       <path approaching_time="2" wpts=" awp5, wp6"/>
       <deroute block="Search_Sweep"/>
     </block>
     <block name="Search_Sweep">
-      <path approaching_time="5" wpts=" wp6, swp1" mID= "5" />
-      <path approaching_time="5" wpts=" swp1, swp2"/>
-      <path approaching_time="5" wpts=" swp2, swp3"/>
-      <go wp="swp4"/>
+      <path approaching_time="5" wpts=" wp6, swp1" mID= '5' />
+      <path approaching_time="5" wpts=" swp1, swp2" mID= '5' />
+      <path approaching_time="5" wpts=" swp2, swp3" mID= '5' />
+      <go wp="swp4" mID= '5' />
       <go wp="swp5" mID= '2'/>
-      <go wp="swp6"/>
-      <go wp="swp7"/>
-      <go wp="swp8"/>
-      <go wp="swp9"/>
-      <go wp="swp10"/>
-      <go wp="swp11"/>
-      <go wp="swp12"/>
-      <go wp="swp13"/>
-      <go wp="swp14"/>
-      <go wp="swp15"/>
-      <go wp="swp16"/>
-      <go wp="swp17"/>
-      <go wp="swp18"/>
+      <go wp="swp6" mID= '5' />
+      <go wp="swp7" mID= '3'/>
+      <go wp="swp8" mID= '3'/>
+      <go wp="swp9" mID= '3'/>
+      <go wp="swp10" mID= '3'/>
+      <go wp="swp11" mID= '3'/>
+      <go wp="swp12" mID= '3'/>
+      <go wp="swp13" mID= '3'/>
+      <go wp="swp14" mID= '3'/>
+      <go wp="swp15" mID= '3'/>
+      <go wp="swp16" mID= '3'/>
+      <go wp="swp17" mID= '3'/>
+      <go wp="swp18" mID= '3'/>
       <deroute block="Standby"/>
     </block>
     <block name="LKN Flyover">
       <go approaching_time="0" wp="bLKN"/>
       <path approaching_time="2" wpts="bLKN, LKN"/>
       <while cond="TRUE">
-        <circle radius="nav_radius " until="stage_time > 43" wp="LKN" mID="3"/>
+        <circle radius="nav_radius " until="stage_time > 43" wp="LKN" />
         <circle radius="nav_radius + 30" until="stage_time > 43+31.4193*5/13" wp="LKN"/>
       </while>
       <deroute block="Go aLKN"/>
@@ -181,7 +222,7 @@
       <circle radius="nav_radius" wp="SRIC"/>
     </block>
     <block name="Gowp2">
-      <go wp="wp2"/>
+      <go wp="wp2" mID="3"/>
       <deroute block="Gowp3"/>
     </block>
     <block name="Gowp3">

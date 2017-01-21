@@ -2,12 +2,12 @@ import ivylinker
 
 sendIvyMSG = ivylinker.sendIvyMSG
 
-class fancyList(object):
+class fancyDict(object):
     '''
     Fancy list object that is fancy
     '''
     def __init__(self):
-        self.lst = list()
+        self.lst = dict()
 
     def add(self, wp):
         self.lst.append(wp)

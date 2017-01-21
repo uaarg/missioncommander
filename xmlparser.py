@@ -105,11 +105,20 @@ class importxml(object):
 
             if not('radius' in miss.keys()):
                 miss['radius'] = None
-            if CBassFlag:
-                print("About to make mission object")
+
             missionObj = mission.Mission(miss['mID'], -1, mission.NavPattern(miss['NavPattern']), miss['wp'], miss['radius'])
             self.db.addMission(missionObj)
-
+            
+            '''
+        # So NOW to make tasks..... a bunch of lists of missions that have mID's
+        tasks = []
+        for tsk in self.root.iter('block'): # over every block
+            print('')
+            print('----------------------------------------')
+            for miss in tsk:
+                if 'mID' in miss.keys():
+                    print(str(miss.tag) + ' ' + str(miss.attrib))
+                    '''
     def __floatize(self, dictionaryWithBadStrings):
         '''
         Makes dictionary entries floats if it can.
