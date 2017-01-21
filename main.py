@@ -55,11 +55,11 @@ if __name__ == '__main__':
     password, username, url = argparser(sys.argv[1:])
     if INTEROP_ENABLE:
         interop = AsyncClient(url, username, password)
+        missionInfo = MissionInformation(interop, sendIvyMSG)
+        missionInfo.getMissionInformation()
+        missionInfo.sendIvyOffAxisShape()
 
     mc = MissionCommander()
-    missionInfo = MissionInformation(interop, sendIvyMSG)
-    missionInfo.getMissionInformation()
-    missionInfo.sendIvyOffAxisShape()
 
     if INTEROP_ENABLE:
         telem_thread = TelemetryThread(interop, mc.db.airplane)
