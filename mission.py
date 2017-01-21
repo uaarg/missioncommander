@@ -29,7 +29,7 @@ class Mission(object):
         Generate useable name for mission if one is not pre-made.
         Uses waypoints involved and the nav_pattern.
         '''
-        
+
         nameStr = ''
 
         if (self.nav_pattern.name is 'MISSION_GOTO_WP'):
@@ -54,8 +54,7 @@ class Mission(object):
                 else:
                     nameStr = nameStr + wp
                     oneWaypoit = False
-        if CBassFlag:
-            print(nameStr)
+
         return nameStr
 
 
@@ -81,8 +80,6 @@ class Mission(object):
 
     def set_nav_pattern(self, nav_pattern, radius = None):
         assert isinstance(nav_pattern, NavPattern)
-        if CBassFlag:
-            print("setting nav pattern")
         self._nav_pattern = nav_pattern
 
 
