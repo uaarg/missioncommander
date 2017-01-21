@@ -16,9 +16,9 @@ class UiThread(Thread):
     """
     Thread to update graphical user interface.
     """
-    def __init__(self, waypointdb):
+    def __init__(self, database):
         super(UiThread, self).__init__()
-        self.ui = UI(waypointdb)
+        self.ui = UI(database)
         self.ui.run()
 
     def run(self):
@@ -26,20 +26,24 @@ class UiThread(Thread):
             sleep(0.1)
 
 class UI(QtCore.QObject):
-    def __init__(self, waypointdb):
+    def __init__(self, database):
         super().__init__()
         self.app = QtWidgets.QApplication(sys.argv)
-        self.mainWindow = MainWindow(waypointdb)
+        self.mainWindow = MainWindow(database)
 
     def run(self):
         self.mainWindow.show()
         return self.app.exec_()
 
 class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self, waypointdb):
+    def __init__(self, database):
         # Initialize Members
         super().__init__()
-        self.db = waypointdb
+        self.db = database
+
+        ################################################
+        ### START OF QT DESIGNER AUTO-GENERATED CODE ###
+        ################################################
 
         # Define Layout, Font, and Size Policy
         self.showMaximized()
@@ -47,7 +51,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setObjectName("mainWindow")
         self.resize(1377, 1018)
         font = QtGui.QFont()
-        font.setPointSize(12)
+        font.setPointSize(18)
         font.setBold(False)
         font.setWeight(50)
         self.setFont(font)
@@ -78,22 +82,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.RightPlane = QtWidgets.QGridLayout()
         self.RightPlane.setObjectName("RightPlane")
         self.interopFreqDisplay = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-        font = QtGui.QFont()
-        font.setPointSize(18)
         self.interopFreqDisplay.setFont(font)
         self.interopFreqDisplay.setAutoFillBackground(False)
         self.interopFreqDisplay.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.interopFreqDisplay.setObjectName("interopFreqDisplay")
         self.RightPlane.addWidget(self.interopFreqDisplay, 1, 1, 1, 1)
         self.ivyMessageTSLabel = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-        font = QtGui.QFont()
-        font.setPointSize(18)
         self.ivyMessageTSLabel.setFont(font)
         self.ivyMessageTSLabel.setObjectName("ivyMessageTSLabel")
         self.RightPlane.addWidget(self.ivyMessageTSLabel, 2, 0, 1, 1)
         self.ivyMessageTSDisplay = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-        font = QtGui.QFont()
-        font.setPointSize(18)
         self.ivyMessageTSDisplay.setFont(font)
         self.ivyMessageTSDisplay.setObjectName("ivyMessageTSDisplay")
         self.RightPlane.addWidget(self.ivyMessageTSDisplay, 2, 1, 1, 1)
@@ -101,8 +99,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.bottomRightBottomPane.setObjectName("bottomRightBottomPane")
         self.RightPlane.addLayout(self.bottomRightBottomPane, 3, 1, 1, 1)
         self.interopFreqDisplay_2 = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-        font = QtGui.QFont()
-        font.setPointSize(18)
         self.interopFreqDisplay_2.setFont(font)
         self.interopFreqDisplay_2.setObjectName("interopFreqDisplay_2")
         self.RightPlane.addWidget(self.interopFreqDisplay_2, 1, 0, 1, 1)
@@ -117,9 +113,6 @@ class MainWindow(QtWidgets.QMainWindow):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.derouteButton.sizePolicy().hasHeightForWidth())
         self.derouteButton.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setFamily("Ubuntu")
-        font.setPointSize(18)
         self.derouteButton.setFont(font)
         self.derouteButton.setObjectName("derouteButton")
         self.leftLowerPane.addWidget(self.derouteButton, 0, 0, 1, 3)
@@ -129,10 +122,6 @@ class MainWindow(QtWidgets.QMainWindow):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.sendWaypointButton.sizePolicy().hasHeightForWidth())
         self.sendWaypointButton.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setFamily("Ubuntu")
-        font.setPointSize(18)
-        font.setItalic(False)
         self.sendWaypointButton.setFont(font)
         self.sendWaypointButton.setObjectName("sendWaypointButton")
         self.leftLowerPane.addWidget(self.sendWaypointButton, 2, 2, 1, 1)
@@ -142,9 +131,6 @@ class MainWindow(QtWidgets.QMainWindow):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.waypointComboBox.sizePolicy().hasHeightForWidth())
         self.waypointComboBox.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setFamily("Ubuntu")
-        font.setPointSize(18)
         self.waypointComboBox.setFont(font)
         self.waypointComboBox.setObjectName("waypointComboBox")
         self.leftLowerPane.addWidget(self.waypointComboBox, 2, 0, 1, 1)
@@ -154,10 +140,6 @@ class MainWindow(QtWidgets.QMainWindow):
         sizePolicy.setVerticalStretch(0)
         sizePolicy.setHeightForWidth(self.typeComboBox.sizePolicy().hasHeightForWidth())
         self.typeComboBox.setSizePolicy(sizePolicy)
-        font = QtGui.QFont()
-        font.setFamily("Ubuntu")
-        font.setPointSize(18)
-        font.setItalic(False)
         self.typeComboBox.setFont(font)
         self.typeComboBox.setObjectName("typeComboBox")
         self.typeComboBox.addItem("")
@@ -167,28 +149,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.leftLowerPane.addItem(spacerItem2, 3, 0, 1, 1)
         self.lowerPane.addLayout(self.leftLowerPane, 0, 3, 1, 1)
         self.scrollAreaGrid.addLayout(self.lowerPane, 1, 0, 1, 1)
-
-        # Upper Pane ( Contain ListViews )
         self.upperPane = QtWidgets.QGridLayout()
         self.upperPane.setObjectName("upperPane")
-
-        # LeftMost Column
-        unstagedListViewModel = QtGui.QStandardItemModel(self.upperPane)
-
-        for waypoint in self.db.lst:
-            item = QtGui.QStandardItem(waypoint.name)
-            item.setCheckable(True)
-            unstagedListViewModel.appendRow(item)
-
         self.unstagedListView = QtWidgets.QListView(self.scrollAreaWidgetContents)
         self.unstagedListView.setObjectName("unstagedListView")
-        self.unstagedListView.setModel(unstagedListViewModel)
         self.upperPane.addWidget(self.unstagedListView, 1, 1, 1, 1)
-
         self.uasWaypointsLabel = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-        font = QtGui.QFont()
-        font.setFamily("Ubuntu")
-        font.setPointSize(12)
         self.uasWaypointsLabel.setFont(font)
         self.uasWaypointsLabel.setObjectName("uasWaypointsLabel")
         self.upperPane.addWidget(self.uasWaypointsLabel, 0, 5, 1, 1)
@@ -198,9 +164,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.stagedlistView.setObjectName("stagedlistView")
         self.upperPane.addWidget(self.stagedlistView, 1, 3, 1, 1)
         self.unstagedLabel = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-        font = QtGui.QFont()
-        font.setFamily("Ubuntu")
-        font.setPointSize(12)
         self.unstagedLabel.setFont(font)
         self.unstagedLabel.setObjectName("unstagedLabel")
         self.upperPane.addWidget(self.unstagedLabel, 0, 1, 1, 1)
@@ -210,35 +173,22 @@ class MainWindow(QtWidgets.QMainWindow):
         spacerItem4 = QtWidgets.QSpacerItem(165, 20, QtWidgets.QSizePolicy.Maximum, QtWidgets.QSizePolicy.Minimum)
         self.upperPane.addItem(spacerItem4, 0, 2, 1, 1)
         self.stagedLabel = QtWidgets.QLabel(self.scrollAreaWidgetContents)
-        font = QtGui.QFont()
-        font.setFamily("Ubuntu")
-        font.setPointSize(12)
         self.stagedLabel.setFont(font)
         self.stagedLabel.setObjectName("stagedLabel")
         self.upperPane.addWidget(self.stagedLabel, 0, 3, 1, 1)
         self.buttonScrollPane = QtWidgets.QGridLayout()
         self.buttonScrollPane.setObjectName("buttonScrollPane")
         self.replaceAllButton = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
-        font = QtGui.QFont()
-        font.setFamily("Ubuntu")
-        font.setPointSize(18)
         self.replaceAllButton.setFont(font)
         self.replaceAllButton.setObjectName("replaceAllButton")
         self.buttonScrollPane.addWidget(self.replaceAllButton, 7, 1, 1, 1)
         spacerItem5 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
         self.buttonScrollPane.addItem(spacerItem5, 2, 1, 1, 1)
         self.prependButton = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
-        font = QtGui.QFont()
-        font.setFamily("Ubuntu")
-        font.setPointSize(18)
         self.prependButton.setFont(font)
         self.prependButton.setObjectName("prependButton")
         self.buttonScrollPane.addWidget(self.prependButton, 3, 1, 1, 1)
         self.replaceButton = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
-        font = QtGui.QFont()
-        font.setFamily("Ubuntu")
-        font.setPointSize(18)
-        font.setItalic(False)
         self.replaceButton.setFont(font)
         self.replaceButton.setObjectName("replaceButton")
         self.buttonScrollPane.addWidget(self.replaceButton, 5, 1, 1, 1)
@@ -249,9 +199,6 @@ class MainWindow(QtWidgets.QMainWindow):
         spacerItem8 = QtWidgets.QSpacerItem(20, 33, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
         self.buttonScrollPane.addItem(spacerItem8, 8, 1, 1, 1)
         self.appendButton = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
-        font = QtGui.QFont()
-        font.setFamily("Ubuntu")
-        font.setPointSize(18)
         self.appendButton.setFont(font)
         self.appendButton.setObjectName("appendButton")
         self.buttonScrollPane.addWidget(self.appendButton, 1, 1, 1, 1)
@@ -307,9 +254,98 @@ class MainWindow(QtWidgets.QMainWindow):
         # Translate text for all labels
         self.translateUi(self)
 
-        # Connect all buttons
+        ################################################
+        ###  END OF QT DESIGNER AUTO-GENERATED CODE  ###
+        ################################################
+
+        # Model for Unstaged Listview
+        unstagedListViewModel = QtGui.QStandardItemModel(self.upperPane)
+        for mission in self.db.allMissions.lst:
+            item = QtGui.QStandardItem(mission.name)
+            item.setCheckable(True)
+            unstagedListViewModel.appendRow(item)
+        self.unstagedListView.setModel(unstagedListViewModel)
+        
+        # Model for staged Listview
+        stagedlistViewModel = QtGui.QStandardItemModel(self.upperPane)
+        for stagedMission in self.db.airMissionStatus.airMissionList.lst:
+            item = QtGui.QStandardItem(stagedMission.name)
+            stagedlistViewModel.appendRow(item)
+        self.stagedlistView.setModel(stagedlistViewModel)
+
+        # Button Bindings
+        self.appendButton.clicked.connect(lambda: self.appendButtonAction())
+        self.prependButton.clicked.connect(lambda: self.prependButtonAction())
+        self.replaceButton.clicked.connect(lambda: self.replaceButtonAction())
+        self.replaceAllButton.clicked.connect(lambda: self.replaceAllButtonAction())
+
+        # Combobox Content
+        waypointComboBoxModel = QtGui.QStandardItemModel(self.upperPane)
+        for waypoint in self.db.waypoints.lst:
+            item = QtGui.QStandardItem(waypoint.name)
+            waypointComboBoxModel.appendRow(item)
+        self.waypointComboBox.setModel(waypointComboBoxModel)
+
         QtCore.QMetaObject.connectSlotsByName(self)
 
+    # Prepend Button clicked_slot():
+    def prependButtonAction(self):
+        print('Prepend Button Pressed')
+        print('List of Selected Mission')
+        model = self.unstagedListView.model()
+
+        # Find Checkboxed Items
+        for index in range(model.rowCount()):
+            item = model.item(index)
+            if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+                print('Index %s with Mission: %s' % (item.row(), item.index().data()))
+
+    # Append Button clicked_slot():
+    def appendButtonAction(self):
+        print('Append Button Pressed')
+        print('List of Selected Mission')
+        model = self.unstagedListView.model()
+
+        # Find Checkboxed Items
+        for index in range(model.rowCount()):
+            item = model.item(index)
+            if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+                print('Index %s with Mission: %s' % (item.row(), item.index().data()))
+                
+    def replaceButtonAction(self):
+        print('Replace button Pressed')
+        model = self.unstagedListView.model()
+        
+        #Find selected row
+        print('Replace mission:')
+        selectedIndexes = self.stagedlistView.selectedIndexes()
+        if len(selectedIndexes) == 1:
+            print(selectedIndexes[0].data())
+        else:
+            print('Select one and only one mission')
+            return
+
+        # Find Checkboxed Items
+        print('List of Selected Missions')
+        for index in range(model.rowCount()):
+            item = model.item(index)
+            if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+                print('Index %s with Mission: %s' % (item.row(), item.index().data()))
+    
+    def replaceAllButtonAction(self):
+        print('replace all button pressed')
+        print('List of Selected Missions')
+        model = self.unstagedListView.model()
+
+        # Find Checkboxed Items
+        for index in range(model.rowCount()):
+            item = model.item(index)
+            if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+                print('Index %s with Mission: %s' % (item.row(), item.index().data()))
+          
+
+    def updateListViews(self):
+        print("Needs to be completed")
 
     # Used by Main Window Constructor
     def translateUi(self, mainWindow):
@@ -335,19 +371,3 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionClose_2.setText(translate("mainWindow", "Import Project"))
         self.actionClose_Project.setText(translate("mainWindow", "Close Project"))
         self.actionExit_Program.setText(translate("mainWindow", "Exit Program"))
-
-class MyListModel(QtCore.QAbstractListModel):
-    def __init__(self, datain, parent=None, *args):
-        """ datain: a list where each item is a row
-        """
-        QtCore.QAbstractListModel.__init__(self, parent, *args)
-        self.listdata = datain
-
-    def rowCount(self, parent=QtCore.QModelIndex()):
-        return len(self.listdata)
-
-    def data(self, index, role):
-        if index.isValid() and role == QtCore.DisplayRole:
-            return QVariant(self.listdata[index.row()])
-        else:
-            return QVariant()
