@@ -263,6 +263,7 @@ class MainWindow(QtWidgets.QMainWindow):
         for mission in self.db.allMissions.lst:
             item = QtGui.QStandardItem(mission.name)
             item.setCheckable(True)
+            item.setEditable(False)
             unstagedListViewModel.appendRow(item)
         self.unstagedListView.setModel(unstagedListViewModel)
         
@@ -270,6 +271,7 @@ class MainWindow(QtWidgets.QMainWindow):
         stagedlistViewModel = QtGui.QStandardItemModel(self.upperPane)
         for stagedMission in self.db.airMissionStatus.airMissionList.lst:
             item = QtGui.QStandardItem(stagedMission.name)
+            item.setEditable(False)
             stagedlistViewModel.appendRow(item)
         self.stagedlistView.setModel(stagedlistViewModel)
 
