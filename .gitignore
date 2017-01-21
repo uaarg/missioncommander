@@ -4,3 +4,5 @@
 *.gitignore~
 *.xml~
 *.orig
+
+/data/*

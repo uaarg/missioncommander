@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import sys, getopt
+import logging
 from xmlparser import *
 from config import *
 from ivylinker import *
@@ -8,6 +9,7 @@ from ui import UiThread
 
 from interop.client import AsyncClient
 from interoperability import MissionInformation, TelemetryThread, ObstacleThread
+import log
 
 def argparser(argv):
     url = "http://localhost:8000"
@@ -52,6 +54,7 @@ class MissionCommander(object):
             self.db.updateAirMissionStatus(msg)
 
 if __name__ == '__main__':
+    log.init()
     password, username, url = argparser(sys.argv[1:])
     if INTEROP_ENABLE:
         interop = AsyncClient(url, username, password)
