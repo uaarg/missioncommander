@@ -7,7 +7,7 @@ from ivylinker import *
 from ui import UiThread
 
 from interop.client import AsyncClient
-from interoperability import TelemetryThread, ObstacleThread
+from interoperability import MissionInformation, TelemetryThread, ObstacleThread
 
 def argparser(argv):
     url = "http://localhost:8000"
@@ -57,6 +57,9 @@ if __name__ == '__main__':
         interop = AsyncClient(url, username, password)
 
     mc = MissionCommander()
+    missionInfo = MissionInformation(interop, sendIvyMSG)
+    missionInfo.getMissionInformation()
+    missionInfo.sendIvyOffAxisShape()
 
     if INTEROP_ENABLE:
         telem_thread = TelemetryThread(interop, mc.db.airplane)

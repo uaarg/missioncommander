@@ -23,14 +23,15 @@ class MissionInformation():
     def __init__(self, interopclient, ivysender):
         self.interopclient = interopclient
         self.ivysender = ivysender
-        self.mission_info = {}
 
     def getMissionInformation(self):
         """
         Gets mission information from the interoperability server.
         """
         try:
-            self.mission_info = interopclient.get_missions()
+            missions = self.interopclient.get_missions().result()
+            self.mission_info = missions[0]
+            print(self.mission_info)
         except InteropError as error:
             print(error.message)
         
@@ -43,16 +44,38 @@ class MissionInformation():
             emergent_waypoint_id: The id of the waypoint associated with the emergent target, an integer.
             altitude: The desired MSL altitude for the emergent target waypoint, in metres.
         """
-        msg = PprzMessage("ground", "SHAPE")
+        msg = PprzMessage("datalink", "MOVE_WP")
         msg['wp_id'] = emergent_waypoint_id
         msg['ac_id'] = ac_id
         msg['lat'] = int(
-            self.mission_info["emergent_last_known_pos"]["latitude"] * 1e7
+            self.mission_info.emergent_last_known_pos.latitude * 1e7
         )
         msg['lon'] = int(
-            self.mission_info["emergent_last_known_pos"]["longitude"] * 1e7
+            self.mission_info.emergent_last_known_pos.longitude * 1e7
         )
         msg['alt'] = int(altitude * 1e3)
+
+        self.ivysender(msg)
+
+    def sendIvyOffAxisShape(self):
+        """
+        Sends a message displaying the shape information for the off-axis target.
+        """
+        msg = PprzMessage("ground", "SHAPE")
+        msg['id'] = 99
+        msg['linecolor'] = 'white'
+        msg['fillcolor'] = 'blue'
+        msg['opacity'] = 2
+        msg['shape'] = 0
+        msg['status'] = 0
+        msg['latarr'] = [int(
+            self.mission_info.off_axis_target_pos.latitude * 1e7
+        )] * 2
+        msg['lonarr'] = [int(
+            self.mission_info.off_axis_target_pos.longitude * 1e7
+        )] * 2
+        msg['radius'] = 10 
+        msg['text'] = 'OAX'
 
         self.ivysender(msg)
 
@@ -91,7 +114,7 @@ class ObstacleThread(Thread):
     """
 
     @staticmethod
-    def _sendIvyShapeMessage(obstacle_id, obstacle, ivysender):
+    def sendIvyShapeMessage(obstacle_id, obstacle, ivysender):
         """
         Send a shape message over the Ivy bus for a given obstacle.
 
@@ -107,8 +130,8 @@ class ObstacleThread(Thread):
         msg['opacity'] = 1
         msg['shape'] = 0
         msg['status'] = 0
-        msg['latarr'] = [int(obstacle.lat * 10000000.)] * 2
-        msg['lonarr'] = [int(obstacle.lon * 10000000.)] * 2
+        msg['latarr'] = [int(obstacle.lat * 1e7)] * 2
+        msg['lonarr'] = [int(obstacle.lon * 1e7)] * 2
         msg['radius'] = obstacle.geom_data['radius']
         if obstacle.shape == 'cylinder':
             msg['text'] = "%.2fm" % (obstacle.geom_data['height'])
@@ -144,7 +167,9 @@ class ObstacleThread(Thread):
 
                 obstacle_id = 0
                 for obstacle in self.obstacles:
-                    sendIvyShapeMessage(obstacle_id, obstacle, self.ivysender)
+                    self.sendIvyShapeMessage(
+                        obstacle_id, obstacle, self.ivysender
+                    )
                     obstacle_id += 1
 
             except InteropError as error:
