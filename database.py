@@ -68,6 +68,9 @@ class AirMissionStatus(object):
         self.airMissionInd = []
         self.airMissionList = fancyList()
         newMission = mission.Mission( 5 ,-1, mission.NavPattern.MISSION_GOTO_WP, 'wp1')
+        self.airMissionList.add(newMission)
+        newMission2 = mission.Mission( 6 ,-1, mission.NavPattern.MISSION_GOTO_WP, 'wp2')
+        self.airMissionList.add(newMission2)
         print("got a new mission")
         print(newMission.name)
 

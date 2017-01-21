@@ -309,18 +309,27 @@ class MainWindow(QtWidgets.QMainWindow):
             item.setCheckable(True)
             unstagedListViewModel.appendRow(item)
         self.unstagedListView.setModel(unstagedListViewModel)
+        
+        # Model for staged Listview
+        stagedlistViewModel = QtGui.QStandardItemModel(self.upperPane)
+        for stagedMission in self.db.airMissionStatus.airMissionList.lst:
+            item = QtGui.QStandardItem(stagedMission.name)
+            stagedlistViewModel.appendRow(item)
+        self.stagedlistView.setModel(stagedlistViewModel)
 
         # Button Bindings
-        self.appendButton.clicked.connect(lambda: self.appendButtonAction(self))
-        self.prependButton.clicked.connect(lambda: self.prependButtonAction(self))
+        self.appendButton.clicked.connect(lambda: self.appendButtonAction())
+        self.prependButton.clicked.connect(lambda: self.prependButtonAction())
+        self.replaceButton.clicked.connect(lambda: self.replaceButtonAction())
+        self.replaceAllButton.clicked.connect(lambda: self.replaceAllButtonAction())
 
         QtCore.QMetaObject.connectSlotsByName(self)
 
     # Prepend Button clicked_slot():
-    def prependButtonAction(self, mainWindow):
+    def prependButtonAction(self):
         print('Prepend Button Pressed')
         print('List of Selected Mission')
-        model = mainWindow.unstagedListView.model()
+        model = self.unstagedListView.model()
 
         # Find Checkboxed Items
         for index in range(model.rowCount()):
@@ -329,16 +338,48 @@ class MainWindow(QtWidgets.QMainWindow):
                 print('Index %s with Mission: %s' % (item.row(), item.index().data()))
 
     # Append Button clicked_slot():
-    def appendButtonAction(self, mainWindow):
+    def appendButtonAction(self):
         print('Append Button Pressed')
         print('List of Selected Mission')
-        model = mainWindow.unstagedListView.model()
+        model = self.unstagedListView.model()
 
         # Find Checkboxed Items
         for index in range(model.rowCount()):
             item = model.item(index)
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 print('Index %s with Mission: %s' % (item.row(), item.index().data()))
+                
+    def replaceButtonAction(self):
+        print('Replace button Pressed')
+        model = self.unstagedListView.model()
+        
+        #Find selected row
+        print('Replace mission:')
+        selectedIndexes = self.stagedlistView.selectedIndexes()
+        if len(selectedIndexes) == 1:
+            print(selectedIndexes[0].data())
+        else:
+            print('Select one and only one mission')
+            return
+
+        # Find Checkboxed Items
+        print('List of Selected Missions')
+        for index in range(model.rowCount()):
+            item = model.item(index)
+            if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+                print('Index %s with Mission: %s' % (item.row(), item.index().data()))
+    
+    def replaceAllButtonAction(self):
+        print('replace all button pressed')
+        print('List of Selected Missions')
+        model = self.unstagedListView.model()
+
+        # Find Checkboxed Items
+        for index in range(model.rowCount()):
+            item = model.item(index)
+            if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+                print('Index %s with Mission: %s' % (item.row(), item.index().data()))
+          
 
     # Used by Main Window Constructor
     def translateUi(self, mainWindow):
