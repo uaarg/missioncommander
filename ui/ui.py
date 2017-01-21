@@ -116,35 +116,40 @@ class MainWindow(QtWidgets.QMainWindow):
         self.derouteButton.setFont(font)
         self.derouteButton.setObjectName("derouteButton")
         self.leftLowerPane.addWidget(self.derouteButton, 0, 0, 1, 3)
-        self.sendWaypointButton = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        self.sendMissionButton = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.sendWaypointButton.sizePolicy().hasHeightForWidth())
-        self.sendWaypointButton.setSizePolicy(sizePolicy)
-        self.sendWaypointButton.setFont(font)
-        self.sendWaypointButton.setObjectName("sendWaypointButton")
-        self.leftLowerPane.addWidget(self.sendWaypointButton, 2, 2, 1, 1)
-        self.waypointComboBox = QtWidgets.QComboBox(self.scrollAreaWidgetContents)
+        sizePolicy.setHeightForWidth(self.sendMissionButton.sizePolicy().hasHeightForWidth())
+        self.sendMissionButton.setSizePolicy(sizePolicy)
+        self.sendMissionButton.setFont(font)
+        self.sendMissionButton.setObjectName("sendMissionButton")
+        self.leftLowerPane.addWidget(self.sendMissionButton, 2, 2, 1, 1)
+        self.waypointOneComboBox = QtWidgets.QComboBox(self.scrollAreaWidgetContents)
+        self.waypointTwoComboBox = QtWidgets.QComboBox(self.scrollAreaWidgetContents)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.waypointComboBox.sizePolicy().hasHeightForWidth())
-        self.waypointComboBox.setSizePolicy(sizePolicy)
-        self.waypointComboBox.setFont(font)
-        self.waypointComboBox.setObjectName("waypointComboBox")
-        self.leftLowerPane.addWidget(self.waypointComboBox, 2, 0, 1, 1)
-        self.typeComboBox = QtWidgets.QComboBox(self.scrollAreaWidgetContents)
+        sizePolicy.setHeightForWidth(self.waypointOneComboBox.sizePolicy().hasHeightForWidth())
+        self.waypointOneComboBox.setSizePolicy(sizePolicy)
+        self.waypointOneComboBox.setFont(font)
+        self.waypointOneComboBox.setObjectName("waypointOneComboBox")
+        self.leftLowerPane.addWidget(self.waypointOneComboBox, 2, 0, 1, 1)
+        self.waypointTwoComboBox.setSizePolicy(sizePolicy)
+        self.waypointTwoComboBox.setFont(font)
+        self.waypointTwoComboBox.setObjectName("waypointOneComboBox")
+        self.leftLowerPane.addWidget(self.waypointTwoComboBox, 2, 0, 2, 1)
+        self.missionTypeComboBox = QtWidgets.QComboBox(self.scrollAreaWidgetContents)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
         sizePolicy.setHorizontalStretch(0)
         sizePolicy.setVerticalStretch(0)
-        sizePolicy.setHeightForWidth(self.typeComboBox.sizePolicy().hasHeightForWidth())
-        self.typeComboBox.setSizePolicy(sizePolicy)
-        self.typeComboBox.setFont(font)
-        self.typeComboBox.setObjectName("typeComboBox")
-        self.typeComboBox.addItem("")
-        self.typeComboBox.addItem("")
-        self.leftLowerPane.addWidget(self.typeComboBox, 2, 1, 1, 1)
+        sizePolicy.setHeightForWidth(self.missionTypeComboBox.sizePolicy().hasHeightForWidth())
+        self.missionTypeComboBox.setSizePolicy(sizePolicy)
+        self.missionTypeComboBox.setFont(font)
+        self.missionTypeComboBox.setObjectName("missionTypeComboBox")
+        self.missionTypeComboBox.addItem("")
+        self.missionTypeComboBox.addItem("")
+        self.leftLowerPane.addWidget(self.missionTypeComboBox, 2, 1, 1, 1)
         spacerItem2 = QtWidgets.QSpacerItem(20, 61, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
         self.leftLowerPane.addItem(spacerItem2, 3, 0, 1, 1)
         self.lowerPane.addLayout(self.leftLowerPane, 0, 3, 1, 1)
@@ -258,6 +263,9 @@ class MainWindow(QtWidgets.QMainWindow):
         ###  END OF QT DESIGNER AUTO-GENERATED CODE  ###
         ################################################
 
+        # QWidget Initializations
+        self.checkMissionTypeComboBox()
+
         # Model for Unstaged Listview
         unstagedListViewModel = QtGui.QStandardItemModel(self.upperPane)
         for mission in self.db.allMissions.lst:
@@ -266,7 +274,7 @@ class MainWindow(QtWidgets.QMainWindow):
             item.setEditable(False)
             unstagedListViewModel.appendRow(item)
         self.unstagedListView.setModel(unstagedListViewModel)
-        
+
         # Model for staged Listview
         stagedlistViewModel = QtGui.QStandardItemModel(self.upperPane)
         for stagedMission in self.db.airMissionStatus.airMissionList.lst:
@@ -275,18 +283,31 @@ class MainWindow(QtWidgets.QMainWindow):
             stagedlistViewModel.appendRow(item)
         self.stagedlistView.setModel(stagedlistViewModel)
 
+        # Model for staged Listview
+        stagedlistViewModel = QtGui.QStandardItemModel(self.upperPane)
+        for stagedMission in self.db.airMissionStatus.airMissionList.lst:
+            item = QtGui.QStandardItem(stagedMission.name)
+            item.setEditable(False)
+            stagedlistViewModel.appendRow(item)
+        self.stagedlistView.setModel(stagedlistViewModel)
+
+        # Waypoint Comboboxes Content
+        waypointComboBoxModel = QtGui.QStandardItemModel(self.upperPane)
+        for waypoint in self.db.waypoints.lst:
+            item = QtGui.QStandardItem(waypoint.name)
+            waypointComboBoxModel.appendRow(item)
+        self.waypointOneComboBox.setModel(waypointComboBoxModel)
+        self.waypointTwoComboBox.setModel(waypointComboBoxModel)
+
         # Button Bindings
         self.appendButton.clicked.connect(lambda: self.appendButtonAction())
         self.prependButton.clicked.connect(lambda: self.prependButtonAction())
         self.replaceButton.clicked.connect(lambda: self.replaceButtonAction())
         self.replaceAllButton.clicked.connect(lambda: self.replaceAllButtonAction())
+        self.sendMissionButton.clicked.connect(lambda: self.sendMissionButtonAction())
 
-        # Combobox Content
-        waypointComboBoxModel = QtGui.QStandardItemModel(self.upperPane)
-        for waypoint in self.db.waypoints.lst:
-            item = QtGui.QStandardItem(waypoint.name)
-            waypointComboBoxModel.appendRow(item)
-        self.waypointComboBox.setModel(waypointComboBoxModel)
+        # Signals
+        self.missionTypeComboBox.currentIndexChanged.connect(lambda: self.checkMissionTypeComboBox())
 
         QtCore.QMetaObject.connectSlotsByName(self)
 
@@ -313,11 +334,11 @@ class MainWindow(QtWidgets.QMainWindow):
             item = model.item(index)
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 print('Index %s with Mission: %s' % (item.row(), item.index().data()))
-                
+
     def replaceButtonAction(self):
         print('Replace button Pressed')
         model = self.unstagedListView.model()
-        
+
         #Find selected row
         print('Replace mission:')
         selectedIndexes = self.stagedlistView.selectedIndexes()
@@ -333,7 +354,7 @@ class MainWindow(QtWidgets.QMainWindow):
             item = model.item(index)
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 print('Index %s with Mission: %s' % (item.row(), item.index().data()))
-    
+
     def replaceAllButtonAction(self):
         print('replace all button pressed')
         print('List of Selected Missions')
@@ -344,7 +365,66 @@ class MainWindow(QtWidgets.QMainWindow):
             item = model.item(index)
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 print('Index %s with Mission: %s' % (item.row(), item.index().data()))
-          
+
+
+    def updateListViews(self):
+        print("Needs to be completed")
+
+
+    def replaceButtonAction(self):
+        print('Replace button Pressed')
+        model = self.unstagedListView.model()
+
+        #Find selected row
+        print('Replace mission:')
+        selectedIndexes = self.stagedlistView.selectedIndexes()
+        if len(selectedIndexes) == 1:
+            print(selectedIndexes[0].data())
+        else:
+            print('Select one and only one mission')
+            return
+
+        # Find Checkboxed Items
+        print('List of Selected Missions')
+        for index in range(model.rowCount()):
+            item = model.item(index)
+            if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+                print('Index %s with Mission: %s' % (item.row(), item.index().data()))
+
+    def replaceAllButtonAction(self):
+        print('replace all button pressed')
+        print('List of Selected Missions')
+        model = self.unstagedListView.model()
+
+        # Find Checkboxed Items
+        for index in range(model.rowCount()):
+            item = model.item(index)
+            if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+                print('Index %s with Mission: %s' % (item.row(), item.index().data()))
+
+
+    def updateListViews(self):
+        print("Needs to be completed")
+
+    def sendMissionButtonAction(self):
+        waypointOneName = self.waypointOneComboBox.currentText()
+        missionType = self.missionTypeComboBox.currentText()
+
+        if 'Path' in missionType:
+            # Todo. Update UI with extra combobox
+            waypointTwoName = self.waypointTwoComboBox.currentText()
+            print('Waypoint 1: %s, Waypoint 2: %s, Mission Type: %s' % (waypointOneName, waypointTwoName, missionType))
+
+        else:
+            print('Waypoint 1: %s, Mission Type: %s' % (waypointOneName, missionType))
+
+        # Create Mission Object. Add to missions database
+
+    def checkMissionTypeComboBox(self):
+        if 'Path' in self.missionTypeComboBox.currentText():
+            self.waypointTwoComboBox.setEnabled(True)
+        else:
+            self.waypointTwoComboBox.setEnabled(False)
 
     def updateListViews(self):
         print("Needs to be completed")
@@ -353,9 +433,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def translateUi(self, mainWindow):
         mainWindow.setWindowTitle(translate("mainWindow", "Mission Commander"))
         self.derouteButton.setText(translate("mainWindow", "Quick Deroute"))
-        self.sendWaypointButton.setText(translate("mainWindow", "Send Waypoint"))
-        self.typeComboBox.setItemText(0, translate("mainWindow", "Path"))
-        self.typeComboBox.setItemText(1, translate("mainWindow", "Circle"))
+        self.sendMissionButton.setText(translate("mainWindow", "Send Mission"))
+        self.missionTypeComboBox.setItemText(0, translate("mainWindow", "Path"))
+        self.missionTypeComboBox.setItemText(1, translate("mainWindow", "Circle"))
         self.uasWaypointsLabel.setText(translate("mainWindow", "Last UAS Waypoints"))
         self.unstagedLabel.setText(translate("mainWindow", "Unstaged Waypoints"))
         self.stagedLabel.setText(translate("mainWindow", "Staged Waypoints"))

@@ -71,8 +71,6 @@ class AirMissionStatus(object):
         self.airMissionList.add(newMission)
         newMission2 = mission.Mission( 6 ,-1, mission.NavPattern.MISSION_GOTO_WP, 'wp2')
         self.airMissionList.add(newMission2)
-        print("got a new mission")
-        print(newMission.name)
 
     def updateAirMissionList(self, allMissions):
         #I have no idea what should be
