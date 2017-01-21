@@ -16,9 +16,9 @@ class UiThread(Thread):
     """
     Thread to update graphical user interface.
     """
-    def __init__(self, waypointdb):
+    def __init__(self, database):
         super(UiThread, self).__init__()
-        self.ui = UI(waypointdb)
+        self.ui = UI(database)
         self.ui.run()
 
     def run(self):
@@ -26,20 +26,20 @@ class UiThread(Thread):
             sleep(0.1)
 
 class UI(QtCore.QObject):
-    def __init__(self, waypointdb):
+    def __init__(self, database):
         super().__init__()
         self.app = QtWidgets.QApplication(sys.argv)
-        self.mainWindow = MainWindow(waypointdb)
+        self.mainWindow = MainWindow(database)
 
     def run(self):
         self.mainWindow.show()
         return self.app.exec_()
 
 class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self, waypointdb):
+    def __init__(self, database):
         # Initialize Members
         super().__init__()
-        self.db = waypointdb
+        self.db = database
 
         ################################################
         ### START OF QT DESIGNER AUTO-GENERATED CODE ###
@@ -304,16 +304,41 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Model for Unstaged Listview
         unstagedListViewModel = QtGui.QStandardItemModel(self.upperPane)
-        for waypoint in self.db.lst:
-            item = QtGui.QStandardItem(waypoint.name)
+        for mission in self.db.allMissions.lst:
+            item = QtGui.QStandardItem(mission.name)
             item.setCheckable(True)
             unstagedListViewModel.appendRow(item)
-
         self.unstagedListView.setModel(unstagedListViewModel)
 
-        # Connect all buttons
+        # Button Bindings
+        self.appendButton.clicked.connect(lambda: self.appendButtonAction(self))
+        self.prependButton.clicked.connect(lambda: self.prependButtonAction(self))
+
         QtCore.QMetaObject.connectSlotsByName(self)
 
+    # Prepend Button clicked_slot():
+    def prependButtonAction(self, mainWindow):
+        print('Prepend Button Pressed')
+        print('List of Selected Mission')
+        model = mainWindow.unstagedListView.model()
+
+        # Find Checkboxed Items
+        for index in range(model.rowCount()):
+            item = model.item(index)
+            if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+                print('Index %s with Mission: %s' % (item.row(), item.index().data()))
+
+    # Append Button clicked_slot():
+    def appendButtonAction(self, mainWindow):
+        print('Append Button Pressed')
+        print('List of Selected Mission')
+        model = mainWindow.unstagedListView.model()
+
+        # Find Checkboxed Items
+        for index in range(model.rowCount()):
+            item = model.item(index)
+            if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+                print('Index %s with Mission: %s' % (item.row(), item.index().data()))
 
     # Used by Main Window Constructor
     def translateUi(self, mainWindow):

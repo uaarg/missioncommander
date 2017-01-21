@@ -70,6 +70,6 @@ if __name__ == '__main__':
         telem_thread.join()
 
     if UI_ENABLE:
-        ui_thread = UiThread(mc.db.waypoints)
+        ui_thread = UiThread(mc.db)
         ui_thread.start()
         ui_thread.join()
