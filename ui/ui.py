@@ -5,6 +5,7 @@ import sys
 from threading import Thread
 from time import sleep
 from PyQt5 import QtCore, QtGui, QtWidgets
+from mission import NavPattern
 
 translate = QtCore.QCoreApplication.translate
 
@@ -147,8 +148,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.missionTypeComboBox.setSizePolicy(sizePolicy)
         self.missionTypeComboBox.setFont(font)
         self.missionTypeComboBox.setObjectName("missionTypeComboBox")
-        self.missionTypeComboBox.addItem("")
-        self.missionTypeComboBox.addItem("")
         self.leftLowerPane.addWidget(self.missionTypeComboBox, 2, 1, 1, 1)
         spacerItem2 = QtWidgets.QSpacerItem(20, 61, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
         self.leftLowerPane.addItem(spacerItem2, 3, 0, 1, 1)
@@ -298,6 +297,14 @@ class MainWindow(QtWidgets.QMainWindow):
             waypointComboBoxModel.appendRow(item)
         self.waypointOneComboBox.setModel(waypointComboBoxModel)
         self.waypointTwoComboBox.setModel(waypointComboBoxModel)
+        
+        # Mission combobox
+        missionComboBoxModel = QtGui.QStandardItemModel(self.upperPane)
+        for name, mission in NavPattern.__members__.items():
+            if "LLA" not in name:
+                item = QtGui.QStandardItem(mission.value.capitalize())
+                missionComboBoxModel.appendRow(item)
+        self.missionTypeComboBox.setModel(missionComboBoxModel)
 
         # Button Bindings
         self.appendButton.clicked.connect(lambda: self.appendButtonAction())
@@ -373,10 +380,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def sendMissionButtonAction(self):
         waypointOneName = self.waypointOneComboBox.currentText()
-        missionType = self.missionTypeComboBox.currentText()
+        missionType = self.missionTypeComboBox.currentText().lower()
 
-        if 'Path' in missionType:
-            # Todo. Update UI with extra combobox
+        if missionType in [NavPattern.MISSION_SEGMENT.value, NavPattern.MISSION_PATH.value, NavPattern.MISSION_SURVEY.value]:
             waypointTwoName = self.waypointTwoComboBox.currentText()
             print('Waypoint 1: %s, Waypoint 2: %s, Mission Type: %s' % (waypointOneName, waypointTwoName, missionType))
 
@@ -386,7 +392,8 @@ class MainWindow(QtWidgets.QMainWindow):
         # Create Mission Object. Add to missions database
 
     def checkMissionTypeComboBox(self):
-        if 'Path' in self.missionTypeComboBox.currentText():
+        missionType = self.missionTypeComboBox.currentText().lower()
+        if missionType in [NavPattern.MISSION_SEGMENT.value, NavPattern.MISSION_PATH.value, NavPattern.MISSION_SURVEY.value]:
             self.waypointTwoComboBox.setEnabled(True)
         else:
             self.waypointTwoComboBox.setEnabled(False)
@@ -399,8 +406,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle(translate("mainWindow", "Mission Commander"))
         self.derouteButton.setText(translate("mainWindow", "Quick Deroute"))
         self.sendMissionButton.setText(translate("mainWindow", "Send Mission"))
-        self.missionTypeComboBox.setItemText(0, translate("mainWindow", "Path"))
-        self.missionTypeComboBox.setItemText(1, translate("mainWindow", "Circle"))
         self.uasWaypointsLabel.setText(translate("mainWindow", "Last UAS Waypoints"))
         self.unstagedLabel.setText(translate("mainWindow", "Unstaged Waypoints"))
         self.stagedLabel.setText(translate("mainWindow", "Staged Waypoints"))
