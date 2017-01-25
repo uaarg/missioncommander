@@ -2,6 +2,8 @@
 
 import sys, getopt
 import logging
+import os
+
 from xmlparser import *
 from config import *
 from ivylinker import *
@@ -35,8 +37,8 @@ def argparser(argv):
 class MissionCommander(object):
     def __init__(self):
         self.initDatabase()
-        importxml('webster_2016.xml', self.db)
-        # Do XML loading stuff
+        importxml(os.path.join(*[PPRZ_SRC, 'conf/flight_plans/UAARG', flightPlan]), self.db)
+        importxml('MissionsAndTasks.xml', self.db)
         bindIvyMsgHandler(self.ivyMsgHandler)
 
     def initDatabase(self):

@@ -36,7 +36,6 @@ class BagOfHolding(object):
                 print(wp.name)
                 print('Updating a Waypoint!')
                 print("Easting is :" + tmpest)
-
                 print("Easting is :" + str(wp.east))
                 print('------------------------------------------------------')
 
@@ -46,19 +45,14 @@ class BagOfHolding(object):
     def addMission(self, missionTuple):
         self.allMissions.update(missionTuple)
 
+    def addTask(self, taskObj):
+        self.tasks = fancyList()
+
     def updateAirMissionStatus(self, msg):
-        print("GOT new mission status MSG")
+        print("Got new mission status MSG")
         #self.airmissionstatus.remainingTime = msg.fieldvalues[0]
         #self.airmissionstatus.missionInd = msg.fieldvalues[1]
         #self.updateMissionList(self.allMissions)
-
-
-
-class task(object):
-
-    def __init__(self, name, missions):
-        self.name = name
-        self.missions = missions
 
 class AirMissionStatus(object):
     '''

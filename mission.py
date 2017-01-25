@@ -195,3 +195,13 @@ class Mission(object):
 
     def flagForUpdate(self):
         self.wpUpdated = True
+
+class task(object):
+    '''
+    Collection of missions used to complete mission objectives
+    (eg. surveying a search area, completing autonamous waypoint navigation)
+    '''
+
+    def __init__(self, name, missions):
+        self.name = name
+        self.missions = missions

@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8" standalone="no" ?>
+
+<lol>
+  <missions>
+    <!-- SORT BY ('go', 'path', 'circle', 'segment', 'survey') -->
+    <go wp="swp4"/>
+    <go wp="LKN"/>
+    <go wp="swp5"/>
+    <go wp="swp6"/>
+    <go wp="swp7"/>
+    <go wp="swp8"/>
+    <go wp="swp9"/>
+    <go wp="swp10"/>
+    <go wp="swp11"/>
+    <go wp="swp12"/>
+    <go wp="swp13"/>
+    <go wp="swp14"/>
+    <go wp="swp15"/>
+    <go wp="swp16"/>
+    <go wp="swp17"/>
+    <go wp="swp18"/>
+    <path approaching_time="5" wpts=" wp6, swp1"/>
+    <path approaching_time="5" wpts=" swp1, swp2"/>
+    <path approaching_time="5" wpts=" swp2, swp3"/>
+    <go wp="wp1"/>
+    <go wp="wp2"/>
+    <go wp="wp3"/>
+    <go wp="wp4"/>
+    <go wp="wp5"/>
+
+  </missions>
+
+  <tasks>
+    <task name="search_survey" mID="4, 5, 2, 3, 1, 6, 17, 18, 19"/>
+
+    <task name="Waypoint Sweep" mID="20, 21, 22, 23, 24"/>
+
+    <task mID="20"/>
+  </tasks>
+
+</lol>
