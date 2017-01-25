@@ -5,7 +5,7 @@ import sys
 from threading import Thread
 from time import sleep
 from PyQt5 import QtCore, QtGui, QtWidgets
-from mission import NavPattern
+from mission import  InsertMode, NavPattern
 
 translate = QtCore.QCoreApplication.translate
 
@@ -267,20 +267,12 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Model for Unstaged Listview
         unstagedListViewModel = QtGui.QStandardItemModel(self.upperPane)
-        for mission in self.db.allMissions.lst:
-            item = QtGui.QStandardItem(mission.name)
+        for mission in self.db.allMissions.items():
+            item = QtGui.QStandardItem(mission[0])
             item.setCheckable(True)
             item.setEditable(False)
             unstagedListViewModel.appendRow(item)
         self.unstagedListView.setModel(unstagedListViewModel)
-
-        # Model for staged Listview
-        stagedlistViewModel = QtGui.QStandardItemModel(self.upperPane)
-        for stagedMission in self.db.airMissionStatus.airMissionList.lst:
-            item = QtGui.QStandardItem(stagedMission.name)
-            item.setEditable(False)
-            stagedlistViewModel.appendRow(item)
-        self.stagedlistView.setModel(stagedlistViewModel)
 
         # Model for staged Listview
         stagedlistViewModel = QtGui.QStandardItemModel(self.upperPane)
@@ -329,6 +321,8 @@ class MainWindow(QtWidgets.QMainWindow):
             item = model.item(index)
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 print('Index %s with Mission: %s' % (item.row(), item.index().data()))
+                #ivyMsg = self.db.allMissions[item.index().data()].gen_mission_msg("AC_ID", InsertMode.Prepend)
+                #print(ivyMsg['ac_id'])
 
     # Append Button clicked_slot():
     def appendButtonAction(self):

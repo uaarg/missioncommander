@@ -4,13 +4,14 @@ import config
 import utm
 import threading
 import mission
+from collections import OrderedDict
 
 class BagOfHolding(object):
 
     def __init__(self):
         self.airplane = AirplaneTelemetry()
         self.waypoints = fancyList()
-        self.allMissions = fancyList()
+        self.allMissions = OrderedDict()
         self.tasks = fancyList()
         self.airMissionStatus = AirMissionStatus()
 
@@ -42,8 +43,8 @@ class BagOfHolding(object):
     def getWaypoint(self, index):
         return self.waypoints.get(index)
 
-    def addMission(self, missionObj):
-        self.allMissions.add(missionObj)
+    def addMission(self, missionTuple):
+        self.allMissions.update(missionTuple)
 
     def updateAirMissionStatus(self, msg):
         print("GOT new mission status MSG")

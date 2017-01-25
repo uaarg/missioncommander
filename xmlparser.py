@@ -107,7 +107,7 @@ class importxml(object):
                 miss['radius'] = None
 
             missionObj = mission.Mission(miss['mID'], -1, mission.NavPattern(miss['NavPattern']), miss['wp'], miss['radius'])
-            self.db.addMission(missionObj)
+            self.db.addMission({missionObj.name: missionObj})
             
             '''
         # So NOW to make tasks..... a bunch of lists of missions that have mID's
