@@ -7,6 +7,8 @@ from time import sleep
 from PyQt5 import QtCore, QtGui, QtWidgets
 from mission import  InsertMode, NavPattern
 
+import xmlparser
+
 translate = QtCore.QCoreApplication.translate
 
 # No Operation (noop)
@@ -23,6 +25,7 @@ class UiThread(Thread):
         self.ui.run()
 
     def run(self):
+
         while True:
             sleep(0.1)
 
@@ -241,17 +244,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionDocumentation.setObjectName("actionDocumentation")
         self.actionClose = QtWidgets.QAction(self)
         self.actionClose.setObjectName("actionClose")
+        self.actionSave = QtWidgets.QAction(self)
+        self.actionSave.setObjectName("actionSave")
         self.actionImport = QtWidgets.QAction(self)
         self.actionImport.setObjectName("actionImport")
-        self.actionClose_2 = QtWidgets.QAction(self)
-        self.actionClose_2.setObjectName("actionClose_2")
         self.actionClose_Project = QtWidgets.QAction(self)
         self.actionClose_Project.setObjectName("actionClose_Project")
         self.actionExit_Program = QtWidgets.QAction(self)
         self.actionExit_Program.setObjectName("actionExit_Program")
         self.menuFile.addAction(self.actionClose)
+        self.menuFile.addAction(self.actionSave)
         self.menuFile.addAction(self.actionImport)
-        self.menuFile.addAction(self.actionClose_2)
         self.menuFile.addAction(self.actionClose_Project)
         self.menuFile.addAction(self.actionExit_Program)
         self.menuMission.addAction(self.actionTask)
@@ -303,6 +306,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 missionComboBoxModel.appendRow(item)
         self.missionTypeComboBox.setModel(missionComboBoxModel)
 
+        # Action Bindings (for clickable objects in the menu bar)
+        self.actionSave.triggered.connect(lambda: self.saveMissionState())
+
         # Button Bindings
         self.appendButton.clicked.connect(lambda: self.appendButtonAction())
         self.prependButton.clicked.connect(lambda: self.prependButtonAction())
@@ -310,6 +316,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.replaceAllButton.clicked.connect(lambda: self.replaceAllButtonAction())
         self.sendMissionButton.clicked.connect(lambda: self.sendMissionButtonAction())
 
+        # Shortcuts
+        self.actionExit_Program.setShortcut('Ctrl+Q')
+        self.actionSave.setShortcut('Ctrl+S')
         # Signals
         self.missionTypeComboBox.currentIndexChanged.connect(lambda: self.checkMissionTypeComboBox())
 
@@ -317,6 +326,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     # Prepend Button clicked_slot():
     def prependButtonAction(self):
+
         print('Prepend Button Pressed')
         print('List of Selected Mission')
         model = self.unstagedListView.model()
@@ -399,6 +409,9 @@ class MainWindow(QtWidgets.QMainWindow):
     def updateListViews(self):
         print("Needs to be completed")
 
+    def saveMissionState(self):
+        xmlparser.exportToXML('data/', self.db)
+
     # Used by Main Window Constructor
     def translateUi(self):
         self.setWindowTitle(translate("mainWindow", "Mission Commander"))
@@ -419,7 +432,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionTask.setText(translate("mainWindow", "Task"))
         self.actionDocumentation.setText(translate("mainWindow", "Documentation"))
         self.actionClose.setText(translate("mainWindow", "Open Project"))
-        self.actionImport.setText(translate("mainWindow", "Save Project"))
-        self.actionClose_2.setText(translate("mainWindow", "Import Project"))
+        self.actionSave.setText(translate("mainWindow", "Save Project"))
+        self.actionImport.setText(translate("mainWindow", "Import Project"))
         self.actionClose_Project.setText(translate("mainWindow", "Close Project"))
         self.actionExit_Program.setText(translate("mainWindow", "Exit Program"))

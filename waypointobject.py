@@ -97,7 +97,7 @@ class Waypoint(object):
         result['north'] = self.north
         return result
 
-    def gen_move_waypoint_msg(self, ac_id, ):
+    def gen_move_waypoint_msg(self, ac_id):
         """
         Returns an Ivy bus message for moving the waypoint.
         """
