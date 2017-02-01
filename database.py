@@ -10,7 +10,7 @@ class BagOfHolding(object):
 
     def __init__(self):
         self.airplane = AirplaneTelemetry()
-        self.waypoints = fancyList()
+        self.waypoints = OrderedDict()
         self.allMissions = OrderedDict()
         self.tasks = fancyList()
         self.airMissionStatus = AirMissionStatus()
@@ -18,8 +18,8 @@ class BagOfHolding(object):
     def updateTelemetry(self, msg):
         self.airplane.updateFromWaldo(msg)
 
-    def addWaypoint(self, wp):
-        self.waypoints.add(wp)
+    def addWaypoint(self, wpTuple):
+        self.waypoints.update(wpTuple)
 
     def updateWaypoint(self, msg):
         east = msg.fieldvalues[1]

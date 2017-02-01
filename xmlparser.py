@@ -45,7 +45,7 @@ class importxml(object):
             self.flightParams['utmZoneLetter0'] = utmHome[3]
 
             originWpObj = waypointobject.Waypoint('OrIgIn', '0','utm',self.flightParams['lat0'], self.flightParams['lon0'], self.flightParams['utmZoneNumber0'], True, self.flightParams['easting0'], self.flightParams['northing0'], self.flightParams['alt'])
-            self.db.addWaypoint(originWpObj)
+            self.db.addWaypoint([(originWpObj.name, originWpObj)])
 
 
 
@@ -92,7 +92,7 @@ class importxml(object):
                     waypoint['wpType'] = 'latlon'
 
                 wpobj = waypointobject.Waypoint(waypoint['name'], waypoint['wpID'], waypoint['wpType'], waypoint['lat'],waypoint['lon'],waypoint['zone'],waypoint['northHemi'],waypoint['easting'],waypoint['northing'],waypoint['alt'])
-                self.db.addWaypoint(wpobj)
+                self.db.addWaypoint([(wpobj.name, wpobj)])
 
         for missionType in ('go', 'path', 'circle', 'segment', 'survey'):
             missions = missions + self.__getListofDictOfXMLtag(missionType)
@@ -106,7 +106,7 @@ class importxml(object):
 
             for miss in missions:
                 if 'wp' in miss.keys():
-                    pass
+                    miss['wp'] = miss['wp'].split()
                 elif 'wpts' in miss.keys():
                     miss['wp'] = miss['wpts'].replace(',','').split()
                 else:

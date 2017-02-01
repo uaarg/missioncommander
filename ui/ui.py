@@ -292,8 +292,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Waypoint Comboboxes Content
         waypointComboBoxModel = QtGui.QStandardItemModel(self.upperPane)
-        for waypoint in self.db.waypoints.lst:
-            item = QtGui.QStandardItem(waypoint.name)
+        for waypoint in self.db.waypoints.items():
+            item = QtGui.QStandardItem(waypoint[0])
             waypointComboBoxModel.appendRow(item)
         self.waypointOneComboBox.setModel(waypointComboBoxModel)
         self.waypointTwoComboBox.setModel(waypointComboBoxModel)
@@ -336,8 +336,8 @@ class MainWindow(QtWidgets.QMainWindow):
             item = model.item(index)
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 print('Index %s with Mission: %s' % (item.row(), item.index().data()))
-                #ivyMsg = self.db.allMissions[item.index().data()].gen_mission_msg("AC_ID", InsertMode.Prepend)
-                #print(ivyMsg['ac_id'])
+                ivyMsg = self.db.allMissions[item.index().data()].gen_mission_msg("AC_ID",self.db.waypoints, InsertMode.Prepend)
+                glbivy.sendIvyMSG(ivyMsg) #Don't know how to test this?
 
     # Append Button clicked_slot():
     def appendButtonAction(self):
