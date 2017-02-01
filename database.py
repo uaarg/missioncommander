@@ -13,10 +13,16 @@ class BagOfHolding(object):
         self.waypoints = fancyList()
         self.allMissions = OrderedDict()
         self.tasks = fancyList()
-        self.airMissionStatus = AirMissionStatus()
+        self.airMissionStatus = fancyList()
+        self.remianingMissionTime = 0
 
     def updateTelemetry(self, msg):
         self.airplane.updateFromWaldo(msg)
+
+    def updateAirMissionStatus(self, msg):
+        self.remianingMissionTime = msg.remaining_time
+        for e in range(0,len(msg.index_list)):
+            self.airMissionStatus.addToIndex(self, (msg.index_list[e],msg.task_array[e]))
 
     def addWaypoint(self, wp):
         self.waypoints.add(wp)
@@ -47,29 +53,6 @@ class BagOfHolding(object):
 
     def addTask(self, taskObj):
         self.tasks = fancyList()
-
-    def updateAirMissionStatus(self, msg):
-        print("Got new mission status MSG")
-        #self.airmissionstatus.remainingTime = msg.fieldvalues[0]
-        #self.airmissionstatus.missionInd = msg.fieldvalues[1]
-        #self.updateMissionList(self.allMissions)
-
-class AirMissionStatus(object):
-    '''
-    Stores the airplane's current Mission Status
-    '''
-    def __init__(self):
-        self.remainingTime = 0
-        self.airMissionInd = []
-        self.airMissionList = fancyList()
-        newMission = mission.Mission( 5 ,-1, mission.NavPattern.MISSION_GOTO_WP, 'wp1')
-        self.airMissionList.add(newMission)
-        newMission2 = mission.Mission( 6 ,-1, mission.NavPattern.MISSION_GOTO_WP, 'wp2')
-        self.airMissionList.add(newMission2)
-
-    def updateAirMissionList(self, allMissions):
-        #I have no idea what should be
-        print("Finish writing this.")
 
 
 class AirplaneTelemetry(object):
