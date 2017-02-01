@@ -45,6 +45,11 @@ class MissionCommander(object):
         from database import BagOfHolding
         self.db = BagOfHolding()
 
+    def initiSync(self):
+        from synchronizer import BagOfSynchronizing
+        self.sync = BagOfSynchronizing()
+        self.sync.startThread()
+
     def ivyMsgHandler(self, ac_id, msg):
         if (msg.name == "WALDO_MSG"):
             self.db.updateTelemetry(msg)
