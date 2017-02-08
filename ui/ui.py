@@ -6,7 +6,7 @@ from threading import Thread
 from time import sleep
 from PyQt5 import QtCore, QtGui, QtWidgets
 from mission import  InsertMode, NavPattern
-import ivylinker
+from ivylinker import sendIvyMSG
 
 import xmlparser
 
@@ -41,6 +41,7 @@ class UI(QtCore.QObject):
         return self.app.exec_()
 
 class MainWindow(QtWidgets.QMainWindow):
+    
     def __init__(self, database):
         # Initialize Members
         super().__init__()
@@ -284,12 +285,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.unstagedListView.setModel(unstagedListViewModel)
 
         # Model for staged Listview
-        stagedlistViewModel = QtGui.QStandardItemModel(self.upperPane)
-        for stagedMission in self.db.airMissionStatus.lst:
-            item = QtGui.QStandardItem(stagedMission.name)
-            item.setEditable(False)
-            stagedlistViewModel.appendRow(item)
-        self.stagedlistView.setModel(stagedlistViewModel)
+        self.updateStagedMissionList()
 
         # Waypoint Comboboxes Content
         waypointComboBoxModel = QtGui.QStandardItemModel(self.upperPane)
@@ -325,20 +321,39 @@ class MainWindow(QtWidgets.QMainWindow):
 
         QtCore.QMetaObject.connectSlotsByName(self)
 
+    
+    def updateStagedMissionList(self):
+        stagedlistViewModel = QtGui.QStandardItemModel(self.upperPane)
+        for stagedMission in self.db.airMissionStatus.lst:
+            item = QtGui.QStandardItem(stagedMission.name)
+            item.setEditable(False)
+            stagedlistViewModel.appendRow(item)
+        self.stagedlistView.setModel(stagedlistViewModel)
+         
     # Prepend Button clicked_slot():
     def prependButtonAction(self):
 
         print('Prepend Button Pressed')
         print('List of Selected Mission')
         model = self.unstagedListView.model()
+        
+        insertList = list()
 
         # Find Checkboxed Items
         for index in range(model.rowCount()):
             item = model.item(index)
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
-                print('Index %s with Mission: %s' % (item.row(), item.index().data()))
-                ivyMsg = self.db.allMissions[item.index().data()].gen_mission_msg("AC_ID",self.db.waypoints, InsertMode.Prepend)
-                glbivy.sendIvyMSG(ivyMsg) #Don't know how to test this?
+                itemName = item.index().data()
+                print('Index %s with Mission: %s' % (item.row(), itemName))
+                current_mission = self.db.allMissions[itemName]
+                ivyMsg = current_mission.gen_mission_msg("AC_ID",self.db.waypoints, InsertMode.Prepend)
+                sendIvyMSG(ivyMsg) #Don't know how to test this?
+                insertList.append(current_mission)
+                
+        self.db.airMissionStatus.prepend(insertList)
+        self.updateStagedMissionList()
+                
+                
 
     # Append Button clicked_slot():
     def appendButtonAction(self):
@@ -350,7 +365,14 @@ class MainWindow(QtWidgets.QMainWindow):
         for index in range(model.rowCount()):
             item = model.item(index)
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
-                print('Index %s with Mission: %s' % (item.row(), item.index().data()))
+                itemName = item.index().data()
+                print('Index %s with Mission: %s' % (item.row(), itemName))
+                current_mission = self.db.allMissions[itemName]
+                ivyMsg = current_mission.gen_mission_msg("AC_ID",self.db.waypoints, InsertMode.Append)
+                sendIvyMSG(ivyMsg) #Don't know how to test this?
+                self.db.airMissionStatus.add(current_mission)
+        
+        self.updateStagedMissionList()
 
     def replaceButtonAction(self):
         print('Replace button Pressed')
@@ -360,28 +382,50 @@ class MainWindow(QtWidgets.QMainWindow):
         print('Replace mission:')
         selectedIndexes = self.stagedlistView.selectedIndexes()
         if len(selectedIndexes) == 1:
+            replaceIndex = selectedIndexes[0].row()
             print(selectedIndexes[0].data())
+            print(replaceIndex)
         else:
             print('Select one and only one mission')
             return
+
+        insertList = list()
 
         # Find Checkboxed Items
         print('List of Selected Missions')
         for index in range(model.rowCount()):
             item = model.item(index)
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
-                print('Index %s with Mission: %s' % (item.row(), item.index().data()))
+                itemName = item.index().data()
+                print('Index %s with Mission: %s' % (item.row(), itemName))
+                current_mission = self.db.allMissions[itemName]
+                ivyMsg = current_mission.gen_mission_msg("AC_ID",self.db.waypoints, InsertMode.ReplaceCurrent)
+                sendIvyMSG(ivyMsg) #Don't know how to test this?
+                insertList.append(current_mission)
+        
+        self.db.airMissionStatus.replace(insertList, replaceIndex)
+        self.updateStagedMissionList() 
 
     def replaceAllButtonAction(self):
         print('replace all button pressed')
         print('List of Selected Missions')
         model = self.unstagedListView.model()
+        
+        insertList = list()
 
         # Find Checkboxed Items
         for index in range(model.rowCount()):
             item = model.item(index)
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
-                print('Index %s with Mission: %s' % (item.row(), item.index().data()))
+                itemName = item.index().data()
+                print('Index %s with Mission: %s' % (item.row(), itemName))
+                current_mission = self.db.allMissions[itemName]
+                ivyMsg = current_mission.gen_mission_msg("AC_ID",self.db.waypoints, InsertMode.ReplaceAll)
+                sendIvyMSG(ivyMsg) #Don't know how to test this?
+                insertList.append(current_mission)
+
+        self.db.airMissionStatus.replaceAll(insertList)
+        self.updateStagedMissionList()
 
 
     def updateListViews(self):

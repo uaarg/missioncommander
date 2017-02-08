@@ -11,6 +11,9 @@ class fancyList(object):
 
     def add(self, wp):
         self.lst.append(wp)
+    
+    def prepend(self, wps):
+        self.lst[0:0] = wps
 
     def addToIndex(self, wp):
         ind = wp.index
@@ -18,13 +21,19 @@ class fancyList(object):
             self.lst.append(None)
         self.lst[ind] = wp
 
-    def replace(self, wp):
+    def replace(self, wp, index):
         try:
-            self.lst[wp.index] = wp
+            self.lst[index:index + 1] = wp
             return True
         except:
             print("The WP Index is out of Range!! Use add or addToIndex")
             return False
+    
+    def replaceAll(self, wps):
+        if type(wps).__name__ == 'list':
+            self.lst = wps
+        else:
+            print("Cannot fancify something that is not a list")
 
     def getFromIndex(self, ind):
         try:
