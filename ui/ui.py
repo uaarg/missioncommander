@@ -6,6 +6,7 @@ from threading import Thread
 from time import sleep
 from PyQt5 import QtCore, QtGui, QtWidgets
 from mission import  InsertMode, NavPattern
+import ivylinker
 
 import xmlparser
 
@@ -284,7 +285,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Model for staged Listview
         stagedlistViewModel = QtGui.QStandardItemModel(self.upperPane)
-        for stagedMission in self.db.airMissionStatus.airMissionList.lst:
+        for stagedMission in self.db.airMissionStatus.lst:
             item = QtGui.QStandardItem(stagedMission.name)
             item.setEditable(False)
             stagedlistViewModel.appendRow(item)
