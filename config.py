@@ -13,14 +13,19 @@ from pprzlink.message import PprzMessage
 ivyint = IvyMessagesInterface
 pprzmsg = PprzMessage
 
+#Startup Arguement Defaults
+urlDefault = "http://localhost:8000"
+usernameDefault = "testuser"
+passwordDefault = "testpass"
+currentFlightPlanDefault = "webster_2016.xml"
+
 PI = math.pi
-flightPlan = 'webster_2016.xml'
 UTM_NORTHERN_HEMISPHERE = True
 
 DEBUG = False
 TELEM_DEBUG = False
 WP_DEBUG = False # Paparazzi needs to be running
 INTEROP_ENABLE = True
-UI_ENABLE = False
+UI_ENABLE = True
 
 CBassFlag = False

@@ -22,7 +22,7 @@ class BagOfHolding(object):
     def updateAirMissionStatus(self, msg):
         self.remianingMissionTime = msg.remaining_time
         for e in range(0,len(msg.index_list)):
-            self.airMissionStatus.addToIndex(self, (msg.index_list[e],msg.task_array[e]))
+            self.airMissionStatus.addToIndex(msg.index_list[e],msg.task_array[e])
 
     def addWaypoint(self, wpTuple):
         self.waypoints.update(wpTuple)

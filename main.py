@@ -1,8 +1,10 @@
 #!/usr/bin/python3
 
 import sys, getopt
-import logging
+import log
 import os
+import argparse
+
 
 from xmlparser import *
 from config import *
@@ -11,33 +13,46 @@ from ui import UiThread
 
 from interop.client import AsyncClient
 from interoperability import MissionInformation, TelemetryThread, ObstacleThread
-import log
 
-def argparser(argv):
-    url = "http://localhost:8000"
-    username = "testuser"
-    password = "testpass"
-    try:
-        opts, args = getopt.getopt(argv,"hl:u:p:",["url=","username=","password="])
-    except getopt.GetoptError:
-        print('main.py -l <url> -u <username> -p <password>')
-        sys.exit(2)
-    for opt, arg in opts:
-        if opt == '-h':
-            print('main.py -l <url> -u <username> -p <password>')
-            sys.exit()
-        elif opt in ("-l", "--url"):
-            url = arg
-        elif opt in ("-u", "--username"):
-            username = arg
-        elif opt in ("-p", "--password"):
-            password = arg
-    return password, username, url
+
+def argParser():
+    '''
+    Uses argparse to read arguements passed on startup. To pass a custom
+    arguement on startup simply add the flag and then the arguement, as per below
+
+    python3 ./main.py -l thisURL
+    python3 ./main.py -l thisURL --flightPlan webster
+
+    TO ADD ANOTHER ARGUEMENT:
+    1) Add default value on config.py and on defaultArgs
+    2) Add input arguement line
+    (parser.add_argument('-shortFlag', '--longFlag', help='delimited list input', type=str))
+    NOTE: args[longFlag] = newArguement
+    3) Access arg in main function by argDict['longflag']
+    '''
+
+    defaultArgs = {'url': urlDefault, 'username':usernameDefault,
+        'password': passwordDefault, 'flightPlan': currentFlightPlanDefault }
+
+    parser = argparse.ArgumentParser()
+    # Input arguements
+    parser.add_argument('-l', '--url', help='delimited list input', type=str)
+    parser.add_argument('-u', '--username', help='delimited list input', type=str)
+    parser.add_argument('-p', '--password', help='delimited list input', type=str)
+    parser.add_argument('-x', '--flightPlan', help='delimited list input', type=str)
+    # vars parses the namespace into a dictionary so we can iterate over the names
+    args = vars(parser.parse_args())
+
+    for key in args.keys():
+        if args[key] is None:
+            args[key] = defaultArgs[key]
+
+    return args
 
 class MissionCommander(object):
-    def __init__(self):
+    def __init__(self, currentFlightPlan):
         self.initDatabase()
-        importxml(os.path.join(*[PPRZ_SRC, 'conf/flight_plans/UAARG', flightPlan]), self.db)
+        importxml(os.path.join(*[PPRZ_SRC, 'conf/flight_plans/UAARG', currentFlightPlan]), self.db)
         importxml('MissionsAndTasks.xml', self.db)
         bindIvyMsgHandler(self.ivyMsgHandler)
 
@@ -62,14 +77,15 @@ class MissionCommander(object):
 
 if __name__ == '__main__':
     log.init()
-    password, username, url = argparser(sys.argv[1:])
+    argDict = argParser()
+
     if INTEROP_ENABLE:
-        interop = AsyncClient(url, username, password)
+        interop = AsyncClient(argDict['url'], argDict['username'], argDict['password'])
         missionInfo = MissionInformation(interop, sendIvyMSG)
         missionInfo.getMissionInformation()
         missionInfo.sendIvyOffAxisShape()
 
-    mc = MissionCommander()
+    mc = MissionCommander(argDict['flightPlan'])
 
     if INTEROP_ENABLE:
         telem_thread = TelemetryThread(interop, mc.db.airplane)

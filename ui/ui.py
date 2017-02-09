@@ -41,7 +41,7 @@ class UI(QtCore.QObject):
         return self.app.exec_()
 
 class MainWindow(QtWidgets.QMainWindow):
-    
+
     def __init__(self, database):
         # Initialize Members
         super().__init__()
@@ -287,6 +287,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Model for staged Listview
         self.updateStagedMissionList()
 
+
         # Waypoint Comboboxes Content
         waypointComboBoxModel = QtGui.QStandardItemModel(self.upperPane)
         for waypoint in self.db.waypoints.items():
@@ -321,7 +322,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         QtCore.QMetaObject.connectSlotsByName(self)
 
-    
+
     def updateStagedMissionList(self):
         stagedlistViewModel = QtGui.QStandardItemModel(self.upperPane)
         for stagedMission in self.db.airMissionStatus.lst:
@@ -329,14 +330,14 @@ class MainWindow(QtWidgets.QMainWindow):
             item.setEditable(False)
             stagedlistViewModel.appendRow(item)
         self.stagedlistView.setModel(stagedlistViewModel)
-         
+
     # Prepend Button clicked_slot():
     def prependButtonAction(self):
 
         print('Prepend Button Pressed')
         print('List of Selected Mission')
         model = self.unstagedListView.model()
-        
+
         insertList = list()
 
         # Find Checkboxed Items
@@ -349,11 +350,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 ivyMsg = current_mission.gen_mission_msg("AC_ID",self.db.waypoints, InsertMode.Prepend)
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
                 insertList.append(current_mission)
-                
+
         self.db.airMissionStatus.prepend(insertList)
         self.updateStagedMissionList()
-                
-                
+
+
 
     # Append Button clicked_slot():
     def appendButtonAction(self):
@@ -371,7 +372,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 ivyMsg = current_mission.gen_mission_msg("AC_ID",self.db.waypoints, InsertMode.Append)
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
                 self.db.airMissionStatus.add(current_mission)
-        
+
         self.updateStagedMissionList()
 
     def replaceButtonAction(self):
@@ -402,15 +403,15 @@ class MainWindow(QtWidgets.QMainWindow):
                 ivyMsg = current_mission.gen_mission_msg("AC_ID",self.db.waypoints, InsertMode.ReplaceCurrent)
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
                 insertList.append(current_mission)
-        
+
         self.db.airMissionStatus.replace(insertList, replaceIndex)
-        self.updateStagedMissionList() 
+        self.updateStagedMissionList()
 
     def replaceAllButtonAction(self):
         print('replace all button pressed')
         print('List of Selected Missions')
         model = self.unstagedListView.model()
-        
+
         insertList = list()
 
         # Find Checkboxed Items
