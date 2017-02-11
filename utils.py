@@ -12,8 +12,8 @@ class fancyList(object):
     def add(self, wp):
         self.lst.append(wp)
     
-    def prepend(self, wps):
-        self.lst[0:0] = wps
+    def prepend(self, wp):
+        self.lst.insert(0, wp)
 
     def addToIndex(self, wp):
         ind = wp.index

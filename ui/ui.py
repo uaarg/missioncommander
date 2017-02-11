@@ -338,10 +338,8 @@ class MainWindow(QtWidgets.QMainWindow):
         print('List of Selected Mission')
         model = self.unstagedListView.model()
 
-        insertList = list()
-
         # Find Checkboxed Items
-        for index in range(model.rowCount()):
+        for index in reversed(range(model.rowCount())):  #Reverse the list to prepend in the right order.
             item = model.item(index)
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 itemName = item.index().data()
@@ -349,9 +347,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 current_mission = self.db.allMissions[itemName]
                 ivyMsg = current_mission.gen_mission_msg(5,self.db.waypoints, InsertMode.Prepend)
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
-                insertList.append(current_mission)
+                self.db.airMissionStatus.prepend(current_mission)
 
-        self.db.airMissionStatus.prepend(insertList)
         self.updateStagedMissionList()
 
 
@@ -400,7 +397,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg(5,self.db.waypoints, InsertMode.ReplaceCurrent)
+                ivyMsg = current_mission.gen_mission_msg(5,self.db.waypoints, InsertMode.ReplaceIndex, 0,replaceIndex)
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
                 insertList.append(current_mission)
 
@@ -421,7 +418,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg(5,self.db.waypoints, InsertMode.ReplaceAll)
+                ivyMsg = current_mission.gen_mission_msg(5,self.db.waypoints, InsertMode.Append)
+                if len(insertList) == 0:
+                    ivyMsg = current_mission.gen_mission_msg(5,self.db.waypoints, InsertMode.ReplaceAll)
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
                 insertList.append(current_mission)
 

@@ -86,26 +86,25 @@ class Mission(object):
     #Causes mission.nav_pattern to call setter or getter
     nav_pattern = property(get_nav_pattern, set_nav_pattern)
 
-    def gen_mission_msg(self, ac_id, wpList, insert_mode = InsertMode.Append, insert_index = 1):
+    def gen_mission_msg(self, ac_id, wpList, insert_mode = InsertMode.Append, task_id = 0, insert_index = 1):
 
         assert isinstance(insert_mode, InsertMode)
         msg = pprzmsg("datalink", self._nav_pattern.name)
 
         msg['ac_id'] = ac_id
         msg['insert'] = insert_mode.value
-        #msg['duration'] = self.duration
-        msg['duration'] = 40
-        #msg['index'] = self.index
-        msg['index'] = 23
+        msg['duration'] = self.duration
+        #msg['duration'] = 40
+        msg['index'] = self.index
         msg['insert_index'] = insert_index
-        msg['task'] = 28
+        msg['task'] = task_id
 
         if self._nav_pattern == NavPattern.MISSION_GOTO_WP:
             assert len(self.waypoints) == 1
             waypoint = wpList[self.waypoints[0]].get_utm()
-            msg['wp_east'] = round(waypoint['east'])
-            msg['wp_north'] = round(waypoint['north'])
-            msg['wp_alt'] = round(waypoint['alt'])
+            msg['wp_east'] = waypoint['east']
+            msg['wp_north'] = waypoint['north']
+            msg['wp_alt'] = waypoint['alt']
 
         elif self._nav_pattern == NavPattern.MISSION_GOTO_WP_LLA:
             assert len(self.waypoints) == 1
