@@ -287,6 +287,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Model for staged Listview
         self.updateStagedMissionList()
 
+        self.updateUavListViewList()
 
         # Waypoint Comboboxes Content
         waypointComboBoxModel = QtGui.QStandardItemModel(self.upperPane)
@@ -323,9 +324,17 @@ class MainWindow(QtWidgets.QMainWindow):
         QtCore.QMetaObject.connectSlotsByName(self)
 
 
+    def updateUavListViewList(self):
+        uavlistViewModel = QtGui.QStandardItemModel(self.upperPane)
+        for airMission in self.db.airMissionStatus.lst:
+            item = QtGui.QStandardItem(airMission.name)
+            item.setEditable(False)
+            uavlistViewModel.appendRow(item)
+        self.uavListView.setModel(uavlistViewModel)
+
     def updateStagedMissionList(self):
         stagedlistViewModel = QtGui.QStandardItemModel(self.upperPane)
-        for stagedMission in self.db.airMissionStatus.lst:
+        for stagedMission in self.db.groundMissionStatus.lst:
             item = QtGui.QStandardItem(stagedMission.name)
             item.setEditable(False)
             stagedlistViewModel.appendRow(item)
@@ -371,7 +380,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 current_mission = self.db.allMissions[itemName]
                 ivyMsg = current_mission.gen_mission_msg(5,self.db.waypoints, InsertMode.Append)
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
-                self.db.airMissionStatus.add(current_mission)
+                self.db.groundMissionStatus.add(current_mission)
 
         self.updateStagedMissionList()
 
@@ -404,7 +413,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
                 insertList.append(current_mission)
 
-        self.db.airMissionStatus.replace(insertList, replaceIndex)
+        self.db.groundMissionStatus.replace(insertList, replaceIndex)
         self.updateStagedMissionList()
 
     def replaceAllButtonAction(self):
@@ -425,7 +434,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
                 insertList.append(current_mission)
 
-        self.db.airMissionStatus.replaceAll(insertList)
+        self.db.groundMissionStatus.replaceAll(insertList)
         self.updateStagedMissionList()
 
 
