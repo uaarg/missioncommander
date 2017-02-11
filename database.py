@@ -20,9 +20,10 @@ class BagOfHolding(object):
         self.airplane.updateFromWaldo(msg)
 
     def updateAirMissionStatus(self, msg):
-        self.remianingMissionTime = msg.remaining_time
-        for e in range(0,len(msg.index_list)):
-            self.airMissionStatus.addToIndex(msg.index_list[e],msg.task_array[e])
+        self.remianingMissionTime = msg.fieldvalues[0]
+        #for e in range(0,len(msg.fieldvalues[1])):
+            #print('msg.fieldvalues[0]'+ msg.fieldvalues[0])
+            #self.airMissionStatus.addToIndex(msg.fieldvalues[1][e])
 
     def addWaypoint(self, wpTuple):
         self.waypoints.update(wpTuple)
@@ -32,7 +33,7 @@ class BagOfHolding(object):
         north = msg.fieldvalues[2]
         alt = msg.fieldvalues[3]
         zone = msg.fieldvalues[4]
-        wp = self.waypoints.getFromIndex(int(msg.fieldvalues[0]))
+        wp = list(self.waypoints.items())[int(msg.fieldvalues[0])][1]
         if wp != None:
             tmpest = str(wp.east)
             wp.update_utm(east, north, zone, northern=True, alt=alt, name=None)
