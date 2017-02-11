@@ -3,31 +3,31 @@
 <lol>
   <missions>
     <!-- SORT BY ('go', 'path', 'circle', 'segment', 'survey') -->
-    <go wp="swp4"/>
-    <go wp="LKN"/>
-    <go wp="swp5"/>
-    <go wp="swp6"/>
-    <go wp="swp7"/>
-    <go wp="swp8"/>
-    <go wp="swp9"/>
-    <go wp="swp10"/>
-    <go wp="swp11"/>
-    <go wp="swp12"/>
-    <go wp="swp13"/>
-    <go wp="swp14"/>
-    <go wp="swp15"/>
-    <go wp="swp16"/>
-    <go wp="swp17"/>
-    <go wp="swp18"/>
-    <path approaching_time="5" wpts=" wp6, swp1"/>
-    <path approaching_time="5" wpts=" swp1, swp2"/>
-    <path approaching_time="5" wpts=" swp2, swp3"/>
-    <go wp="wp1"/>
-    <go wp="wp2"/>
-    <go wp="wp3"/>
-    <go wp="wp4"/>
-    <go wp="wp5"/>
-    <circle radius="60" wp="HOME"/>
+    <go wp="swp4"  mID="1"/>
+    <go wp="LKN"   mID="2"/>
+    <go wp="swp5"  mID="3"/>
+    <go wp="swp6"  mID="4"/>
+    <go wp="swp7"  mID="5"/>
+    <go wp="swp8"  mID="6"/>
+    <go wp="swp9"  mID="7"/>
+    <go wp="swp10" mID="8"/>
+    <go wp="swp11" mID="9"/>
+    <go wp="swp12" mID="10"/>
+    <go wp="swp13" mID="11"/>
+    <go wp="swp14" mID="12"/>
+    <go wp="swp15" mID="13"/>
+    <go wp="swp16" mID="14"/>
+    <go wp="swp17" mID="15"/>
+    <go wp="swp18" mID="16"/>
+    <go wp="wp1"   mID="17"/>
+    <go wp="wp2"   mID="18"/>
+    <go wp="wp3"   mID="19"/>
+    <go wp="wp4"   mID="20"/>
+    <go wp="wp5"   mID="21"/>
+    <path approaching_time="5" wpts=" wp6, swp1" mID="22"/>
+    <path approaching_time="5" wpts=" swp1, swp2" mID="23"/>
+    <path approaching_time="5" wpts=" swp2, swp3" mID="24"/>
+    <circle radius="60" wp="HOME" mID="25"/>
 
   </missions>
 
