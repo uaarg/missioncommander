@@ -347,7 +347,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg("AC_ID",self.db.waypoints, InsertMode.Prepend)
+                ivyMsg = current_mission.gen_mission_msg(5,self.db.waypoints, InsertMode.Prepend)
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
                 insertList.append(current_mission)
 
@@ -369,7 +369,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg("AC_ID",self.db.waypoints, InsertMode.Append)
+                ivyMsg = current_mission.gen_mission_msg(5,self.db.waypoints, InsertMode.Append)
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
                 self.db.airMissionStatus.add(current_mission)
 
@@ -400,7 +400,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg("AC_ID",self.db.waypoints, InsertMode.ReplaceCurrent)
+                ivyMsg = current_mission.gen_mission_msg(5,self.db.waypoints, InsertMode.ReplaceCurrent)
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
                 insertList.append(current_mission)
 
@@ -421,7 +421,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg("AC_ID",self.db.waypoints, InsertMode.ReplaceAll)
+                ivyMsg = current_mission.gen_mission_msg(5,self.db.waypoints, InsertMode.ReplaceAll)
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
                 insertList.append(current_mission)
 
