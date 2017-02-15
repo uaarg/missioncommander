@@ -99,38 +99,34 @@ class importxml(object):
 
         if missions is not None:
 
-            index = 1
-            for miss in missions: # Add mID's
-                miss['mID'] = index
-                index = index + 1
-
             for miss in missions:
-                if 'wp' in miss.keys():
-                    miss['wp'] = miss['wp'].split()
-                elif 'wpts' in miss.keys():
-                    miss['wp'] = miss['wpts'].replace(',','').split()
-                else:
-                    raise AttributeError ('Mission ID:' + miss['mID']+ ' does not contain waypoints. ;(')
+                if 'mID' in miss.keys(): # Only use it if it already has a mission ID
+                    if 'wp' in miss.keys():
+                        miss['wp'] = miss['wp'].split()
+                    elif 'wpts' in miss.keys():
+                        miss['wp'] = miss['wpts'].replace(',','').split()
+                    else:
+                        raise AttributeError ('Mission ID:' + miss['mID']+ ' does not contain waypoints. ;(')
 
-                if not('radius' in miss.keys()):
-                    miss['radius'] = None
+                    if not('radius' in miss.keys()):
+                        miss['radius'] = None
 
-                missionObj = mission.Mission(miss['mID'], -1, mission.NavPattern(miss['NavPattern']), miss['wp'], miss['radius'])
-                self.db.addMission([(missionObj.name , missionObj)])
+                    missionObj = mission.Mission(miss['mID'], -1, mission.NavPattern(miss['NavPattern']), miss['wp'], miss['radius'])
+                    self.db.addMission([(missionObj.name , missionObj)])
 
-        index2 = 0
+        taskIndex= -1
         tasks = self.__getListofDictOfXMLtag('task')
 
         if tasks is not None:
             for task in tasks:
+                taskIndex = taskIndex + 1
                 if not('name' in task.keys()):
                     pass
                 else:
                     task['mID'] = str(task['mID']).replace(',','').split()
-                    task['tID'] = index2
-                    index2 = index2 + 1
+                    task['tID'] = taskIndex
                     taskObj = mission.task(task['name'], task['mID'])
-                    self.db.addTask(taskObj)
+                    self.db.addTask([(task['name'],taskObj)])
 
     def __floatize(self, dictionaryWithBadStrings):
         '''
@@ -179,7 +175,7 @@ class exportToXML(object):
         gParentElement = ET.Element('MissionCommanderFlightStuff')
 
         waypoints = ET.SubElement(gParentElement, 'waypoints')
-        for waypoint in self.db.waypoints.lst:
+        for waypoint in self.db.waypoints.values():
             wpt = ET.SubElement(waypoints, 'waypoint')
             wpt.set('name', waypoint.name)
             wpt.set('utm_x0', str(waypoint.east))
@@ -192,6 +188,14 @@ class exportToXML(object):
         missions = ET.SubElement(gParentElement, 'missions')
         for missObj in self.db.allMissions.values():
             miss = ET.SubElement(missions, str(missObj._nav_pattern.value))
+            miss.set('mID', str(missObj.index))
+
+            waypts = self.listToStringList(missObj.waypoints)
+            if ',' in waypts:
+                miss.set('wpts', waypts)
+            else:
+                miss.set('wp', waypts)
+            '''
             if type(missObj.waypoints) is str:
                 miss.set('wp', missObj.waypoints)
             else:
@@ -200,20 +204,36 @@ class exportToXML(object):
                     wptString = wptString + wpt + ', '
                 wptString = wptString[:(len(wptString)-2)] # Remove last ', '
                 miss.set('wpts', str(wptString))
-            if missObj._nav_pattern is 'circle':
+                '''
+            if missObj._nav_pattern.value is 'circle':
                 miss.set('radius', str(missObj.radius))
 
         tasks = ET.SubElement(gParentElement, 'tasks')
-        for task in self.db.tasks.lst:
+
+        for taskObj in self.db.tasks.values():
             tsk = ET.SubElement(tasks, 'task')
-            tsk.set('name', str(task.name))
-            tsk.set('mID', str(task.missions))
+            tsk.set('name', str(taskObj.name))
+            allMiss = self.listToStringList(taskObj.missions)
+            tsk.set('mID', allMiss)
 
         self.indent(gParentElement)
 
         outgoingTree = ET.ElementTree(gParentElement)
         fileName = filepath + str(datetime.now()) + '_WptsMissTsks.xml'
         outgoingTree.write(fileName, xml_declaration = True, encoding='utf-8', method="xml")
+
+    def listToStringList(self, thingToConvert):
+        '''
+        Converts a list of waypoints (or mission ID's) to a single string to be put into an xml.
+        '''
+        if type(thingToConvert) is str:
+            return thingToConvert
+        else:
+            string = ''
+            for thing in thingToConvert:
+                string = string + thing + ', '
+            string = string[:(len(string)-2)] # Remove last ', '
+            return string
 
     def indent(self, elem, level=0):
         '''

@@ -12,8 +12,9 @@ class BagOfHolding(object):
         self.airplane = AirplaneTelemetry()
         self.waypoints = OrderedDict()
         self.allMissions = OrderedDict()
-        self.tasks = fancyList()
+        self.tasks = OrderedDict()
         self.airMissionStatus = fancyList()
+        self.groundMissionStatus = fancyList()
         self.remianingMissionTime = 0
 
     def updateTelemetry(self, msg):
@@ -21,9 +22,19 @@ class BagOfHolding(object):
 
     def updateAirMissionStatus(self, msg):
         self.remianingMissionTime = msg.fieldvalues[0]
-        #for e in range(0,len(msg.fieldvalues[1])):
-            #print('msg.fieldvalues[0]'+ msg.fieldvalues[0])
-            #self.airMissionStatus.addToIndex(msg.fieldvalues[1][e])
+
+        if(msg.fieldvalues[1].split(",")[0] != 0):
+            mission_array = msg.fieldvalues[1].split(",")
+            mission_list = list()
+
+            task_array = msg.fieldvalues[2].split(",")
+
+            # Parse Missions and Task
+            for e in range(0,len(mission_array)-1):
+                missionFromIndex = list(self.allMissions.items())[e][1]
+                mission_list.append(missionFromIndex)
+
+            self.airMissionStatus.replaceAll(mission_list)
 
     def addWaypoint(self, wpTuple):
         self.waypoints.update(wpTuple)
@@ -52,8 +63,8 @@ class BagOfHolding(object):
     def addMission(self, missionTuple):
         self.allMissions.update(missionTuple)
 
-    def addTask(self, taskObj):
-        self.tasks = fancyList()
+    def addTask(self, taskTuple):
+        self.tasks.update(taskTuple)
 
 
 class AirplaneTelemetry(object):

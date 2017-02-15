@@ -5,7 +5,7 @@ from config import *
 
 import os
 
-default_messages_file = 'pprzlink/messages.xml'
+default_messages_file = os.path.join(*[PPRZ_SRC,'conf','messages.xml'])
 
 message_dictionary = {}
 message_dictionary_types = {}
