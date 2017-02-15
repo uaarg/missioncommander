@@ -5,12 +5,15 @@ import sys
 from threading import Thread
 from time import sleep
 from PyQt5 import QtCore, QtGui, QtWidgets
-from mission import  InsertMode, NavPattern
+from mission import  InsertMode, NavPattern, Mission
 from ivylinker import sendIvyMSG
 
 import xmlparser
 
 translate = QtCore.QCoreApplication.translate
+
+RADIUS_DISABLED_TEXT = "Radius field (Disabled)"
+
 
 # No Operation (noop)
 def noop():
@@ -41,7 +44,9 @@ class UI(QtCore.QObject):
         return self.app.exec_()
 
 class MainWindow(QtWidgets.QMainWindow):
-
+    
+    
+    
     def __init__(self, database):
         # Initialize Members
         super().__init__()
@@ -159,6 +164,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.missionTypeComboBox.setFont(font)
         self.missionTypeComboBox.setObjectName("missionTypeComboBox")
         self.leftLowerPane.addWidget(self.missionTypeComboBox, 2, 1, 1, 1)
+        self.radiusField = QtWidgets.QLineEdit(self.scrollAreaWidgetContents)
+        self.radiusField.setSizePolicy(sizePolicy)
+        self.radiusField.setFont(font)
+        self.radiusField.setReadOnly(True)
+        self.radiusField.setText(RADIUS_DISABLED_TEXT)
+        self.radiusField.setObjectName("interopFreqDisplay")
+        self.leftLowerPane.addWidget(self.radiusField, 2, 1, 2, 1)
         spacerItem2 = QtWidgets.QSpacerItem(20, 61, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
         self.leftLowerPane.addItem(spacerItem2, 3, 0, 1, 1)
         self.lowerPane.addLayout(self.leftLowerPane, 0, 3, 1, 1)
@@ -276,17 +288,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.checkMissionTypeComboBox()
 
         # Model for Unstaged Listview
-        unstagedListViewModel = QtGui.QStandardItemModel(self.upperPane)
-        for mission in self.db.allMissions.items():
-            item = QtGui.QStandardItem(mission[0])
-            item.setCheckable(True)
-            item.setEditable(False)
-            unstagedListViewModel.appendRow(item)
-        self.unstagedListView.setModel(unstagedListViewModel)
+        self.updateUnstagedMissionList()
 
         # Model for staged Listview
         self.updateStagedMissionList()
-
 
         # Waypoint Comboboxes Content
         waypointComboBoxModel = QtGui.QStandardItemModel(self.upperPane)
@@ -322,7 +327,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         QtCore.QMetaObject.connectSlotsByName(self)
 
-
     def updateStagedMissionList(self):
         stagedlistViewModel = QtGui.QStandardItemModel(self.upperPane)
         for stagedMission in self.db.airMissionStatus.lst:
@@ -330,6 +334,15 @@ class MainWindow(QtWidgets.QMainWindow):
             item.setEditable(False)
             stagedlistViewModel.appendRow(item)
         self.stagedlistView.setModel(stagedlistViewModel)
+        
+    def updateUnstagedMissionList(self):
+        unstagedListViewModel = QtGui.QStandardItemModel(self.upperPane)
+        for mission in self.db.allMissions.items():
+            item = QtGui.QStandardItem(mission[0])
+            item.setCheckable(True)
+            item.setEditable(False)
+            unstagedListViewModel.appendRow(item)
+        self.unstagedListView.setModel(unstagedListViewModel)
 
     # Prepend Button clicked_slot():
     def prependButtonAction(self):
@@ -434,15 +447,30 @@ class MainWindow(QtWidgets.QMainWindow):
     def sendMissionButtonAction(self):
         waypointOneName = self.waypointOneComboBox.currentText()
         missionType = self.missionTypeComboBox.currentText().lower()
-
+        radius = 0
+        missionName = None #causes it to generate name automitically
+        
         if missionType in [NavPattern.MISSION_SEGMENT.value, NavPattern.MISSION_PATH.value, NavPattern.MISSION_SURVEY.value]:
             waypointTwoName = self.waypointTwoComboBox.currentText()
             print('Waypoint 1: %s, Waypoint 2: %s, Mission Type: %s' % (waypointOneName, waypointTwoName, missionType))
-
+            waypointArray = [waypointOneName, waypointTwoName]
         else:
             print('Waypoint 1: %s, Mission Type: %s' % (waypointOneName, missionType))
-
+            waypointArray = [waypointOneName]
+        if missionType == NavPattern.MISSION_CIRCLE.value:
+            if self.radiusField.text().isdigit():
+                radius = int(self.radiusField.text())
+            else:
+                msgBox = QtWidgets.QMessageBox()
+                msgBox.setText("Circle requires valid radius")
+                ret = msgBox.exec_()
+                raise AttributeError("Circle requires valid radius")
         # Create Mission Object. Add to missions database
+        print('radius: %s' % (radius))
+        missionObj = Mission(missionName, -1, NavPattern(missionType), waypointArray, radius)
+        print(missionObj.name)
+        self.db.addMission([(missionObj.name , missionObj)])
+        self.updateUnstagedMissionList()
 
     def checkMissionTypeComboBox(self):
         missionType = self.missionTypeComboBox.currentText().lower()
@@ -450,6 +478,12 @@ class MainWindow(QtWidgets.QMainWindow):
             self.waypointTwoComboBox.setEnabled(True)
         else:
             self.waypointTwoComboBox.setEnabled(False)
+        if missionType == NavPattern.MISSION_CIRCLE.value:
+            self.radiusField.setReadOnly(False)
+            self.radiusField.setText("Enter radius")
+        else:
+            self.radiusField.setReadOnly(True)
+            self.radiusField.setText(RADIUS_DISABLED_TEXT)
 
     def updateListViews(self):
         print("Needs to be completed")
