@@ -115,9 +115,6 @@ class Mission(object):
 
             wpList.append(db.waypoints[str(self.waypoints[wpIndex])])
 
-        # Convert to x,y if message is not LLA
-        print('Mission Nav Pattern ' + str(self._nav_pattern.value))
-
 
         if self._nav_pattern == NavPattern.MISSION_GOTO_WP:
             assert len(self.waypoints) == 1

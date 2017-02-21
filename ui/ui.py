@@ -322,6 +322,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.replaceButton.clicked.connect(lambda: self.replaceButtonAction())
         self.replaceAllButton.clicked.connect(lambda: self.replaceAllButtonAction())
         self.sendMissionButton.clicked.connect(lambda: self.sendMissionButtonAction())
+        self.derouteButton.clicked.connect(lambda: self.derouteButtonAction())
 
         # Shortcuts
         self.actionExit_Program.setShortcut('Ctrl+Q')
@@ -484,7 +485,37 @@ class MainWindow(QtWidgets.QMainWindow):
         print(missionObj.name)
         self.db.addMission([(missionObj.name , missionObj)])
         self.updateUnstagedMissionList()
+        sendIvyMSG(missionObj.gen_mission_msg(5, self.db, len(self.db.allMissions) +1,  InsertMode.Append, len(self.db.tasks) +1))
+
+    def derouteButtonAction(self):
+        waypointOneName = self.waypointOneComboBox.currentText()
+        missionType = self.missionTypeComboBox.currentText().lower()
+        radius = 0
+        missionName = None #causes it to generate name automitically
+
+        if missionType in [NavPattern.MISSION_SEGMENT.value, NavPattern.MISSION_PATH.value, NavPattern.MISSION_SURVEY.value]:
+            waypointTwoName = self.waypointTwoComboBox.currentText()
+            print('Waypoint 1: %s, Waypoint 2: %s, Mission Type: %s' % (waypointOneName, waypointTwoName, missionType))
+            waypointArray = [waypointOneName, waypointTwoName]
+        else:
+            print('Waypoint 1: %s, Mission Type: %s' % (waypointOneName, missionType))
+            waypointArray = [waypointOneName]
+        if missionType == NavPattern.MISSION_CIRCLE.value:
+            if self.radiusField.text().isdigit():
+                radius = int(self.radiusField.text())
+            else:
+                msgBox = QtWidgets.QMessageBox()
+                msgBox.setText("Circle requires valid radius")
+                ret = msgBox.exec_()
+                raise AttributeError("Circle requires valid radius")
+        # Create Mission Object. Add to missions database
+        print('radius: %s' % (radius))
+        missionObj = Mission(missionName, -1, NavPattern(missionType), waypointArray, radius)
+        print(missionObj.name)
+        self.db.addMission([(missionObj.name , missionObj)])
+        self.updateUnstagedMissionList()
         sendIvyMSG(missionObj.gen_mission_msg(5, self.db, len(self.db.allMissions) +1,  InsertMode.Prepend, len(self.db.tasks) +1))
+
 
     def checkMissionTypeComboBox(self):
         missionType = self.missionTypeComboBox.currentText().lower()
