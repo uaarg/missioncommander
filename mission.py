@@ -94,14 +94,30 @@ class Mission(object):
         msg['ac_id'] = ac_id
         msg['insert'] = insert_mode.value
         msg['duration'] = self.duration
-        #msg['duration'] = 40
+        #msg['duration'] = 40 #if duration is -1 mission completes
         msg['index'] = index
         msg['insert_index'] = insert_index
         msg['task'] = task_id
 
+        if 'lla' not in str(self._nav_pattern.value):
+            translateUTM2Home = True
+            originWpObj = db.waypoints['OrIgIn'].get_utm()
+
         wpList = []
         for wpIndex in range(0,len(self.waypoints)):
+            if translateUTM2Home:
+                oldUTM = db.waypoints[str(self.waypoints[wpIndex])].get_utm()
+                x = str(float(oldUTM['east']) - float(originWpObj['east']))
+                y = str(float(oldUTM['north']) - float(originWpObj['north']))
+                #if oldUTM['zone'] is not originWpObj['zone']:
+                #    raise AttributeError('Waypoint not in same utm zone as origin. Message generation failed.')
+                db.waypoints[str(self.waypoints[wpIndex])].update_utm(x,y,oldUTM['zone'])
+
             wpList.append(db.waypoints[str(self.waypoints[wpIndex])])
+
+        # Convert to x,y if message is not LLA
+        print('Mission Nav Pattern ' + str(self._nav_pattern.value))
+
 
         if self._nav_pattern == NavPattern.MISSION_GOTO_WP:
             assert len(self.waypoints) == 1
@@ -196,7 +212,6 @@ class Mission(object):
             msg['survey_lat_2'] = waypoint2['lat']
             msg['survey_lon_2'] = waypoint2['lon']
             msg['survey_alt'] = waypoint1['alt']
-        print(msg)
         return msg
 
     def flagForUpdate(self):

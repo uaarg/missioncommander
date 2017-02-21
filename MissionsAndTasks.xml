@@ -3,6 +3,7 @@
 <lol>
   <missions>
     <!-- SORT BY ('go', 'path', 'circle', 'segment', 'survey') -->
+    <!-- Mission Commander will automatically sort this when it prints to xml -->
     <go wp="swp4"  mID="1"/>
     <go wp="LKN"   mID="2"/>
     <go wp="swp5"  mID="3"/>
