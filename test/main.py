@@ -13,16 +13,17 @@ def gen_mission_msg():
     msg['ac_id'] = 5
     msg['insert'] = 1
 
-    msg['duration'] = 40
+    msg['duration'] = -1
     msg['index'] = 23
     msg['task'] = 28
     msg['insert_index'] = 1
-
-    msg['wp_east'] = 374772
-    msg['wp_north'] = 4222902
+    msg['wp_east'] = 0
+    msg['wp_north'] = 0
     msg['wp_alt'] = 100
-
+    print(msg)
     return msg
+
+
 
 def ivyMsgHandler(ac_id, msg):
     if (msg.name == "WALDO_MSG"):
@@ -41,4 +42,3 @@ sendIvyMSG(gen_mission_msg())
 print("hello")
 shutdownIvyBus()
 #bindIvyMsgHandler(self.ivyMsgHandler)
-

@@ -195,16 +195,7 @@ class exportToXML(object):
                 miss.set('wpts', waypts)
             else:
                 miss.set('wp', waypts)
-            '''
-            if type(missObj.waypoints) is str:
-                miss.set('wp', missObj.waypoints)
-            else:
-                wptString = ''
-                for wpt in missObj.waypoints:
-                    wptString = wptString + wpt + ', '
-                wptString = wptString[:(len(wptString)-2)] # Remove last ', '
-                miss.set('wpts', str(wptString))
-                '''
+
             if missObj._nav_pattern.value is 'circle':
                 miss.set('radius', str(missObj.radius))
 

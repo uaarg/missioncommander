@@ -44,9 +44,9 @@ class UI(QtCore.QObject):
         return self.app.exec_()
 
 class MainWindow(QtWidgets.QMainWindow):
-    
-    
-    
+
+
+
     def __init__(self, database):
         # Initialize Members
         super().__init__()
@@ -295,8 +295,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
         self.updateUavListViewList()
-        
-        
+
+
         # Waypoint Comboboxes Content
         waypointComboBoxModel = QtGui.QStandardItemModel(self.upperPane)
         for waypoint in self.db.waypoints.items():
@@ -347,7 +347,7 @@ class MainWindow(QtWidgets.QMainWindow):
             item.setEditable(False)
             stagedlistViewModel.appendRow(item)
         self.stagedlistView.setModel(stagedlistViewModel)
-        
+
     def updateUnstagedMissionList(self):
         unstagedListViewModel = QtGui.QStandardItemModel(self.upperPane)
         for mission in self.db.allMissions.items():
@@ -462,7 +462,7 @@ class MainWindow(QtWidgets.QMainWindow):
         missionType = self.missionTypeComboBox.currentText().lower()
         radius = 0
         missionName = None #causes it to generate name automitically
-        
+
         if missionType in [NavPattern.MISSION_SEGMENT.value, NavPattern.MISSION_PATH.value, NavPattern.MISSION_SURVEY.value]:
             waypointTwoName = self.waypointTwoComboBox.currentText()
             print('Waypoint 1: %s, Waypoint 2: %s, Mission Type: %s' % (waypointOneName, waypointTwoName, missionType))
@@ -484,6 +484,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print(missionObj.name)
         self.db.addMission([(missionObj.name , missionObj)])
         self.updateUnstagedMissionList()
+        sendIvyMSG(missionObj.gen_mission_msg(5, self.db, len(self.db.allMissions) +1,  InsertMode.Prepend, len(self.db.tasks) +1))
 
     def checkMissionTypeComboBox(self):
         missionType = self.missionTypeComboBox.currentText().lower()
