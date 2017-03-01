@@ -372,9 +372,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg(5,self.db.waypoints, InsertMode.Prepend)
+                ivyMsg = current_mission.gen_mission_msg(5,self.db, InsertMode.Prepend)
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
-                self.db.airMissionStatus.prepend(current_mission)
+                self.db.groundMissionStatus.prepend(current_mission)
 
         self.updateStagedMissionList()
 
@@ -393,7 +393,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg(5,self.db.waypoints, InsertMode.Append)
+                ivyMsg = current_mission.gen_mission_msg(5, self.db, InsertMode.Append)
+                print(ivyMsg)
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
                 self.db.groundMissionStatus.add(current_mission)
 
@@ -424,7 +425,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg(5,self.db.waypoints, InsertMode.ReplaceIndex, 0,replaceIndex)
+                ivyMsg = current_mission.gen_mission_msg(5,self.db, InsertMode.ReplaceIndex, 0,replaceIndex)
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
                 insertList.append(current_mission)
 
@@ -445,9 +446,9 @@ class MainWindow(QtWidgets.QMainWindow):
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg(5,self.db.waypoints, InsertMode.Append)
+                ivyMsg = current_mission.gen_mission_msg(5,self.db, InsertMode.Append)
                 if len(insertList) == 0:
-                    ivyMsg = current_mission.gen_mission_msg(5,self.db.waypoints, InsertMode.ReplaceAll)
+                    ivyMsg = current_mission.gen_mission_msg(5,self.db, InsertMode.ReplaceAll)
                 sendIvyMSG(ivyMsg) #Don't know how to test this?
                 insertList.append(current_mission)
 
@@ -462,7 +463,6 @@ class MainWindow(QtWidgets.QMainWindow):
         waypointOneName = self.waypointOneComboBox.currentText()
         missionType = self.missionTypeComboBox.currentText().lower()
         radius = 0
-        missionName = None #causes it to generate name automitically
 
         if missionType in [NavPattern.MISSION_SEGMENT.value, NavPattern.MISSION_PATH.value, NavPattern.MISSION_SURVEY.value]:
             waypointTwoName = self.waypointTwoComboBox.currentText()
@@ -481,17 +481,20 @@ class MainWindow(QtWidgets.QMainWindow):
                 raise AttributeError("Circle requires valid radius")
         # Create Mission Object. Add to missions database
         print('radius: %s' % (radius))
-        missionObj = Mission(missionName, -1, NavPattern(missionType), waypointArray, radius)
+        missionObj = Mission(len(self.db.allMissions) + 1, -1, NavPattern(missionType), waypointArray, radius)
         print(missionObj.name)
         self.db.addMission([(missionObj.name , missionObj)])
         self.updateUnstagedMissionList()
-        sendIvyMSG(missionObj.gen_mission_msg(5, self.db, len(self.db.allMissions) +1,  InsertMode.Append, len(self.db.tasks) +1))
+        self.db.groundMissionStatus.add(missionObj)
+        self.updateStagedMissionList()
+        ivyMsg = missionObj.gen_mission_msg(5, self.db,  InsertMode.Append)
+        print(ivyMsg)
+        sendIvyMSG(ivyMsg)
 
     def derouteButtonAction(self):
         waypointOneName = self.waypointOneComboBox.currentText()
         missionType = self.missionTypeComboBox.currentText().lower()
         radius = 0
-        missionName = None #causes it to generate name automitically
 
         if missionType in [NavPattern.MISSION_SEGMENT.value, NavPattern.MISSION_PATH.value, NavPattern.MISSION_SURVEY.value]:
             waypointTwoName = self.waypointTwoComboBox.currentText()
@@ -510,11 +513,11 @@ class MainWindow(QtWidgets.QMainWindow):
                 raise AttributeError("Circle requires valid radius")
         # Create Mission Object. Add to missions database
         print('radius: %s' % (radius))
-        missionObj = Mission(missionName, -1, NavPattern(missionType), waypointArray, radius)
+        missionObj = Mission(len(self.db.allMissions) +1, -1, NavPattern(missionType), waypointArray, radius)
         print(missionObj.name)
         self.db.addMission([(missionObj.name , missionObj)])
         self.updateUnstagedMissionList()
-        sendIvyMSG(missionObj.gen_mission_msg(5, self.db, len(self.db.allMissions) +1,  InsertMode.Prepend, len(self.db.tasks) +1))
+        sendIvyMSG(missionObj.gen_mission_msg(5, self.db, InsertMode.Prepend))
 
 
     def checkMissionTypeComboBox(self):

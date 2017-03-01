@@ -86,16 +86,15 @@ class Mission(object):
     #Causes mission.nav_pattern to call setter or getter
     nav_pattern = property(get_nav_pattern, set_nav_pattern)
 
-    def gen_mission_msg(self, ac_id, db, index, insert_mode = InsertMode.Append, task_id = 0, insert_index = 1):
+    def gen_mission_msg(self, ac_id, db, insert_mode = InsertMode.Append, task_id = 0, insert_index = 1):
 
         assert isinstance(insert_mode, InsertMode)
         msg = pprzmsg("datalink", self._nav_pattern.name)
 
         msg['ac_id'] = ac_id
         msg['insert'] = insert_mode.value
-        msg['duration'] = self.duration
-        #msg['duration'] = 40 #if duration is -1 mission completes
-        msg['index'] = index
+        msg['duration'] = self.duration #if duration is -1 mission completes
+        msg['index'] = int(self.index)
         msg['insert_index'] = insert_index
         msg['task'] = task_id
 
@@ -209,6 +208,14 @@ class Mission(object):
             msg['survey_lat_2'] = waypoint2['lat']
             msg['survey_lon_2'] = waypoint2['lon']
             msg['survey_alt'] = waypoint1['alt']
+          
+        #if translateUTM2Home: 
+        #    for wpIndex in range(0,len(self.waypoints)):
+        #        oldUTM = db.waypoints[str(self.waypoints[wpIndex])].get_utm()
+        #        x = str(float(oldUTM['east']) + float(originWpObj['east']))
+        #        y = str(float(oldUTM['north']) + float(originWpObj['north']))
+        #        db.waypoints[str(self.waypoints[wpIndex])].update_utm(oldUTM['east'],oldUTM['north'],oldUTM['zone'])
+            
         return msg
 
     def flagForUpdate(self):
