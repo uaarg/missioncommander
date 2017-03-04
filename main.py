@@ -52,8 +52,10 @@ def argParser():
 class MissionCommander(object):
     def __init__(self, currentFlightPlan):
         self.initDatabase()
-        importxml(os.path.join(*[PPRZ_SRC, 'conf/flight_plans/UAARG', currentFlightPlan]), self.db)
-        importxml('MissionsAndTasks.xml', self.db)
+        importxml.bindDBandFilepath(os.path.join(*[PPRZ_SRC, 'conf/flight_plans/UAARG', currentFlightPlan]), self.db)
+        importxml.parseXML()
+        importxml.bindDBandFilepath('MissionsAndTasks.xml', self.db)
+        importxml.parseXML()
         bindIvyMsgHandler(self.ivyMsgHandler)
 
     def initDatabase(self):

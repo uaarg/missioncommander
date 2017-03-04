@@ -6,27 +6,32 @@ from config import *
 import waypointobject
 import mission
 
+class importXML(object):
+    def __init__(self):
+        '''
+        CALL bindDBandFilepath BEFORE USING
+        '''
+        self.do = 'Nothing'
 
-class importxml(object):
-    def __init__(self, filepath, datDatabase):
-
+    def bindDBandFilepath(self, fP, datDatabase):
+        self.filepath = fP
         self.db = datDatabase
-        self.parseXML(filepath)
-        self.flightParams = {}
-        self.root = None
 
-    def parseXML(self, filepath):
+    def parseXML(self):
         '''
         Parses the XML file at 'filepath' to add its waypoints,
         missions and tasks to a 'Bag of Holding'
         '''
+
+        if (self.filepath or self.db) is None:
+            raise AttributeError('Tried to export without binding database and filepath. :| ')
 
         wpID = 0
         waypoints = []
         missions = []
         tasks = []
 
-        tree = ET.parse(filepath)
+        tree = ET.parse(self.filepath)
         self.root = tree.getroot()
 
 
@@ -61,12 +66,11 @@ class importxml(object):
                 defaultAlt = True
 
                 for key in waypoint:
-
                     if key is ('x' or 'y'):
                         wpTypeXY = True
                     if key is ('lat' or 'lon'):
                         wpTypeLatLon = True
-                    if key is 'alt':
+                    if 'alt' in str(key):
                         defaultAlt = False
 
                 wpID = wpID + 1
@@ -111,7 +115,7 @@ class importxml(object):
                     if not('radius' in miss.keys()):
                         miss['radius'] = None
 
-                    missionObj = mission.Mission(miss['mID'], -1, mission.NavPattern(miss['NavPattern']), miss['wp'], miss['radius'])
+                    missionObj = mission.Mission(miss['mID'], -1, mission.NavPattern(miss['NavPattern'] +'_lla'), miss['wp'], miss['radius'])
                     self.db.addMission([(missionObj.name , missionObj)])
 
         taskIndex= -1
@@ -156,14 +160,17 @@ class importxml(object):
 
 class exportToXML(object):
 
-    def __init__(self, filepath, datDatabase):
+    def __init__(self):
+        '''
+        CALL bindDBandFilepath BEFORE USING
+        '''
+        self.do = 'Nothing'
 
+    def bindDBandFilepath(self, fP, datDatabase):
+        self.filepath = fP
         self.db = datDatabase
-        self.writeXML(filepath)
-        self.flightParams = {}
-        self.root = None
 
-    def writeXML(self, filepath):
+    def writeXML(self):
         '''
         Writes the current Waypoints, Missions and Tasks to an xml file
         at the designated filepath.
@@ -171,6 +178,8 @@ class exportToXML(object):
         paste the flight plan parameters and waypoints to the flight plan
         used by paparazzi.
         '''
+        if (self.filepath or self.db) is None:
+            raise AttributeError('Tried to export without binding database and filepath. :| ')
 
         gParentElement = ET.Element('MissionCommanderFlightStuff')
 
@@ -178,8 +187,8 @@ class exportToXML(object):
         for waypoint in self.db.waypoints.values():
             wpt = ET.SubElement(waypoints, 'waypoint')
             wpt.set('name', waypoint.name)
-            wpt.set('utm_x0', str(waypoint.east))
-            wpt.set('utm_y0', str(waypoint.north))
+            wpt.set('lat', str(waypoint.get_latlon()['lat']))
+            wpt.set('lon', str(waypoint.get_latlon()['lon']))
             if waypoint.alt is not None:
                 wpt.set('alt', str(waypoint.alt))
             else:
@@ -210,7 +219,7 @@ class exportToXML(object):
         self.indent(gParentElement)
 
         outgoingTree = ET.ElementTree(gParentElement)
-        fileName = filepath + str(datetime.now()) + '_WptsMissTsks.xml'
+        fileName = self.filepath + str(datetime.now()) + '_WptsMissTsks.xml'
         outgoingTree.write(fileName, xml_declaration = True, encoding='utf-8', method="xml")
 
     def listToStringList(self, thingToConvert):
@@ -248,3 +257,9 @@ class exportToXML(object):
         else:
             if level and (not elem.tail or not elem.tail.strip()):
                 elem.tail = i
+
+global importxml
+importxml = importXML()
+
+global exportxml
+exportxml = exportToXML()

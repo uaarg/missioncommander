@@ -1,4 +1,5 @@
 import utm
+from xmlparser import *
 
 class Waypoint(object):
     """
@@ -25,7 +26,7 @@ class Waypoint(object):
             if not (lat and lon):
                 raise AttributeError("Waypoint initialization failed: latitide and/or longitude not given")
             else:
-                (self.east, self.north, self.zone, placeholder) = utm.from_latlon(lat, lon)
+                (self.east, self.north, self.zone, placeholder) = utm.from_latlon(float(lat), float(lon))
         elif point_type == 'utm':
             if not (zone and east and north):
                 raise AttributeError("Waypoint initialization failed: one or more UTM parameters not given")
@@ -50,7 +51,7 @@ class Waypoint(object):
         """
         Used to update the waypoint using latitude and longitude.
         """
-        (self.east, self.north, self.zone, placeholder) = utm.from_latlon(lat, lon)
+        (self.east, self.north, self.zone, placeholder) = utm.from_latlon(float(lat), float(lon))
         if alt:
             self.alt = alt
         if name:
@@ -80,9 +81,21 @@ class Waypoint(object):
         result = {}
         result['name'] = self.name
         result['alt'] = self.alt
-        (result['lat'], result['lon']) = utm.to_latlon(self.east, self.north, self.zone, northern=self.northern)
+        latlon = utm.to_latlon(float(self.east), float(self.north), int(self.zone), northern=self.northern)
+        (result['lat'], result['lon']) = (latlon[0], latlon[1])
         return result
 
+    def get_fancyLatLon(self):
+        """
+        Returns a dictionary that paparazzi can use for latlon positions
+        """
+        result = self.get_latlon()
+        # LatLon is a float in decimal form
+        # Gotta change it to a 10^7 integer
+        result['alt'] = int(result['alt'])
+        result['lat'] = int(result['lat'] *10**7)
+        result['lon'] = int(result['lon'] *10**7)
+        return result
 
     def get_utm(self):
         """
@@ -95,6 +108,20 @@ class Waypoint(object):
         result['northern'] = self.northern
         result['east'] = self.east
         result['north'] = self.north
+        return result
+
+    def get_xy(self):
+        """
+        Returns a dictionary of the relative utm coordinates from the origin waypoint.
+        THIS NEEDS TO BE DEBUGGED
+        """
+        result = {}
+        result['name'] = self.name
+        result['alt'] = self.alt
+        result['zone'] = self.zone
+        result['northern'] = self.northern
+        result['x'] = self.east - xmlparser.flightParams['easting0']
+        result['y'] = self.north - xmlparser.flightParams['northing0']
         return result
 
     def gen_move_waypoint_msg(self, ac_id):

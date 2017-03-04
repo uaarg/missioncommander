@@ -33,15 +33,15 @@ class Mission(object):
 
         nameStr = ''
 
-        if (self.nav_pattern.name is 'MISSION_GOTO_WP'):
+        if ('MISSION_GOTO_WP'  in self.nav_pattern.name):
             nameStr = nameStr + 'Go to waypoint '
-        elif (self.nav_pattern.name is 'MISSION_CIRCLE'):
+        elif ('MISSION_CIRCLE' in self.nav_pattern.name):
             nameStr = nameStr + 'Circle waypoint '
-        elif (self.nav_pattern.name is 'MISSION_PATH'):
+        elif ('MISSION_PATH'   in self.nav_pattern.name):
             nameStr = nameStr + 'Make a path from '
-        elif (self.nav_pattern.name is 'MISSION_SEGMENT'):
+        elif ('MISSION_SEGMENT'in self.nav_pattern.name):
             nameStr = nameStr + 'Make a path between '
-        elif (self.nav_pattern.name is 'MISSION_SURVEY'):
+        elif ('MISSION_SURVEY' in self.nav_pattern.name):
             nameStr = nameStr + 'Survey from waypoint '
 
         oneWaypoit = True
@@ -98,33 +98,21 @@ class Mission(object):
         msg['insert_index'] = insert_index
         msg['task'] = task_id
 
-        if 'lla' not in str(self._nav_pattern.value):
-            translateUTM2Home = True
-            originWpObj = db.waypoints['OrIgIn'].get_utm()
-
         wpList = []
         for wpIndex in range(0,len(self.waypoints)):
-            if translateUTM2Home:
-                oldUTM = db.waypoints[str(self.waypoints[wpIndex])].get_utm()
-                x = str(float(oldUTM['east']) - float(originWpObj['east']))
-                y = str(float(oldUTM['north']) - float(originWpObj['north']))
-                #if oldUTM['zone'] is not originWpObj['zone']:
-                #    raise AttributeError('Waypoint not in same utm zone as origin. Message generation failed.')
-                db.waypoints[str(self.waypoints[wpIndex])].update_utm(x,y,oldUTM['zone'])
-
             wpList.append(db.waypoints[str(self.waypoints[wpIndex])])
 
 
         if self._nav_pattern == NavPattern.MISSION_GOTO_WP:
             assert len(self.waypoints) == 1
-            waypoint = wpList[0].get_utm()
-            msg['wp_east'] = waypoint['east']
-            msg['wp_north'] = waypoint['north']
+            waypoint = wpList[0].get_xy()
+            msg['wp_east'] = waypoint['x']
+            msg['wp_north'] = waypoint['y']
             msg['wp_alt'] = waypoint['alt']
 
         elif self._nav_pattern == NavPattern.MISSION_GOTO_WP_LLA:
             assert len(self.waypoints) == 1
-            waypoint = wpList[0].get_latlon()
+            waypoint = wpList[0].get_fancyLatLon()
             msg['wp_lat'] = waypoint['lat']
             msg['wp_lon'] = waypoint['lon']
             msg['wp_alt'] = waypoint['alt']
@@ -133,10 +121,10 @@ class Mission(object):
             assert len(self.waypoints) == 1
             if not self.radius:
                 raise AttributeError("Circle requires radius")
-            waypoint = wpList[0].get_utm()
+            waypoint = wpList[0].get_xy()
 
-            msg['center_east'] = waypoint['east']
-            msg['center_north'] = waypoint['north']
+            msg['center_east'] = waypoint['x']
+            msg['center_north'] = waypoint['y']
             msg['center_alt'] = waypoint['alt']
             msg['radius'] = self.radius
 
@@ -144,7 +132,7 @@ class Mission(object):
             assert len(self.waypoints) == 1
             if not self.radius:
                 raise AttributeError("Circle requires radius")
-            waypoint = wpList[0].get_latlon()
+            waypoint = wpList[0].get_fancyLatLon()
 
             msg['center_lat'] = waypoint['lat']
             msg['center_lon'] = waypoint['lon']
@@ -153,17 +141,17 @@ class Mission(object):
 
         elif self._nav_pattern == NavPattern.MISSION_SEGMENT:
             assert len(self.waypoints) == 2
-            waypoint1 = wpList[0].get_utm()
-            waypoint2 = wpList[1].get_utm()
-            msg['segment_east_1'] = waypoint1['east']
-            msg['segment_north_1'] = waypoint1['north']
-            msg['segment_east_2'] = waypoint2['east']
-            msg['segment_north_2'] = waypoint2['north']
+            waypoint1 = wpList[0].get_xy()
+            waypoint2 = wpList[1].get_xy()
+            msg['segment_east_1'] = waypoint1['x']
+            msg['segment_north_1'] = waypoint1['y']
+            msg['segment_east_2'] = waypoint2['x']
+            msg['segment_north_2'] = waypoint2['y']
 
         elif self._nav_pattern == NavPattern.MISSION_SEGMENT_LLA:
             assert len(self.waypoints) == 2
-            waypoint1 = wpList[0].get_latlon()
-            waypoint2 = wpList[1].get_latlon()
+            waypoint1 = wpList[0].get_fancyLatLon()
+            waypoint2 = wpList[1].get_fancyLatLon()
             msg['segment_lat_1'] = waypoint1['lat']
             msg['segment_lon_1'] = waypoint1['lon']
             msg['segment_lat_2'] = waypoint2['lat']
@@ -173,49 +161,42 @@ class Mission(object):
             waypoints_num = len(self.waypoints)
             assert waypoints_num >= 2 and waypoints_num <= 5
             for i in range(0, waypoints_num):
-                waypoint = wpList[i].get_utm()
-                msg['point_east_' + str(i + 1)] = waypoint['east']
-                msg['point_north_' + str(i + 1)] = waypoint['north']
-            msg['path_alt'] = wpList[0].get_utm()['alt']
+                waypoint = wpList[i].get_xy()
+                msg['point_east_' + str(i + 1)] = waypoint['x']
+                msg['point_north_' + str(i + 1)] = waypoint['y']
+            msg['path_alt'] = wpList[0].get_xy()['alt']
             msg['nb'] = waypoints_num
 
         elif self._nav_pattern == NavPattern.MISSION_PATH_LLA:
             waypoints_num = len(self.waypoints)
             assert waypoints_num >= 2 and waypoints_num <= 5
             for i in range(0,waypoints_num):
-                waypoint = wpList[i].get_latlon()
+                waypoint = wpList[i].get_fancyLatLon()
                 msg['point_lat_' + str(i + 1)] = waypoint['lat']
                 msg['point_lon_' + str(i + 1)] = waypoint['lon']
-            msg['path_alt'] = wpList[self.waypoints[0]].get_utm()['alt']
+            msg['path_alt'] = wpList[self.waypoints[0]].get_xy()['alt']
             msg['nb'] = waypoints_num
 
         elif self._nav_pattern == NavPattern.MISSION_SURVEY:
             assert len(self.waypoints) == 2
-            waypoint1 = wpList[0].get_utm()
-            waypoint2 = wpList[1].get_utm()
-            msg['survey_east_1'] = waypoint1['east']
-            msg['survey_north_1'] = waypoint1['north']
-            msg['survey_east_2'] = waypoint2['east']
-            msg['survey_north_2'] = waypoint2['north']
+            waypoint1 = wpList[0].get_xy()
+            waypoint2 = wpList[1].get_xy()
+            msg['survey_east_1'] = waypoint1['x']
+            msg['survey_north_1'] = waypoint1['y']
+            msg['survey_east_2'] = waypoint2['x']
+            msg['survey_north_2'] = waypoint2['y']
             msg['survey_alt'] = waypoint1['alt']
 
         elif self._nav_pattern == NavPattern.MISSION_SURVEY_LLA:
             assert len(self.waypoints) == 2
-            waypoint1 = wpList[0].get_latlon()
-            waypoint2 = wpList[1].get_latlon()
+            waypoint1 = wpList[0].get_fancyLatLon()
+            waypoint2 = wpList[1].get_fancyLatLon()
             msg['survey_lat_1'] = waypoint1['lat']
             msg['survey_lon_1'] = waypoint1['lon']
             msg['survey_lat_2'] = waypoint2['lat']
             msg['survey_lon_2'] = waypoint2['lon']
             msg['survey_alt'] = waypoint1['alt']
-          
-        #if translateUTM2Home: 
-        #    for wpIndex in range(0,len(self.waypoints)):
-        #        oldUTM = db.waypoints[str(self.waypoints[wpIndex])].get_utm()
-        #        x = str(float(oldUTM['east']) + float(originWpObj['east']))
-        #        y = str(float(oldUTM['north']) + float(originWpObj['north']))
-        #        db.waypoints[str(self.waypoints[wpIndex])].update_utm(oldUTM['east'],oldUTM['north'],oldUTM['zone'])
-            
+
         return msg
 
     def flagForUpdate(self):

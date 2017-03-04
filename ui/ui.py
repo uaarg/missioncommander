@@ -8,7 +8,7 @@ from PyQt5 import QtCore, QtGui, QtWidgets
 from mission import  InsertMode, NavPattern, Mission
 from ivylinker import sendIvyMSG
 
-import xmlparser
+from xmlparser import *
 
 translate = QtCore.QCoreApplication.translate
 
@@ -394,8 +394,12 @@ class MainWindow(QtWidgets.QMainWindow):
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 current_mission = self.db.allMissions[itemName]
                 ivyMsg = current_mission.gen_mission_msg(5, self.db, InsertMode.Append)
-                print(ivyMsg)
-                sendIvyMSG(ivyMsg) #Don't know how to test this?
+                if DEBUG:
+                    print(ivyMsg)
+                    for key in ivyMsg.to_dict().keys():
+                        print(key + ' is ' +str(ivyMsg.to_dict()[key]))
+                        print(type(ivyMsg.to_dict()[key]))
+                sendIvyMSG(ivyMsg)
                 self.db.groundMissionStatus.add(current_mission)
 
         self.updateStagedMissionList()
@@ -481,7 +485,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 raise AttributeError("Circle requires valid radius")
         # Create Mission Object. Add to missions database
         print('radius: %s' % (radius))
-        missionObj = Mission(len(self.db.allMissions) + 1, -1, NavPattern(missionType), waypointArray, radius)
+        missionObj = Mission(len(self.db.allMissions) + 1, -1, NavPattern(missionType + '_lla'), waypointArray, radius)
         print(missionObj.name)
         self.db.addMission([(missionObj.name , missionObj)])
         self.updateUnstagedMissionList()
@@ -512,8 +516,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 ret = msgBox.exec_()
                 raise AttributeError("Circle requires valid radius")
         # Create Mission Object. Add to missions database
-        print('radius: %s' % (radius))
-        missionObj = Mission(len(self.db.allMissions) +1, -1, NavPattern(missionType), waypointArray, radius)
+        missionObj = Mission(len(self.db.allMissions) +1, -1, NavPattern(missionType + '_lla'), waypointArray, radius)
         print(missionObj.name)
         self.db.addMission([(missionObj.name , missionObj)])
         self.updateUnstagedMissionList()
@@ -537,18 +540,19 @@ class MainWindow(QtWidgets.QMainWindow):
         print("Needs to be completed")
 
     def saveMissionState(self):
-        xmlparser.exportToXML('data/', self.db)
+        exportxml.bindDBandFilepath('data/', self.db)
+        exportxml.writeXML()
 
     # Used by Main Window Constructor
     def translateUi(self):
         self.setWindowTitle(translate("mainWindow", "Mission Commander"))
         self.derouteButton.setText(translate("mainWindow", "Quick Deroute"))
         self.sendMissionButton.setText(translate("mainWindow", "Send Mission"))
-        self.uasWaypointsLabel.setText(translate("mainWindow", "Last UAS Waypoints"))
+        self.uasWaypointsLabel.setText(translate("mainWindow", "UAS Missions"))
         self.ivyMessageTSLabel.setText(translate("mainWindow", "Last Ivy Message Timestamp"))
         self.interopFreqLabel.setText(translate("mainWindow", "Interoperability Frequency"))
-        self.unstagedLabel.setText(translate("mainWindow", "Unstaged Waypoints"))
-        self.stagedLabel.setText(translate("mainWindow", "Staged Waypoints"))
+        self.unstagedLabel.setText(translate("mainWindow", "Unstaged Missions"))
+        self.stagedLabel.setText(translate("mainWindow", "Staged Missions"))
         self.replaceAllButton.setText(translate("mainWindow", "Replace All"))
         self.prependButton.setText(translate("mainWindow", "Prepend"))
         self.replaceButton.setText(translate("mainWindow", "Replace"))
