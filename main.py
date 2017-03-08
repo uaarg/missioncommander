@@ -81,23 +81,21 @@ if __name__ == '__main__':
     log.init()
     argDict = argParser()
 
-    if INTEROP_ENABLE:
-        interop = AsyncClient(argDict['url'], argDict['username'], argDict['password'])
-        missionInfo = MissionInformation(interop, sendIvyMSG)
-        missionInfo.getMissionInformation()
-        missionInfo.sendIvyOffAxisShape()
+    interop = AsyncClient(argDict['url'], argDict['username'], argDict['password'])
+    missionInfo = MissionInformation(interop, sendIvyMSG)
+    missionInfo.getMissionInformation()
+    missionInfo.sendIvyOffAxisShape()
 
     mc = MissionCommander(argDict['flightPlan'])
 
-    if INTEROP_ENABLE:
-        telem_thread = TelemetryThread(interop, mc.db.airplane)
-        obstacle_thread = ObstacleThread(interop, sendIvyMSG)
-        telem_thread.start()
-        obstacle_thread.start()
-        obstacle_thread.join()
-        telem_thread.join()
+    telem_thread = TelemetryThread(interop, mc.db.airplane)
+    obstacle_thread = ObstacleThread(interop, sendIvyMSG)
+    ui_thread = UiThread(mc.db)
 
-    if UI_ENABLE:
-        ui_thread = UiThread(mc.db)
-        ui_thread.start()
-        ui_thread.join()
+    telem_thread.start()
+    ui_thread.start()
+    obstacle_thread.start()
+
+    obstacle_thread.join()
+    ui_thread.join()
+    telem_thread.join()

@@ -25,7 +25,5 @@ UTM_NORTHERN_HEMISPHERE = True
 DEBUG = False
 TELEM_DEBUG = False
 WP_DEBUG = False # Paparazzi needs to be running
-INTEROP_ENABLE = False
-UI_ENABLE = True
 
 CBassFlag = False
