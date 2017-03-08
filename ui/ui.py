@@ -532,6 +532,8 @@ class MainWindow(QtWidgets.QMainWindow):
         print(missionObj.name)
         self.db.addMission([(missionObj.name , missionObj)])
         self.updateUnstagedMissionList()
+        self.db.groundMissionStatus.add(missionObj)
+        self.updateStagedMissionList()
         sendIvyMSG(missionObj.gen_mission_msg(5, self.db, InsertMode.Prepend))
 
 
