@@ -141,6 +141,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sendMissionButton.setFont(font)
         self.sendMissionButton.setObjectName("sendMissionButton")
         self.leftLowerPane.addWidget(self.sendMissionButton, 2, 2, 1, 1)
+        self.createMissionButton = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        self.createMissionButton.setSizePolicy(sizePolicy)
+        self.createMissionButton.setFont(font)
+        self.createMissionButton.setObjectName("createMissionButton")
+        self.leftLowerPane.addWidget(self.createMissionButton, 2, 2, 2, 1)
         self.waypointOneComboBox = QtWidgets.QComboBox(self.scrollAreaWidgetContents)
         self.waypointTwoComboBox = QtWidgets.QComboBox(self.scrollAreaWidgetContents)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
@@ -153,7 +158,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.leftLowerPane.addWidget(self.waypointOneComboBox, 2, 0, 1, 1)
         self.waypointTwoComboBox.setSizePolicy(sizePolicy)
         self.waypointTwoComboBox.setFont(font)
-        self.waypointTwoComboBox.setObjectName("waypointOneComboBox")
+        self.waypointTwoComboBox.setObjectName("waypointTwoComboBox")
         self.leftLowerPane.addWidget(self.waypointTwoComboBox, 2, 0, 2, 1)
         self.missionTypeComboBox = QtWidgets.QComboBox(self.scrollAreaWidgetContents)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
@@ -322,6 +327,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.replaceButton.clicked.connect(lambda: self.replaceButtonAction())
         self.replaceAllButton.clicked.connect(lambda: self.replaceAllButtonAction())
         self.sendMissionButton.clicked.connect(lambda: self.sendMissionButtonAction())
+        self.createMissionButton.clicked.connect(lambda: self.createMissionButtonAction())
         self.derouteButton.clicked.connect(lambda: self.derouteButtonAction())
 
         # Shortcuts
@@ -462,8 +468,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def updateListViews(self):
         print("Needs to be completed")
+        
 
-    def sendMissionButtonAction(self):
+    def createMissionButtonAction(self):
         waypointOneName = self.waypointOneComboBox.currentText()
         missionType = self.missionTypeComboBox.currentText().lower()
         radius = 0
@@ -489,11 +496,16 @@ class MainWindow(QtWidgets.QMainWindow):
         print(missionObj.name)
         self.db.addMission([(missionObj.name , missionObj)])
         self.updateUnstagedMissionList()
+        return missionObj
+
+    def sendMissionButtonAction(self):
+        missionObj = self.createMissionButtonAction()
         self.db.groundMissionStatus.add(missionObj)
         self.updateStagedMissionList()
         ivyMsg = missionObj.gen_mission_msg(5, self.db,  InsertMode.Append)
         print(ivyMsg)
         sendIvyMSG(ivyMsg)
+        
 
     def derouteButtonAction(self):
         waypointOneName = self.waypointOneComboBox.currentText()
@@ -548,6 +560,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle(translate("mainWindow", "Mission Commander"))
         self.derouteButton.setText(translate("mainWindow", "Quick Deroute"))
         self.sendMissionButton.setText(translate("mainWindow", "Send Mission"))
+        self.createMissionButton.setText(translate("mainWindow", "Create Mission"))
         self.uasWaypointsLabel.setText(translate("mainWindow", "UAS Missions"))
         self.ivyMessageTSLabel.setText(translate("mainWindow", "Last Ivy Message Timestamp"))
         self.interopFreqLabel.setText(translate("mainWindow", "Interoperability Frequency"))

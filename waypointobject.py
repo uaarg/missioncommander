@@ -92,7 +92,7 @@ class Waypoint(object):
         result = self.get_latlon()
         # LatLon is a float in decimal form
         # Gotta change it to a 10^7 integer
-        result['alt'] = int(result['alt'])
+        result['alt'] = int(round(float(result['alt'])))
         result['lat'] = int(result['lat'] *10**7)
         result['lon'] = int(result['lon'] *10**7)
         return result
