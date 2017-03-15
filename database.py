@@ -5,6 +5,7 @@ import utm
 import threading
 import mission
 from collections import OrderedDict
+from PyQt5.QtCore import QObject, pyqtSignal
 
 class BagOfHolding(object):
 
@@ -16,6 +17,7 @@ class BagOfHolding(object):
         self.airMissionStatus = fancyList()
         self.groundMissionStatus = fancyList()
         self.remianingMissionTime = 0
+        self.signals = dbSignals()
 
     def updateTelemetry(self, msg):
         self.airplane.updateFromWaldo(msg)
@@ -35,6 +37,9 @@ class BagOfHolding(object):
                 mission_list.append(missionFromIndex)
 
             self.airMissionStatus.replaceAll(mission_list)
+
+        self.signals.updateUASinUI();
+
 
     def addWaypoint(self, wpTuple):
         self.waypoints.update(wpTuple)
@@ -131,3 +136,14 @@ class AirplaneTelemetry(object):
             'uas_heading':float(self.heading)
         }
         return tele
+
+class dbSignals(QObject):
+    '''This class is to be used to create QT signal objects which can then be connected to the UI'''
+    uas_update = pyqtSignal()
+
+    def __init__(self):
+        # Initialize as a QObject
+        QObject.__init__(self)
+
+    def updateUASinUI(self):
+        self.uas_update.emit()

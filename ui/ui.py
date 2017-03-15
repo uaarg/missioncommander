@@ -333,8 +333,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # Shortcuts
         self.actionExit_Program.setShortcut('Ctrl+Q')
         self.actionSave.setShortcut('Ctrl+S')
+
         # Signals
         self.missionTypeComboBox.currentIndexChanged.connect(lambda: self.checkMissionTypeComboBox())
+        self.db.signals.uas_update.connect(lambda: self.updateUavListViewList())
 
         QtCore.QMetaObject.connectSlotsByName(self)
 
@@ -468,7 +470,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def updateListViews(self):
         print("Needs to be completed")
-        
+
 
     def createMissionButtonAction(self):
         waypointOneName = self.waypointOneComboBox.currentText()
@@ -505,7 +507,7 @@ class MainWindow(QtWidgets.QMainWindow):
         ivyMsg = missionObj.gen_mission_msg(5, self.db,  InsertMode.Append)
         print(ivyMsg)
         sendIvyMSG(ivyMsg)
-        
+
 
     def derouteButtonAction(self):
         waypointOneName = self.waypointOneComboBox.currentText()
