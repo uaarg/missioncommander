@@ -32,9 +32,11 @@ class BagOfHolding(object):
             task_array = msg.fieldvalues[2].split(",")
 
             # Parse Missions and Task
-            for e in range(0,len(mission_array)-1):
-                missionFromIndex = list(self.allMissions.items())[e][1]
-                mission_list.append(missionFromIndex)
+            print(mission_array)
+            for iv_miss_id in mission_array:
+                for miss in self.allMissions.items():
+                    if (str(miss[1].index) == iv_miss_id):
+                        mission_list.append(miss[1])
 
             self.airMissionStatus.replaceAll(mission_list)
 

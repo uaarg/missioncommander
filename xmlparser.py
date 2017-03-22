@@ -115,7 +115,7 @@ class importXML(object):
                     if not('radius' in miss.keys()):
                         miss['radius'] = None
 
-                    missionObj = mission.Mission(miss['mID'], -1, mission.NavPattern(miss['NavPattern'] +'_lla'), miss['wp'], miss['radius'])
+                    missionObj = mission.Mission(int(miss['mID']), -1, mission.NavPattern(miss['NavPattern'] +'_lla'), miss['wp'], miss['radius'])
                     self.db.addMission([(missionObj.name , missionObj)])
 
         taskIndex= -1
