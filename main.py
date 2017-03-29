@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import sys, getopt
-import log
+import log, logging
 import os
 import argparse
 
@@ -80,22 +80,35 @@ class MissionCommander(object):
 if __name__ == '__main__':
     log.init()
     argDict = argParser()
+    serverIsUp = True
+    logger = logging.getLogger(__name__)
+    interop = None
+    try:
+        interop = AsyncClient(argDict['url'], argDict['username'], argDict['password'])
+    except Exception as e:
+        logging.critical('Interop failed to initialize due to: \n'+str(e)+'.\nOperation of Interop threads are supressed.\n')
+        serverIsUp = False
 
-    interop = AsyncClient(argDict['url'], argDict['username'], argDict['password'])
-    missionInfo = MissionInformation(interop, sendIvyMSG)
-    missionInfo.getMissionInformation()
-    missionInfo.sendIvyOffAxisShape()
+    if serverIsUp:
+        missionInfo = MissionInformation(interop, sendIvyMSG)
+        missionInfo.getMissionInformation()
+        missionInfo.sendIvyOffAxisShape()
 
     mc = MissionCommander(argDict['flightPlan'])
 
-    telem_thread = TelemetryThread(interop, mc.db.airplane)
-    obstacle_thread = ObstacleThread(interop, sendIvyMSG)
+    if serverIsUp:
+        telem_thread = TelemetryThread(interop, mc.db.airplane)
+        obstacle_thread = ObstacleThread(interop, sendIvyMSG)
+
     ui_thread = UiThread(mc.db)
 
-    telem_thread.start()
-    ui_thread.start()
-    obstacle_thread.start()
+    if serverIsUp:
+        telem_thread.start()
+        obstacle_thread.start()
 
-    obstacle_thread.join()
+    ui_thread.start()
     ui_thread.join()
-    telem_thread.join()
+
+    if serverIsUp:
+        obstacle_thread.join()
+        telem_thread.join()
