@@ -32,16 +32,20 @@ class BagOfHolding(object):
             task_array = msg.fieldvalues[2].split(",")
 
             # Parse Missions and Task
-            print(mission_array)
             for iv_miss_id in mission_array:
-                for miss in self.allMissions.items():
-                    if (str(miss[1].index) == iv_miss_id):
-                        mission_list.append(miss[1])
+                miss = self.findMissionById(iv_miss_id)
+                if miss != None :
+                    mission_list.append(miss)
 
             self.airMissionStatus.replaceAll(mission_list)
 
         self.signals.updateUASinUI();
 
+    def findMissionById(self, idStr):
+        for miss in self.allMissions.items():
+            if (str(miss[1].index) == idStr):
+                return miss[1]
+        return None
 
     def addWaypoint(self, wpTuple):
         self.waypoints.update(wpTuple)

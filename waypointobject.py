@@ -1,10 +1,10 @@
 import utm
-from xmlparser import *
 
 class Waypoint(object):
     """
     This object may take either latlon or UTM format as input; however, it stores them in UTM.
     """
+    flightParams = {}
 
     def __init__(self, name, wpID, point_type, lat=None, lon=None, zone=None, northern=True, east=None, north=None, alt=None, missions=[]):
 
@@ -113,15 +113,15 @@ class Waypoint(object):
     def get_xy(self):
         """
         Returns a dictionary of the relative utm coordinates from the origin waypoint.
-        THIS NEEDS TO BE DEBUGGED
         """
         result = {}
         result['name'] = self.name
         result['alt'] = self.alt
         result['zone'] = self.zone
         result['northern'] = self.northern
-        result['x'] = self.east - xmlparser.flightParams['easting0']
-        result['y'] = self.north - xmlparser.flightParams['northing0']
+        global importxml
+        result['x'] = self.east - Waypoint.flightParams['easting0']
+        result['y'] = self.north - Waypoint.flightParams['northing0']
         return result
 
     def gen_move_waypoint_msg(self, ac_id):

@@ -44,11 +44,12 @@ class importXML(object):
 
             utmHome = utm.from_latlon(self.flightParams['lat0'], self.flightParams['lon0'])
 
-            self.flightParams['easting0'] = utmHome[0]
-            self.flightParams['northing0'] = utmHome[1]
+            self.flightParams['easting0'] = float(utmHome[0])
+            self.flightParams['northing0'] = float(utmHome[1])
             self.flightParams['utmZoneNumber0'] = utmHome[2]
             self.flightParams['utmZoneLetter0'] = utmHome[3]
 
+            waypointobject.Waypoint.flightParams = self.flightParams
             originWpObj = waypointobject.Waypoint('OrIgIn', '0','utm',self.flightParams['lat0'], self.flightParams['lon0'], self.flightParams['utmZoneNumber0'], True, self.flightParams['easting0'], self.flightParams['northing0'], self.flightParams['alt'])
             self.db.addWaypoint([(originWpObj.name, originWpObj)])
 
@@ -129,7 +130,7 @@ class importXML(object):
                 else:
                     task['mID'] = str(task['mID']).replace(',','').split()
                     task['tID'] = taskIndex
-                    taskObj = mission.task(task['name'], task['mID'])
+                    taskObj = mission.task(task['tID'], task['name'], task['mID'])
                     self.db.addTask([(task['name'],taskObj)])
 
     def __floatize(self, dictionaryWithBadStrings):

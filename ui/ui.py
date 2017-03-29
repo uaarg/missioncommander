@@ -364,7 +364,15 @@ class MainWindow(QtWidgets.QMainWindow):
             item.setCheckable(True)
             item.setEditable(False)
             unstagedListViewModel.appendRow(item)
+        for task in self.db.tasks.items():
+            self.appendItemToRowCheckable(unstagedListViewModel,task[0])
         self.unstagedListView.setModel(unstagedListViewModel)
+
+    def appendItemToRowCheckable(self, qItemModel, itemName):
+        item = QtGui.QStandardItem(itemName)
+        item.setCheckable(True)
+        item.setEditable(False)
+        qItemModel.appendRow(item)
 
     # Prepend Button clicked_slot():
     def prependButtonAction(self):
@@ -374,15 +382,23 @@ class MainWindow(QtWidgets.QMainWindow):
         model = self.unstagedListView.model()
 
         # Find Checkboxed Items
-        for index in reversed(range(model.rowCount())):  #Reverse the list to prepend in the right order.
+        for index in reversed(range(model.rowCount())):  #Reverse the list so that when prepend is called individually for each, it is the same order as if the whole list were prepended at once
             item = model.item(index)
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
-                current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg(5,self.db, InsertMode.Prepend)
-                sendIvyMSG(ivyMsg) #Don't know how to test this?
-                self.db.groundMissionStatus.prepend(current_mission)
+                if (itemName in self.db.allMissions):
+                    currentMission = self.db.allMissions[itemName]
+                    ivyMsg = currentMission.gen_mission_msg(5, self.db, InsertMode.Prepend)
+                    sendIvyMSG(ivyMsg)
+                    self.db.groundMissionStatus.prepend(currentMission)
+                else:
+                    currentTask = self.db.tasks[itemName]
+                    for missID in reversed(currentTask.missions):
+                        currentMission = self.db.findMissionById(missID)
+                        ivyMsg = currentMission.gen_mission_msg(5, self.db, InsertMode.Prepend, currentTask.id)
+                        sendIvyMSG(ivyMsg)
+                        self.db.groundMissionStatus.prepend(currentMission)
 
         self.updateStagedMissionList()
 
@@ -400,15 +416,23 @@ class MainWindow(QtWidgets.QMainWindow):
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
-                current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg(5, self.db, InsertMode.Append)
-                if DEBUG:
-                    print(ivyMsg)
-                    for key in ivyMsg.to_dict().keys():
-                        print(key + ' is ' +str(ivyMsg.to_dict()[key]))
-                        print(type(ivyMsg.to_dict()[key]))
-                sendIvyMSG(ivyMsg)
-                self.db.groundMissionStatus.add(current_mission)
+                if (itemName in self.db.allMissions):
+                    currentMission = self.db.allMissions[itemName]
+                    ivyMsg = currentMission.gen_mission_msg(5, self.db, InsertMode.Append)
+                    if DEBUG:
+                        print(ivyMsg)
+                        for key in ivyMsg.to_dict().keys():
+                            print(key + ' is ' +str(ivyMsg.to_dict()[key]))
+                            print(type(ivyMsg.to_dict()[key]))
+                    sendIvyMSG(ivyMsg)
+                    self.db.groundMissionStatus.add(currentMission)
+                else: #Tasks
+                    currentTask = self.db.tasks[itemName]
+                    for missID in currentTask.missions:
+                        currentMission = self.db.findMissionById(missID)
+                        ivyMsg = currentMission.gen_mission_msg(5, self.db, InsertMode.Append, currentTask.id)
+                        sendIvyMSG(ivyMsg)
+                        self.db.groundMissionStatus.add(currentMission)
 
         self.updateStagedMissionList()
 
@@ -428,6 +452,8 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
         insertList = list()
+
+        ## TODO: Cannot currently replace Multiple, cannot replace with Tasks
 
         # Find Checkboxed Items
         print('List of Selected Missions')
@@ -457,12 +483,22 @@ class MainWindow(QtWidgets.QMainWindow):
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
-                current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg(5,self.db, InsertMode.Append)
-                if len(insertList) == 0:
-                    ivyMsg = current_mission.gen_mission_msg(5,self.db, InsertMode.ReplaceAll)
-                sendIvyMSG(ivyMsg) #Don't know how to test this?
-                insertList.append(current_mission)
+                if (itemName in self.db.allMissions):
+                    currentMission = self.db.allMissions[itemName]
+                    ivyMsg = currentMission.gen_mission_msg(5,self.db, InsertMode.Append)
+                    if len(insertList) == 0:
+                        ivyMsg = currentMission.gen_mission_msg(5,self.db, InsertMode.ReplaceAll)
+                    sendIvyMSG(ivyMsg) #Don't know how to test this?
+                    insertList.append(currentMission)
+                else: #Task
+                    currentTask = self.db.tasks[itemName]
+                    for missID in currentTask.missions:
+                        currentMission = self.db.findMissionById(missID)
+                        ivyMsg = currentMission.gen_mission_msg(5,self.db, InsertMode.Append)
+                        if len(insertList) == 0:
+                            ivyMsg = currentMission.gen_mission_msg(5,self.db, InsertMode.ReplaceAll)
+                        sendIvyMSG(ivyMsg) #Don't know how to test this?
+                        insertList.append(currentMission)
 
         self.db.groundMissionStatus.replaceAll(insertList)
         self.updateStagedMissionList()
