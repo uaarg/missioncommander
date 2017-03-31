@@ -1,7 +1,7 @@
 #!/usr/bin/python3
 
 import sys, getopt
-import log
+import log, logging
 import os
 import argparse
 
@@ -88,27 +88,38 @@ class MissionCommander():
 if __name__ == '__main__':
     log.init()
     argDict = argParser()
+    logger = logging.getLogger(__name__)
+
+    serverIsUp = True
+    try:
+        interop = AsyncClient(argDict['url'], argDict['username'], argDict['password'])
+    except Exception as e:
+        logging.critical('Interop failed to initialize due to: \n'+str(e)+'.\nOperation of Interop threads are supressed.\n')
+        serverIsUp = False
 
     ivy_sender = ivylinker.IvySender(verbose=True)
-    interop = AsyncClient(argDict['url'], argDict['username'], argDict['password'])
     mc = MissionCommander(argDict['flightPlan'], ivy_sender)
     ui = UI(mc.db, ivy_sender)
 
-    missionInfo = MissionInformation(interop, ivy_sender.sendMessage)
-    missionInfo.getMissionInformation()
-    missionInfo.sendIvyOffAxisShape()
+    if serverIsUp:
+        missionInfo = MissionInformation(interop, ivy_sender.sendMessage)
+        missionInfo.getMissionInformation()
+        missionInfo.sendIvyOffAxisShape()
 
-    telem_thread = TelemetryThread(interop, mc.db.airplane)
-    obstacle_thread = ObstacleThread(interop, ivy_sender.sendMessage)
+        telem_thread = TelemetryThread(interop, mc.db.airplane)
+        obstacle_thread = ObstacleThread(interop, ivy_sender.sendMessage)
 
-    telem_thread.start()
-    obstacle_thread.start()
+        telem_thread.start()
+        obstacle_thread.start()
 
     ui.run() # Finishes when UI window is closed
 
-    obstacle_thread.stop()
-    telem_thread.stop()
+    if serverIsUp:
+        obstacle_thread.stop()
+        telem_thread.stop()
+
     ivy_sender.shutdown()
 
-    obstacle_thread.join()
-    telem_thread.join()
+    if serverIsUp:
+        obstacle_thread.join()
+        telem_thread.join()

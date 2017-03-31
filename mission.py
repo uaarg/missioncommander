@@ -174,7 +174,8 @@ class Mission(object):
                 waypoint = wpList[i].get_fancyLatLon()
                 msg['point_lat_' + str(i + 1)] = waypoint['lat']
                 msg['point_lon_' + str(i + 1)] = waypoint['lon']
-            msg['path_alt'] = wpList[self.waypoints[0]].get_xy()['alt']
+
+            msg['path_alt'] = wpList[0].get_xy()['alt']
             msg['nb'] = waypoints_num
 
         elif self._nav_pattern == NavPattern.MISSION_SURVEY:
@@ -208,6 +209,7 @@ class task(object):
     (eg. surveying a search area, completing autonamous waypoint navigation)
     '''
 
-    def __init__(self, name, missions):
+    def __init__(self, id, name, missions):
+        self.id = id
         self.name = name
         self.missions = missions

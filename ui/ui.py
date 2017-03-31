@@ -129,6 +129,11 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sendMissionButton.setFont(font)
         self.sendMissionButton.setObjectName("sendMissionButton")
         self.leftLowerPane.addWidget(self.sendMissionButton, 2, 2, 1, 1)
+        self.createMissionButton = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        self.createMissionButton.setSizePolicy(sizePolicy)
+        self.createMissionButton.setFont(font)
+        self.createMissionButton.setObjectName("createMissionButton")
+        self.leftLowerPane.addWidget(self.createMissionButton, 2, 2, 2, 1)
         self.waypointOneComboBox = QtWidgets.QComboBox(self.scrollAreaWidgetContents)
         self.waypointTwoComboBox = QtWidgets.QComboBox(self.scrollAreaWidgetContents)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
@@ -141,7 +146,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.leftLowerPane.addWidget(self.waypointOneComboBox, 2, 0, 1, 1)
         self.waypointTwoComboBox.setSizePolicy(sizePolicy)
         self.waypointTwoComboBox.setFont(font)
-        self.waypointTwoComboBox.setObjectName("waypointOneComboBox")
+        self.waypointTwoComboBox.setObjectName("waypointTwoComboBox")
         self.leftLowerPane.addWidget(self.waypointTwoComboBox, 2, 0, 2, 1)
         self.missionTypeComboBox = QtWidgets.QComboBox(self.scrollAreaWidgetContents)
         sizePolicy = QtWidgets.QSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Fixed)
@@ -310,13 +315,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.replaceButton.clicked.connect(lambda: self.replaceButtonAction())
         self.replaceAllButton.clicked.connect(lambda: self.replaceAllButtonAction())
         self.sendMissionButton.clicked.connect(lambda: self.sendMissionButtonAction())
+        self.createMissionButton.clicked.connect(lambda: self.createMissionButtonAction())
         self.derouteButton.clicked.connect(lambda: self.derouteButtonAction())
 
         # Shortcuts
         self.actionExit_Program.setShortcut('Ctrl+Q')
         self.actionSave.setShortcut('Ctrl+S')
+
         # Signals
         self.missionTypeComboBox.currentIndexChanged.connect(lambda: self.checkMissionTypeComboBox())
+        self.db.signals.uas_update.connect(lambda: self.updateUavListViewList())
 
         QtCore.QMetaObject.connectSlotsByName(self)
 
@@ -344,7 +352,15 @@ class MainWindow(QtWidgets.QMainWindow):
             item.setCheckable(True)
             item.setEditable(False)
             unstagedListViewModel.appendRow(item)
+        for task in self.db.tasks.items():
+            self.appendItemToRowCheckable(unstagedListViewModel,task[0])
         self.unstagedListView.setModel(unstagedListViewModel)
+
+    def appendItemToRowCheckable(self, qItemModel, itemName):
+        item = QtGui.QStandardItem(itemName)
+        item.setCheckable(True)
+        item.setEditable(False)
+        qItemModel.appendRow(item)
 
     # Prepend Button clicked_slot():
     def prependButtonAction(self):
@@ -354,15 +370,23 @@ class MainWindow(QtWidgets.QMainWindow):
         model = self.unstagedListView.model()
 
         # Find Checkboxed Items
-        for index in reversed(range(model.rowCount())):  #Reverse the list to prepend in the right order.
+        for index in reversed(range(model.rowCount())):  #Reverse the list so that when prepend is called individually for each, it is the same order as if the whole list were prepended at once
             item = model.item(index)
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
-                current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg(5,self.db, InsertMode.Prepend)
-                self.sendIvyMsg(ivyMsg) #Don't know how to test this?
-                self.db.groundMissionStatus.prepend(current_mission)
+                if (itemName in self.db.allMissions):
+                    currentMission = self.db.allMissions[itemName]
+                    ivyMsg = currentMission.gen_mission_msg(5, self.db, InsertMode.Prepend)
+                    self.sendIvyMsg(ivyMsg)
+                    self.db.groundMissionStatus.prepend(currentMission)
+                else:
+                    currentTask = self.db.tasks[itemName]
+                    for missID in reversed(currentTask.missions):
+                        currentMission = self.db.findMissionById(missID)
+                        ivyMsg = currentMission.gen_mission_msg(5, self.db, InsertMode.Prepend, currentTask.id)
+                        self.sendIvyMsg(ivyMsg)
+                        self.db.groundMissionStatus.prepend(currentMission)
 
         self.updateStagedMissionList()
 
@@ -380,15 +404,23 @@ class MainWindow(QtWidgets.QMainWindow):
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
-                current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg(5, self.db, InsertMode.Append)
-                if DEBUG:
-                    print(ivyMsg)
-                    for key in ivyMsg.to_dict().keys():
-                        print(key + ' is ' +str(ivyMsg.to_dict()[key]))
-                        print(type(ivyMsg.to_dict()[key]))
-                self.sendIvyMsg(ivyMsg)
-                self.db.groundMissionStatus.add(current_mission)
+                if (itemName in self.db.allMissions):
+                    currentMission = self.db.allMissions[itemName]
+                    ivyMsg = currentMission.gen_mission_msg(5, self.db, InsertMode.Append)
+                    if DEBUG:
+                        print(ivyMsg)
+                        for key in ivyMsg.to_dict().keys():
+                            print(key + ' is ' +str(ivyMsg.to_dict()[key]))
+                            print(type(ivyMsg.to_dict()[key]))
+                    self.sendIvyMsg(ivyMsg)
+                    self.db.groundMissionStatus.add(currentMission)
+                else: #Tasks
+                    currentTask = self.db.tasks[itemName]
+                    for missID in currentTask.missions:
+                        currentMission = self.db.findMissionById(missID)
+                        ivyMsg = currentMission.gen_mission_msg(5, self.db, InsertMode.Append, currentTask.id)
+                        self.sendIvyMsg(ivyMsg)
+                        self.db.groundMissionStatus.add(currentMission)
 
         self.updateStagedMissionList()
 
@@ -408,6 +440,8 @@ class MainWindow(QtWidgets.QMainWindow):
             return
 
         insertList = list()
+
+        ## TODO: Cannot currently replace Multiple, cannot replace with Tasks
 
         # Find Checkboxed Items
         print('List of Selected Missions')
@@ -437,12 +471,22 @@ class MainWindow(QtWidgets.QMainWindow):
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
-                current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg(5,self.db, InsertMode.Append)
-                if len(insertList) == 0:
-                    ivyMsg = current_mission.gen_mission_msg(5,self.db, InsertMode.ReplaceAll)
-                self.sendIvyMsg(ivyMsg) #Don't know how to test this?
-                insertList.append(current_mission)
+                if (itemName in self.db.allMissions):
+                    currentMission = self.db.allMissions[itemName]
+                    ivyMsg = currentMission.gen_mission_msg(5,self.db, InsertMode.Append)
+                    if len(insertList) == 0:
+                        ivyMsg = currentMission.gen_mission_msg(5,self.db, InsertMode.ReplaceAll)
+                    self.sendIvyMsg(ivyMsg) #Don't know how to test this?
+                    insertList.append(currentMission)
+                else: #Task
+                    currentTask = self.db.tasks[itemName]
+                    for missID in currentTask.missions:
+                        currentMission = self.db.findMissionById(missID)
+                        ivyMsg = currentMission.gen_mission_msg(5,self.db, InsertMode.Append)
+                        if len(insertList) == 0:
+                            ivyMsg = currentMission.gen_mission_msg(5,self.db, InsertMode.ReplaceAll)
+                        self.sendIvyMsg(ivyMsg) #Don't know how to test this?
+                        insertList.append(currentMission)
 
         self.db.groundMissionStatus.replaceAll(insertList)
         self.updateStagedMissionList()
@@ -451,7 +495,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def updateListViews(self):
         print("Needs to be completed")
 
-    def sendMissionButtonAction(self):
+
+    def createMissionButtonAction(self):
         waypointOneName = self.waypointOneComboBox.currentText()
         missionType = self.missionTypeComboBox.currentText().lower()
         radius = 0
@@ -477,11 +522,16 @@ class MainWindow(QtWidgets.QMainWindow):
         print(missionObj.name)
         self.db.addMission([(missionObj.name , missionObj)])
         self.updateUnstagedMissionList()
+        return missionObj
+
+    def sendMissionButtonAction(self):
+        missionObj = self.createMissionButtonAction()
         self.db.groundMissionStatus.add(missionObj)
         self.updateStagedMissionList()
         ivyMsg = missionObj.gen_mission_msg(5, self.db,  InsertMode.Append)
         print(ivyMsg)
         self.sendIvyMsg(ivyMsg)
+
 
     def derouteButtonAction(self):
         waypointOneName = self.waypointOneComboBox.currentText()
@@ -508,6 +558,8 @@ class MainWindow(QtWidgets.QMainWindow):
         print(missionObj.name)
         self.db.addMission([(missionObj.name , missionObj)])
         self.updateUnstagedMissionList()
+        self.db.groundMissionStatus.add(missionObj)
+        self.updateStagedMissionList()
         self.sendIvyMsg(missionObj.gen_mission_msg(5, self.db, InsertMode.Prepend))
 
 
@@ -536,6 +588,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.setWindowTitle(translate("mainWindow", "Mission Commander"))
         self.derouteButton.setText(translate("mainWindow", "Quick Deroute"))
         self.sendMissionButton.setText(translate("mainWindow", "Send Mission"))
+        self.createMissionButton.setText(translate("mainWindow", "Create Mission"))
         self.uasWaypointsLabel.setText(translate("mainWindow", "UAS Missions"))
         self.ivyMessageTSLabel.setText(translate("mainWindow", "Last Ivy Message Timestamp"))
         self.interopFreqLabel.setText(translate("mainWindow", "Interoperability Frequency"))
