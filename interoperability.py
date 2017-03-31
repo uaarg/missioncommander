@@ -38,7 +38,7 @@ class MissionInformation():
             )
             self.mission_info = missions[0]
         except InteropError as error:
-            print(error.message)
+            logger.error(error.message)
         
     def sendIvyEmergentTarget(self, ac_id, emergent_waypoint_id, altitude):
         """
@@ -92,9 +92,11 @@ class TelemetryThread(Thread):
         super(TelemetryThread, self).__init__()
         self.plane = plane
         self.interopclient = interopclient
+        self.running = False
 
     def run(self):
-        while True:
+        self.running = True
+        while self.running:
             self.plane.teleAvail.wait()
             try:
                 t = self.plane.getTelemetry()
@@ -103,13 +105,17 @@ class TelemetryThread(Thread):
                     r = self.interopclient.post_telemetry(telem).result()
 
             except InteropError as error:
-                print(error)
+                logger.error(error.message)
 
     def getDataSendFrequency():
         """
         Returns the rate, in Hz, that the interoperability server
         is being updated with telemetry at.
         """
+
+    def stop(self):
+        self.plane.teleAvail.set()
+        self.running = False
 
 class ObstacleThread(Thread):
     """
@@ -159,9 +165,11 @@ class ObstacleThread(Thread):
         self.ivysender = ivysender
         self.obstacles = []
         self.sleepDuration = 1.0 / update_frequency
+        self.running = False
 
     def run(self):
-        while True:
+        self.running = True
+        while self.running:
             try:
                 async_future = self.interopclient.get_obstacles()
                 stationary, moving = async_future.result()
@@ -178,9 +186,12 @@ class ObstacleThread(Thread):
                     obstacle_id += 1
 
             except InteropError as error:
-                print(error.message)
+                logger.error(error.message)
             
             sleep(self.sleepDuration)
+
+    def stop(self):
+        self.running = False
 
     
 

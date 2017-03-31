@@ -6,10 +6,10 @@ import os
 import argparse
 
 
-from xmlparser import *
 from config import *
-from ivylinker import *
-from ui import UiThread
+import ivylinker
+from ui import UI
+from xmlparser import *
 
 from interop.client import AsyncClient
 from interoperability import MissionInformation, TelemetryThread, ObstacleThread
@@ -49,14 +49,22 @@ def argParser():
 
     return args
 
-class MissionCommander(object):
-    def __init__(self, currentFlightPlan):
+class MissionCommander():
+    def __init__(self, current_flight_plan, ivy_sender):
+        """
+        Initializes a MissionCommander object.
+        Args:
+            current_flight_plan: ???
+            ivy_sender: An ivylinker.IvySender object to which a
+            message handler can be bound.
+        """
         self.initDatabase()
-        importxml.bindDBandFilepath(os.path.join(*[PPRZ_SRC, 'conf/flight_plans/UAARG', currentFlightPlan]), self.db)
+        importxml.bindDBandFilepath(os.path.join(*[PPRZ_SRC, 'conf/flight_plans/UAARG', current_flight_plan]), self.db)
         importxml.parseXML()
         importxml.bindDBandFilepath('MissionsAndTasks.xml', self.db)
         importxml.parseXML()
-        bindIvyMsgHandler(self.ivyMsgHandler)
+
+        ivy_sender.bindMessageHandler(self.ivyMsgHandler)
 
     def initDatabase(self):
         from database import BagOfHolding
@@ -81,21 +89,26 @@ if __name__ == '__main__':
     log.init()
     argDict = argParser()
 
+    ivy_sender = ivylinker.IvySender(verbose=True)
     interop = AsyncClient(argDict['url'], argDict['username'], argDict['password'])
-    missionInfo = MissionInformation(interop, sendIvyMSG)
+    mc = MissionCommander(argDict['flightPlan'], ivy_sender)
+    ui = UI(mc.db, ivy_sender)
+
+    missionInfo = MissionInformation(interop, ivy_sender.sendMessage)
     missionInfo.getMissionInformation()
     missionInfo.sendIvyOffAxisShape()
 
-    mc = MissionCommander(argDict['flightPlan'])
-
     telem_thread = TelemetryThread(interop, mc.db.airplane)
-    obstacle_thread = ObstacleThread(interop, sendIvyMSG)
-    ui_thread = UiThread(mc.db)
+    obstacle_thread = ObstacleThread(interop, ivy_sender.sendMessage)
 
     telem_thread.start()
-    ui_thread.start()
     obstacle_thread.start()
 
+    ui.run() # Finishes when UI window is closed
+
+    obstacle_thread.stop()
+    telem_thread.stop()
+    ivy_sender.shutdown()
+
     obstacle_thread.join()
-    ui_thread.join()
     telem_thread.join()

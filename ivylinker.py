@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 from config import *
 
 class IvySender(ivyint):
@@ -9,7 +8,7 @@ class IvySender(ivyint):
         self._interface.subscribe(self.message_recv)
         self._interface.start()
 
-    def bindCallBack(self, cb):
+    def bindMessageHandler(self, cb):
         self.callback = cb
 
     def message_recv(self, ac_id, msg):
@@ -24,19 +23,5 @@ class IvySender(ivyint):
     def __del__(self):
         self.shutdown()
 
-    def sendMSG(self, msg):
+    def sendMessage(self, msg):
         self._interface.send(msg)
-
-def sendIvyMSG(msg):
-    glbivy.sendMSG(msg)
-
-def shutdownIvyBus():
-    glbivy.shutdown()
-
-def bindIvyMsgHandler(cb):
-    glbivy.bindCallBack(cb)
-
-global glbivy
-glbivy = IvySender(verbose = True)
-if DEBUG:
-    print("starting IVY")

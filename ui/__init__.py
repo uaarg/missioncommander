@@ -1,1 +1,1 @@
-from .ui import UiThread
+from .ui import UI

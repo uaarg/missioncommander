@@ -1,7 +1,3 @@
-import ivylinker
-
-sendIvyMSG = ivylinker.sendIvyMSG
-
 class fancyList(object):
     '''
     Fancy list object that is fancy
