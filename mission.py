@@ -175,7 +175,7 @@ class Mission(object):
                 msg['point_lat_' + str(i + 1)] = waypoint['lat']
                 msg['point_lon_' + str(i + 1)] = waypoint['lon']
 
-            msg['path_alt'] = wpList[0].get_xy()['alt']
+            msg['path_alt'] = wpList[0].get_utm()['alt']
             msg['nb'] = waypoints_num
 
         elif self._nav_pattern == NavPattern.MISSION_SURVEY:
@@ -198,6 +198,8 @@ class Mission(object):
             msg['survey_lon_2'] = waypoint2['lon']
             msg['survey_alt'] = waypoint1['alt']
 
+        #print(msg)
+        #print(msg.fieldtypes)
         return msg
 
     def flagForUpdate(self):

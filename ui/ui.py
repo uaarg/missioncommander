@@ -39,6 +39,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Initialize Members
         super().__init__()
         self.db = database
+        self.ivySender = send_ivy_message
 
         ################################################
         ### START OF QT DESIGNER AUTO-GENERATED CODE ###
@@ -378,14 +379,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 if (itemName in self.db.allMissions):
                     currentMission = self.db.allMissions[itemName]
                     ivyMsg = currentMission.gen_mission_msg(5, self.db, InsertMode.Prepend)
-                    self.sendIvyMsg(ivyMsg)
+                    self.ivySender.sendMessage(ivyMsg)
                     self.db.groundMissionStatus.prepend(currentMission)
                 else:
                     currentTask = self.db.tasks[itemName]
                     for missID in reversed(currentTask.missions):
                         currentMission = self.db.findMissionById(missID)
                         ivyMsg = currentMission.gen_mission_msg(5, self.db, InsertMode.Prepend, currentTask.id)
-                        self.sendIvyMsg(ivyMsg)
+                        self.ivySender.sendMessage(ivyMsg)
                         self.db.groundMissionStatus.prepend(currentMission)
 
         self.updateStagedMissionList()
@@ -412,14 +413,14 @@ class MainWindow(QtWidgets.QMainWindow):
                         for key in ivyMsg.to_dict().keys():
                             print(key + ' is ' +str(ivyMsg.to_dict()[key]))
                             print(type(ivyMsg.to_dict()[key]))
-                    self.sendIvyMsg(ivyMsg)
+                    self.ivySender.sendMessage(ivyMsg)
                     self.db.groundMissionStatus.add(currentMission)
                 else: #Tasks
                     currentTask = self.db.tasks[itemName]
                     for missID in currentTask.missions:
                         currentMission = self.db.findMissionById(missID)
                         ivyMsg = currentMission.gen_mission_msg(5, self.db, InsertMode.Append, currentTask.id)
-                        self.sendIvyMsg(ivyMsg)
+                        self.ivySender.sendMessage(ivyMsg)
                         self.db.groundMissionStatus.add(currentMission)
 
         self.updateStagedMissionList()
@@ -441,7 +442,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         insertList = list()
 
-        ## TODO: Cannot currently replace Multiple, cannot replace with Tasks
+        ## TODO: cannot replace with Tasks
 
         # Find Checkboxed Items
         print('List of Selected Missions')
@@ -450,13 +451,47 @@ class MainWindow(QtWidgets.QMainWindow):
             if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
                 itemName = item.index().data()
                 print('Index %s with Mission: %s' % (item.row(), itemName))
-                current_mission = self.db.allMissions[itemName]
-                ivyMsg = current_mission.gen_mission_msg(5,self.db, InsertMode.ReplaceIndex, 0,replaceIndex)
-                self.sendIvyMsg(ivyMsg) #Don't know how to test this?
-                insertList.append(current_mission)
+                if itemName in self.db.allMissions:
+                    current_mission = self.db.allMissions[itemName]
+                    insertList.append(current_mission)
+                else:#Tasks
+                    currentTask = self.db.tasks[itemName]
+                    for missID in currentTask.missions:
+                        insertList.append(self.db.findMissionById(missID))
 
-        self.db.groundMissionStatus.replace(insertList, replaceIndex)
+        print('replaceList')
+        print(insertList)
+        givenReplaceIndex = replaceIndex
+        insertIndex = 0
+        shiftingList = list()
+        while insertIndex < len(insertList) or len(shiftingList) > 0:
+            if insertIndex == 0:
+                ivyMsg = insertList[0].gen_mission_msg(5,self.db, InsertMode.ReplaceIndex, 0, replaceIndex)
+                self.ivySender.sendMessage(ivyMsg)
+                replaceIndex += 1
+                insertIndex += 1
+                continue
+
+            if insertIndex < len(insertList):
+                currentMission = insertList[insertIndex]
+            else:
+                currentMission = shiftingItem = shiftingList.pop(0)
+
+            if replaceIndex < len(self.db.groundMissionStatus.lst):
+                ivyMsg = currentMission.gen_mission_msg(5,self.db, InsertMode.ReplaceIndex, 0, replaceIndex)
+                shiftingList.append(self.db.groundMissionStatus.getFromIndex(replaceIndex))
+                self.ivySender.sendMessage(ivyMsg)
+                replaceIndex += 1
+                insertIndex += 1
+            else:
+                ivyMsg = currentMission.gen_mission_msg(5,self.db, InsertMode.Append)
+                self.ivySender.sendMessage(ivyMsg)
+                replaceIndex += 1
+                insertIndex += 1
+
+        self.db.groundMissionStatus.replace(insertList, givenReplaceIndex)
         self.updateStagedMissionList()
+
 
     def replaceAllButtonAction(self):
         print('replace all button pressed')
@@ -476,7 +511,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     ivyMsg = currentMission.gen_mission_msg(5,self.db, InsertMode.Append)
                     if len(insertList) == 0:
                         ivyMsg = currentMission.gen_mission_msg(5,self.db, InsertMode.ReplaceAll)
-                    self.sendIvyMsg(ivyMsg) #Don't know how to test this?
+                    self.ivySender.sendMessage(ivyMsg)
                     insertList.append(currentMission)
                 else: #Task
                     currentTask = self.db.tasks[itemName]
@@ -485,7 +520,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         ivyMsg = currentMission.gen_mission_msg(5,self.db, InsertMode.Append)
                         if len(insertList) == 0:
                             ivyMsg = currentMission.gen_mission_msg(5,self.db, InsertMode.ReplaceAll)
-                        self.sendIvyMsg(ivyMsg) #Don't know how to test this?
+                        self.ivySender.sendMessage(ivyMsg)
                         insertList.append(currentMission)
 
         self.db.groundMissionStatus.replaceAll(insertList)

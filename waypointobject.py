@@ -120,8 +120,9 @@ class Waypoint(object):
         result['zone'] = self.zone
         result['northern'] = self.northern
         global importxml
-        result['x'] = self.east - Waypoint.flightParams['easting0']
-        result['y'] = self.north - Waypoint.flightParams['northing0']
+        result['x'] = float(self.east) - Waypoint.flightParams['easting0']
+        result['y'] = float(self.north) - Waypoint.flightParams['northing0']
+         
         return result
 
     def gen_move_waypoint_msg(self, ac_id):
