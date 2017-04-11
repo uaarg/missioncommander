@@ -390,6 +390,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         self.db.groundMissionStatus.prepend(currentMission)
 
         self.updateStagedMissionList()
+        self.updateUnstagedMissionList()
 
 
 
@@ -424,6 +425,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         self.db.groundMissionStatus.add(currentMission)
 
         self.updateStagedMissionList()
+        self.updateUnstagedMissionList()
 
     def replaceButtonAction(self):
         print('Replace button Pressed')
@@ -491,6 +493,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.db.groundMissionStatus.replace(insertList, givenReplaceIndex)
         self.updateStagedMissionList()
+        self.updateUnstagedMissionList()
 
 
     def replaceAllButtonAction(self):
@@ -525,6 +528,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
         self.db.groundMissionStatus.replaceAll(insertList)
         self.updateStagedMissionList()
+        self.updateUnstagedMissionList()
 
 
     def updateListViews(self):
