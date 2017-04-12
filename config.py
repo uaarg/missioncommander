@@ -18,6 +18,7 @@ urlDefault = "http://localhost:8000"
 usernameDefault = "testuser"
 passwordDefault = "testpass"
 currentFlightPlanDefault = "webster_2016.xml"
+AC_ID = 5
 
 PI = math.pi
 UTM_NORTHERN_HEMISPHERE = True
