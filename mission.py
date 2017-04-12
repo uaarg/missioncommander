@@ -175,7 +175,7 @@ class Mission(object):
                 msg['point_lat_' + str(i + 1)] = waypoint['lat']
                 msg['point_lon_' + str(i + 1)] = waypoint['lon']
 
-            msg['path_alt'] = wpList[0].get_utm()['alt']
+            msg['path_alt'] = wpList[0].get_fancyLatLon()['alt']
             msg['nb'] = waypoints_num
 
         elif self._nav_pattern == NavPattern.MISSION_SURVEY:

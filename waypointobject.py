@@ -92,7 +92,7 @@ class Waypoint(object):
         result = self.get_latlon()
         # LatLon is a float in decimal form
         # Gotta change it to a 10^7 integer
-        result['alt'] = int(round(float(result['alt'])))
+        result['alt'] = int(round(float(result['alt']) * 10**3))
         result['lat'] = int(result['lat'] *10**7)
         result['lon'] = int(result['lon'] *10**7)
         return result
@@ -122,7 +122,7 @@ class Waypoint(object):
         global importxml
         result['x'] = float(self.east) - Waypoint.flightParams['easting0']
         result['y'] = float(self.north) - Waypoint.flightParams['northing0']
-         
+
         return result
 
     def gen_move_waypoint_msg(self, ac_id):
