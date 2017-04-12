@@ -25,9 +25,9 @@
     <go wp="wp3"   mID="19"/>
     <go wp="wp4"   mID="20"/>
     <go wp="wp5"   mID="21"/>
-    <path approaching_time="5" wpts=" wp6, swp1" mID="22"/>
-    <path approaching_time="5" wpts=" swp1, swp2" mID="23"/>
-    <path approaching_time="5" wpts=" swp2, swp3" mID="24"/>
+    <path wpts=" wp6, swp1" mID="22"/>
+    <path wpts=" swp1, swp2" mID="23"/>
+    <path wpts=" swp2, swp3" mID="24"/>
     <circle radius="60" wp="HOME" mID="25"/>
 
   </missions>

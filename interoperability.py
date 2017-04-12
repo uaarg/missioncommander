@@ -37,10 +37,13 @@ class MissionInformation():
                 "Received mission information from interop server: %s", missions
             )
             self.mission_info = missions[0]
+
         except InteropError as error:
             logger.error(error.message)
-        
-    def sendIvyEmergentTarget(self, ac_id, emergent_waypoint_id, altitude):
+
+            self.mission_info = None
+
+    def sendIvyEmergentTarget(self, ac_id, db):
         """
         Sends updated information about the location of the emergent target.
         This is dependent on there being an existing waypoint in the flight plan that can be used for the emergent target task.
@@ -49,18 +52,12 @@ class MissionInformation():
             emergent_waypoint_id: The id of the waypoint associated with the emergent target, an integer.
             altitude: The desired MSL altitude for the emergent target waypoint, in metres.
         """
-        msg = PprzMessage("datalink", "MOVE_WP")
-        msg['wp_id'] = emergent_waypoint_id
-        msg['ac_id'] = ac_id
-        msg['lat'] = int(
-            self.mission_info.emergent_last_known_pos.latitude * 1e7
-        )
-        msg['lon'] = int(
-            self.mission_info.emergent_last_known_pos.longitude * 1e7
-        )
-        msg['alt'] = int(altitude * 1e3)
+        LKNwpt = db.waypoints['LKN']
+        LKNwpt.update_latlon(self.mission_info.emergent_last_known_pos.latitude, self.mission_info.emergent_last_known_pos.longitude)
+        msg = LKNwpt.gen_move_waypoint_msg(5)
 
         self.ivysender(msg)
+        print('sent ' + str(msg) + ' over the ivy bus')
 
     def sendIvyOffAxisShape(self):
         """
@@ -79,7 +76,7 @@ class MissionInformation():
         msg['lonarr'] = [int(
             self.mission_info.off_axis_target_pos.longitude * 1e7
         )] * 2
-        msg['radius'] = 10 
+        msg['radius'] = 10
         msg['text'] = 'OAX'
 
         self.ivysender(msg)
@@ -187,13 +184,13 @@ class ObstacleThread(Thread):
 
             except InteropError as error:
                 logger.error(error.message)
-            
+
             sleep(self.sleepDuration)
 
     def stop(self):
         self.running = False
 
-    
+
 
 def main():
     config = {

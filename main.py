@@ -99,12 +99,13 @@ if __name__ == '__main__':
 
     ivy_sender = ivylinker.IvySender(verbose=True)
     mc = MissionCommander(argDict['flightPlan'], ivy_sender)
-    ui = UI(mc.db, ivy_sender)
+    ui = UI(mc.db, ivy_sender.sendMessage)
 
     if serverIsUp:
         missionInfo = MissionInformation(interop, ivy_sender.sendMessage)
         missionInfo.getMissionInformation()
         missionInfo.sendIvyOffAxisShape()
+        missionInfo.sendIvyEmergentTarget(5,mc.db)
 
         telem_thread = TelemetryThread(interop, mc.db.airplane)
         obstacle_thread = ObstacleThread(interop, ivy_sender.sendMessage)

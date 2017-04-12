@@ -64,8 +64,8 @@ class BagOfHolding(object):
                 print(str(msg.fieldvalues[0]))
                 print(wp.name)
                 print('Updating a Waypoint!')
-                print("Easting is :" + tmpest)
-                print("Easting is :" + str(wp.east))
+                print("New Easting is :" + tmpest)
+                print("Old Easting is :" + str(wp.east))
                 print('------------------------------------------------------')
 
     def getWaypoint(self, index):

@@ -1,4 +1,5 @@
 import utm
+from config import *
 
 class Waypoint(object):
     """
@@ -130,9 +131,9 @@ class Waypoint(object):
         Returns an Ivy bus message for moving the waypoint.
         """
         msg = pprzmsg("datalink", "MOVE_WP")
-        msg['wp_id'] = self.wpID
+        msg['wp_id'] = str(int(self.wpID) - 2)
         msg['ac_id'] = ac_id
-        latlon = self.get_latlon()
+        latlon = self.get_fancyLatLon()
         msg['lat'] = latlon['lat']
         msg['lon'] = latlon['lon']
         msg['alt'] = latlon['alt']
