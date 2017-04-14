@@ -32,7 +32,7 @@ def argParser():
     '''
 
     defaultArgs = {'url': urlDefault, 'username':usernameDefault,
-        'password': passwordDefault, 'flightPlan': currentFlightPlanDefault }
+        'password': passwordDefault, 'flightPlan': currentFlightPlanDefault, 'acid': AC_ID }
 
     parser = argparse.ArgumentParser()
     # Input arguements
@@ -40,6 +40,7 @@ def argParser():
     parser.add_argument('-u', '--username', help='delimited list input', type=str)
     parser.add_argument('-p', '--password', help='delimited list input', type=str)
     parser.add_argument('-x', '--flightPlan', help='delimited list input', type=str)
+    parser.add_argument('-id', '--acid', help='delimited list input', type=str)
     # vars parses the namespace into a dictionary so we can iterate over the names
     args = vars(parser.parse_args())
 

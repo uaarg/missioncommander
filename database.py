@@ -2,10 +2,13 @@ from utils import *
 from config import *
 import config
 import utm
+import logging
 import threading
 import mission
 from collections import OrderedDict
 from PyQt5.QtCore import QObject, pyqtSignal
+
+logg = logging.getLogger(__name__)
 
 class BagOfHolding(object):
 
@@ -100,8 +103,17 @@ class AirplaneTelemetry(object):
         easting = float(msg.fieldvalues[4]) / 100
         northing = float(msg.fieldvalues[5]) / 100
         zone_num = int(msg.fieldvalues[6])
-        self.position = utm.to_latlon(easting, northing, zone_num, northern=UTM_NORTHERN_HEMISPHERE)
-        self.altitude = msg.fieldvalues[10]
+        try:
+            self.position = utm.to_latlon(easting, northing, zone_num, northern=UTM_NORTHERN_HEMISPHERE)
+        except utm.error.OutOfRangeError:
+            logg.warning('Out Of Range Error, GPS is probably disconnected. Defaulting to NULL ISLAND (0,0) \n GPS Easting: ' +str(easting)+ ' Northing: ' + str(northing))
+            self.position = ('0', '0') #Plane defaults to NULL ISLAND in the Atlantic Ocean
+
+        self.altitude = str(float(msg.fieldvalues[10]))
+        if (float(self.altitude) > 0):
+            logg.warning('Altitude reported as negative. Flipping Altitude:' + self.altitude + ' to prevent further errors')
+            self.altitude = str(-1*float(self.altitude))
+
         self.heading = float(msg.fieldvalues[1]) * 180 / PI + 90
         self.teleAvail.set()
         if TELEM_DEBUG:
