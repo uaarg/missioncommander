@@ -4,6 +4,7 @@ import sys, getopt
 import log, logging
 import os
 import argparse
+import signal
 
 
 from config import *
@@ -102,6 +103,9 @@ if __name__ == '__main__':
     mc = MissionCommander(argDict['flightPlan'], ivy_sender)
     ui = UI(mc.db, ivy_sender.sendMessage)
 
+    # Allow Ctrl+C to kill the program with no cleanup
+    signal.signal(signal.SIGINT, signal.SIG_DFL)
+
     if serverIsUp:
         missionInfo = MissionInformation(interop, ivy_sender.sendMessage)
         missionInfo.getMissionInformation()
@@ -115,6 +119,7 @@ if __name__ == '__main__':
         obstacle_thread.start()
 
     ui.run() # Finishes when UI window is closed
+    print('Shutting down...')
 
     if serverIsUp:
         obstacle_thread.stop()
