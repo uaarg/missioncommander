@@ -120,7 +120,6 @@ class Waypoint(object):
         result['alt'] = self.alt
         result['zone'] = self.zone
         result['northern'] = self.northern
-        global importxml
         result['x'] = float(self.east) - Waypoint.flightParams['easting0']
         result['y'] = float(self.north) - Waypoint.flightParams['northing0']
 

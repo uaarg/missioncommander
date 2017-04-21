@@ -6,6 +6,9 @@ from config import *
 import waypointobject
 import mission
 
+import logging
+logger = logging.getLogger(__name__)
+
 class importXML(object):
     def __init__(self):
         '''
@@ -171,7 +174,7 @@ class exportToXML(object):
         self.filepath = fP
         self.db = datDatabase
 
-    def writeXML(self):
+    def writeXML(self, coordSyst = 'latlon'):
         '''
         Writes the current Waypoints, Missions and Tasks to an xml file
         at the designated filepath.
@@ -188,8 +191,22 @@ class exportToXML(object):
         for waypoint in self.db.waypoints.values():
             wpt = ET.SubElement(waypoints, 'waypoint')
             wpt.set('name', waypoint.name)
-            wpt.set('lat', str(waypoint.get_latlon()['lat']))
-            wpt.set('lon', str(waypoint.get_latlon()['lon']))
+
+            if coordSyst is 'utm':
+                wpt.set('east', str(waypoint.get_utm()['east']))
+                wpt.set('north', str(waypoint.get_utm()['north']))
+                wpt.set('zone', str(waypoint.get_utm()['zone']))
+            elif coordSyst is 'xy':
+                wpt.set('x', str(waypoint.get_xy()['x']))
+                wpt.set('y', str(waypoint.get_xy()['y']))
+                wpt.set('zone', str(waypoint.get_xy()['zone']))
+            else:
+                if coordSyst is not 'latlon':
+                        logger.warning('Invalid writing coordinate system ' + coordSyst + '. Defaulting to LatLon')
+                wpt.set('lat', str(waypoint.get_latlon()['lat']))
+                wpt.set('lon', str(waypoint.get_latlon()['lon']))
+
+
             if waypoint.alt is not None:
                 wpt.set('alt', str(waypoint.alt))
             else:
