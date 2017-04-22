@@ -2,10 +2,11 @@ import sys
 from os import path, getenv
 import math
 
-# if PAPARAZZI_SRC not set, then assume the tree containing this
-# file is a reasonable substitute
-PPRZ_SRC = getenv("PAPARAZZI_SRC", path.normpath(path.join(path.dirname(path.abspath(__file__)), '../paparazzi')))
-#sys.path.append(PPRZ_SRC + "/sw/ext/pprzlink/lib/v1.0/python/")
+PPRZ_SRC = getenv("PPRZ_SRC")
+if PPRZ_SRC == None:
+    print("Paparzzi_SRC variable is not set. Considering setting it in your bash.rc file. See the README")
+    PPRZ_SRC = path.abspath(path.join(__file__ ,"../../../../"))
+
 
 from pprzlink.ivy  import IvyMessagesInterface
 from pprzlink.message import PprzMessage
@@ -17,7 +18,6 @@ pprzmsg = PprzMessage
 urlDefault = "http://localhost:8000"
 usernameDefault = "testuser"
 passwordDefault = "testpass"
-currentFlightPlanDefault = "webster_2016.xml"
 AC_ID = 5
 
 PI = math.pi

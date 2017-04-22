@@ -2,6 +2,7 @@ from config import *
 
 class IvySender(ivyint):
     def __init__(self, verbose=False, callback = None):
+        self.AC_ID = None
         self.verbose = verbose
         self.callback = callback
         self._interface = IvyMessagesInterface("Mission Commander", start_ivy=False)
@@ -24,4 +25,6 @@ class IvySender(ivyint):
         self.shutdown()
 
     def sendMessage(self, msg):
+        if msg.msg_class == 'telemetry':
+            msg['ac_id'] = self.AC_ID
         self._interface.send(msg)

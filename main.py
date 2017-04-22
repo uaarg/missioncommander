@@ -5,12 +5,14 @@ import log, logging
 import os
 import argparse
 import signal
+import threading
 
 
 from config import *
 import ivylinker
 from ui import UI
 from xmlparser import *
+from md5checker import findMD5
 
 from interop.client import AsyncClient
 from interoperability import MissionInformation, TelemetryThread, ObstacleThread
@@ -33,15 +35,13 @@ def argParser():
     '''
 
     defaultArgs = {'url': urlDefault, 'username':usernameDefault,
-        'password': passwordDefault, 'flightPlan': currentFlightPlanDefault, 'acid': AC_ID }
+        'password': passwordDefault}
 
     parser = argparse.ArgumentParser()
     # Input arguements
     parser.add_argument('-l', '--url', help='delimited list input', type=str)
     parser.add_argument('-u', '--username', help='delimited list input', type=str)
     parser.add_argument('-p', '--password', help='delimited list input', type=str)
-    parser.add_argument('-x', '--flightPlan', help='delimited list input', type=str)
-    parser.add_argument('-id', '--acid', help='delimited list input', type=str)
     # vars parses the namespace into a dictionary so we can iterate over the names
     args = vars(parser.parse_args())
 
@@ -52,7 +52,7 @@ def argParser():
     return args
 
 class MissionCommander():
-    def __init__(self, current_flight_plan, ivy_sender):
+    def __init__(self, ivy_sender, logger):
         """
         Initializes a MissionCommander object.
         Args:
@@ -60,17 +60,25 @@ class MissionCommander():
             ivy_sender: An ivylinker.IvySender object to which a
             message handler can be bound.
         """
-        self.initDatabase()
-        importxml.bindDBandFilepath(os.path.join(*[PPRZ_SRC, 'conf/flight_plans/UAARG', current_flight_plan]), self.db)
+        self.logger = logger
+        self.foundXML = False
+        self.loadedXML = threading.Event()
+        self.loadedXML.clear()
+
+        from database import BagOfHolding
+        self.db = BagOfHolding()
+        self.ivy_sender = ivy_sender
+        self.ivy_sender.bindMessageHandler(self.ivyMsgHandler)
+        
+        self.loadedXML.wait()
+
+
+    def loadXMLs(self, filepath):
+        importxml.bindDBandFilepath(os.path.join(*[filepath, 'flight_plan.xml']), self.db)
         importxml.parseXML()
         importxml.bindDBandFilepath('MissionsAndTasks.xml', self.db)
         importxml.parseXML()
-
-        ivy_sender.bindMessageHandler(self.ivyMsgHandler)
-
-    def initDatabase(self):
-        from database import BagOfHolding
-        self.db = BagOfHolding()
+        self.loadedXML.set()
 
     def initiSync(self):
         from synchronizer import BagOfSynchronizing
@@ -78,14 +86,25 @@ class MissionCommander():
         self.sync.startThread()
 
     def ivyMsgHandler(self, ac_id, msg):
-        if (msg.name == "WALDO_MSG"):
-            self.db.updateTelemetry(msg)
+        if self.foundXML:
+            if (msg.name == "WALDO_MSG"):
+                self.db.updateTelemetry(msg)
 
-        if (msg.name == "WP_MOVED"):
-            self.db.updateWaypoint(msg)
+            if (msg.name == "WP_MOVED"):
+                self.db.updateWaypoint(msg)
 
-        if (msg.name == "MISSION_STATUS"):
-            self.db.updateAirMissionStatus(msg)
+            if (msg.name == "MISSION_STATUS"):
+                self.db.updateAirMissionStatus(msg)
+        else:
+            if (msg.name == "ALIVE"):
+                filepath = findMD5(msg.md5sum, self.logger)
+                if filepath != None:
+                    self.loadXMLs(filepath)
+                    self.foundXML = True
+                    self.ivy_sender.AC_ID = ac_id
+                    
+                    
+
 
 if __name__ == '__main__':
     log.init()
@@ -100,7 +119,7 @@ if __name__ == '__main__':
         serverIsUp = False
 
     ivy_sender = ivylinker.IvySender(verbose=True)
-    mc = MissionCommander(argDict['flightPlan'], ivy_sender)
+    mc = MissionCommander(ivy_sender, logger)
     ui = UI(mc.db, ivy_sender.sendMessage)
 
     # Allow Ctrl+C to kill the program with no cleanup
