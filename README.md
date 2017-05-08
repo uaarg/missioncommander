@@ -9,10 +9,10 @@ sudo pip3 install utm requests
 sudo apt-get install qtdeclarative5-dev qtmultimedia5-dev python3-pyqt5 pyqt5-dev-tools
 ```
 
-Add Paparazzi to your system path. To make this automatic on startup, copy the following lines to ~/.bashrc
+Add Paparazzi to your system path. To make this automatic on startup, copy the following lines to ~/.bashrc (If your paparazzi folder is drectly in your home folder.)
 ```
-export PAPARAZZI_HOME=''your paparazzi software directory''
-export PAPARAZZI_SRC=''your paparazzi software directory''
+export PAPARAZZI_HOME=~/paparazzi
+export PAPARAZZI_SRC=~/paparazzi
 ```
 
 
