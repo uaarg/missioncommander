@@ -69,16 +69,28 @@ class MissionCommander():
         self.db = BagOfHolding()
         self.ivy_sender = ivy_sender
         self.ivy_sender.bindMessageHandler(self.ivyMsgHandler)
-        
+
         self.loadedXML.wait()
 
 
     def loadXMLs(self, filepath):
         importxml.bindDBandFilepath(os.path.join(*[filepath, 'flight_plan.xml']), self.db)
         importxml.parseXML()
-        importxml.bindDBandFilepath('MissionsAndTasks.xml', self.db)
+        prefixMandT = self.determineFlightPlan()
+        importxml.bindDBandFilepath(os.path.join('MissAndTsk', prefixMandT + 'MissionsAndTasks.xml'), self.db)
         importxml.parseXML()
         self.loadedXML.set()
+
+    def determineFlightPlan(self):
+        '''
+        This is a dumb way to find out what MissionsAndTasks file we should use. But its easy to do.
+        '''
+        print(self.db.waypoints['OrIgIn'].get_latlon())
+
+        if (float(self.db.waypoints['OrIgIn'].get_latlon()['lat'])>49.0): #AKA the origin is in Canada
+            return 'Bremner'
+        else:
+            return ''
 
     def initiSync(self):
         from synchronizer import BagOfSynchronizing
@@ -99,12 +111,10 @@ class MissionCommander():
             if (msg.name == "ALIVE"):
                 filepath = findMD5(msg.md5sum, self.logger)
                 if filepath != None:
+                    print(filepath)
                     self.loadXMLs(filepath)
                     self.foundXML = True
                     self.ivy_sender.AC_ID = ac_id
-                    
-                    
-
 
 if __name__ == '__main__':
     log.init()

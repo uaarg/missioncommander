@@ -52,12 +52,15 @@ class MissionInformation():
             emergent_waypoint_id: The id of the waypoint associated with the emergent target, an integer.
             altitude: The desired MSL altitude for the emergent target waypoint, in metres.
         """
-        LKNwpt = db.waypoints['LKN']
-        LKNwpt.update_latlon(self.mission_info.emergent_last_known_pos.latitude, self.mission_info.emergent_last_known_pos.longitude)
-        msg = LKNwpt.gen_move_waypoint_msg(5)
+        try:
+            LKNwpt = db.waypoints['LKN']
+            LKNwpt.update_latlon(self.mission_info.emergent_last_known_pos.latitude, self.mission_info.emergent_last_known_pos.longitude)
+            msg = LKNwpt.gen_move_waypoint_msg(5)
 
-        self.ivysender(msg)
-        print('sent ' + str(msg) + ' over the ivy bus')
+            self.ivysender(msg)
+            print('sent ' + str(msg) + ' over the ivy bus')
+        except KeyError:
+            logger.critical('LKN waypoint not found in list of Waypoints. Lask Known Location from Interop Server is '+ str(self.mission_info.emergent_last_known_pos.latitude) + ' ' + str(self.mission_info.emergent_last_known_pos.longitude))
 
     def sendIvyOffAxisShape(self):
         """

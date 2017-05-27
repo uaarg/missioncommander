@@ -110,7 +110,7 @@ class AirplaneTelemetry(object):
             self.position = ('0', '0') #Plane defaults to NULL ISLAND in the Atlantic Ocean
 
         self.altitude = str(float(msg.fieldvalues[10]))
-        if (float(self.altitude) > 0):
+        if (float(self.altitude) < 0):
             logg.warning('Altitude reported as negative. Flipping Altitude:' + self.altitude + ' to prevent further errors')
             self.altitude = str(-1*float(self.altitude))
 
@@ -137,6 +137,7 @@ class AirplaneTelemetry(object):
             return False
 
     def newHeading(self, newHead):
+        newHead = self.checkHeading(newHead)
         if (self.heading != newHead):
             self.heading = newHead
             self.headingFlag = True
@@ -144,9 +145,29 @@ class AirplaneTelemetry(object):
         else:
             return False
 
+    def checkHeading(self, value):
+        '''
+        Ensures heading is a value the interop server accepts.
+        '''
+        counter = 0
+        while (value > 360.0) or (value < 0.0):
+            if (value > 360.0):
+                value = value - 360.0
+            else:
+                value = value + 360.0
+
+            counter = counter + 1
+            if counter > 1000:
+                logger. critical('Breaking infinite loop of heading checker')
+                break
+
+        return value
+
     # Interop server code will call this when new data is recieved
     def getTelemetry(self):
         self.teleAvail.clear()
+        self.newHeading(self.heading) # probably a better way to do this, but I want to be sure were sending a valid heading
+
         tele = {
             'latitude':float(self.position[0]),
             'longitude':float(self.position[1]),

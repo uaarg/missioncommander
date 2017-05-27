@@ -2,7 +2,10 @@ import sys
 from os import path, getenv
 import math
 
-PPRZ_SRC = getenv("PAPARAZZI_SRC")
+
+#PPRZ_SRC = getenv("PPRZ_SRC")
+PPRZ_SRC = getenv("PAPARAZZI_SRC", path.normpath(path.join(path.dirname(path.abspath(__file__)), '../paparazzi')))
+
 if PPRZ_SRC == None:
     print("Paparzzi_SRC variable is not set. Considering setting it in your bash.rc file. See the README")
     PPRZ_SRC = getenv(path.normpath(path.join(path.dirname(path.abspath(__file__)), '~/paparazzi/')))

@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+
+<lol>
+  <missions>
+    <!-- SORT BY ('go', 'path', 'circle', 'segment', 'survey') -->
+    <!-- Mission Commander will automatically sort this when it prints to xml -->
+    <go wp="ENDURANCE1" mID="1"/>
+    <go wp="ENDURANCE2" mID="2"/>
+    <go wp="ENDURANCE3" mID="3"/>
+    <go wp="ENDURANCE4" mID="4"/>
+
+  </missions>
+
+  <tasks>
+
+    <task name="EnduranceLoop" mID="1, 2, 3, 4"/>
+
+    <task mID="20"/>
+  </tasks>
+
+</lol>
