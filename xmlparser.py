@@ -5,6 +5,7 @@ from datetime import datetime
 from config import *
 import waypointobject
 import mission
+import flightblock
 
 import logging
 logger = logging.getLogger(__name__)
@@ -15,10 +16,12 @@ class importXML(object):
         CALL bindDBandFilepath BEFORE USING
         '''
         self.do = 'Nothing'
+        self.ac_id = None
 
-    def bindDBandFilepath(self, fP, datDatabase):
+    def bindDBandFilepath(self, fP, datDatabase, ac_id):
         self.filepath = fP
         self.db = datDatabase
+        self.ac_id = ac_id
 
     def parseXML(self):
         '''
@@ -135,6 +138,13 @@ class importXML(object):
                     task['tID'] = taskIndex
                     taskObj = mission.task(task['tID'], task['name'], task['mID'])
                     self.db.addTask([(task['name'],taskObj)])
+
+        blockIndex = 0
+        blocks = self.__getListofDictOfXMLtag('block')
+        if blocks is not None:
+            for block in  blocks:
+                self.db.flightBlocks.add(flightblock.FlightBlock(block['name'], blockIndex, self.ac_id))
+                blockIndex = blockIndex + 1
 
     def __floatize(self, dictionaryWithBadStrings):
         '''

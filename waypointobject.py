@@ -129,13 +129,13 @@ class Waypoint(object):
         """
         Returns an Ivy bus message for moving the waypoint.
         """
-        msg = pprzmsg("datalink", "MOVE_WP")
+        msg = pprzmsg("ground", "MOVE_WAYPOINT")
         msg['wp_id'] = str(int(self.wpID) - 2)
         msg['ac_id'] = ac_id
         latlon = self.get_fancyLatLon()
-        msg['lat'] = latlon['lat']
-        msg['lon'] = latlon['lon']
-        msg['alt'] = latlon['alt']
+        msg['lat'] = 53.63835999806274
+        msg['long'] = -113.28607038001229
+        msg['alt'] = 122.2
         return msg
 
     def addMission(self, mission):

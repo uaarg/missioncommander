@@ -25,7 +25,8 @@ class IvySender(ivyint):
         self.shutdown()
 
     def sendMessage(self, msg):
-        if msg.msg_class == 'telemetry':
-            msg['ac_id'] = self.AC_ID
-            print(self.AC_ID)
+        for fieldname in msg.fieldnames:
+            if fieldname == 'ac_id':
+                 msg['ac_id'] = self.AC_ID
+        
         self._interface.send(msg)

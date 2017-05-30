@@ -37,7 +37,6 @@ class MissionInformation():
                 "Received mission information from interop server: %s", missions
             )
             self.mission_info = missions[0]
-
         except InteropError as error:
             logger.error(error.message)
 
@@ -178,11 +177,12 @@ class ObstacleThread(Thread):
                     ob_list.append(Obstacle(interop_ob))
                 self.obstacles = ob_list
 
-                obstacle_id = 0
+                obstacle_id = 1
                 for obstacle in self.obstacles:
                     self.sendIvyShapeMessage(
                         obstacle_id, obstacle, self.ivysender
                     )
+
                     obstacle_id += 1
 
             except InteropError as error:

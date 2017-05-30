@@ -73,11 +73,11 @@ class MissionCommander():
         self.loadedXML.wait()
 
 
-    def loadXMLs(self, filepath):
-        importxml.bindDBandFilepath(os.path.join(*[filepath, 'flight_plan.xml']), self.db)
+    def loadXMLs(self, filepath, ac_id):
+        importxml.bindDBandFilepath(os.path.join(*[filepath, 'flight_plan.xml']), self.db, ac_id)
         importxml.parseXML()
         prefixMandT = self.determineFlightPlan()
-        importxml.bindDBandFilepath(os.path.join('MissAndTsk', prefixMandT + 'MissionsAndTasks.xml'), self.db)
+        importxml.bindDBandFilepath(os.path.join('MissAndTsk', prefixMandT + 'MissionsAndTasks.xml'), self.db, ac_id)
         importxml.parseXML()
         self.loadedXML.set()
 
@@ -112,9 +112,10 @@ class MissionCommander():
                 filepath = findMD5(msg.md5sum, self.logger)
                 if filepath != None:
                     print(filepath)
-                    self.loadXMLs(filepath)
+                    self.loadXMLs(filepath, ac_id)
                     self.foundXML = True
                     self.ivy_sender.AC_ID = ac_id
+                    self.ivy_sender.sendMessage(self.db.flightBlocks.getFlightBlock("Mission").gen_change_block_msg())
 
 if __name__ == '__main__':
     log.init()

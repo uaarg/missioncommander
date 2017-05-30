@@ -1,5 +1,6 @@
 from utils import *
 from config import *
+import flightblock
 import config
 import utm
 import logging
@@ -21,6 +22,7 @@ class BagOfHolding(object):
         self.groundMissionStatus = fancyList()
         self.remianingMissionTime = 0
         self.signals = dbSignals()
+        self.flightBlocks = flightblock.FlightBlockList()
 
     def updateTelemetry(self, msg):
         self.airplane.updateFromWaldo(msg)
