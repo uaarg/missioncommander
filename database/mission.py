@@ -1,5 +1,5 @@
 from enum import Enum
-from waypointobject import Waypoint
+from .waypointobject import Waypoint
 from config import *
 
 class InsertMode(Enum):

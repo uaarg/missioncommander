@@ -5,9 +5,8 @@ import sys
 from threading import Thread
 from time import sleep
 from PyQt5 import QtCore, QtGui, QtWidgets
-from mission import  InsertMode, NavPattern, Mission
-
-from xmlparser import *
+from database import  InsertMode, NavPattern, Mission, exportxml
+from config import *
 
 translate = QtCore.QCoreApplication.translate
 
@@ -19,7 +18,7 @@ def noop():
     pass
 
 class UI(QtCore.QObject):
-    def __init__(self, database, send_ivy_message):
+    def __init__(self, database, send_ivy_message, ac_id):
         """
         Initialize the UI.
         Args:
@@ -28,19 +27,19 @@ class UI(QtCore.QObject):
         """
         super().__init__()
         self.app = QtWidgets.QApplication(sys.argv)
-        self.mainWindow = MainWindow(database, send_ivy_message)
+        self.mainWindow = MainWindow(database, send_ivy_message, ac_id)
 
     def run(self):
         self.mainWindow.show()
         return self.app.exec_()
 
 class MainWindow(QtWidgets.QMainWindow):
-    def __init__(self, database, send_ivy_message):
+    def __init__(self, database, send_ivy_message, ac_id):
         # Initialize Members
         super().__init__()
         self.db = database
         self.ivySender = send_ivy_message
-
+        self.AC_ID = ac_id
         ################################################
         ### START OF QT DESIGNER AUTO-GENERATED CODE ###
         ################################################
@@ -378,14 +377,14 @@ class MainWindow(QtWidgets.QMainWindow):
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 if (itemName in self.db.allMissions):
                     currentMission = self.db.allMissions[itemName]
-                    ivyMsg = currentMission.gen_mission_msg(AC_ID, self.db, InsertMode.Prepend)
+                    ivyMsg = currentMission.gen_mission_msg(self.AC_ID, self.db, InsertMode.Prepend)
                     self.ivySender(ivyMsg)
                     self.db.groundMissionStatus.prepend(currentMission)
                 else:
                     currentTask = self.db.tasks[itemName]
                     for missID in reversed(currentTask.missions):
                         currentMission = self.db.findMissionById(missID)
-                        ivyMsg = currentMission.gen_mission_msg(AC_ID, self.db, InsertMode.Prepend, currentTask.id)
+                        ivyMsg = currentMission.gen_mission_msg(self.AC_ID, self.db, InsertMode.Prepend, currentTask.id)
                         self.ivySender(ivyMsg)
                         self.db.groundMissionStatus.prepend(currentMission)
 
@@ -408,8 +407,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 if (itemName in self.db.allMissions):
                     currentMission = self.db.allMissions[itemName]
-                    ivyMsg = currentMission.gen_mission_msg(AC_ID, self.db, InsertMode.Append)
-                    if DEBUG:
+                    ivyMsg = currentMission.gen_mission_msg(self.AC_ID, self.db, InsertMode.Append)
+                    if WP_DEBUG:
                         print(ivyMsg)
                         for key in ivyMsg.to_dict().keys():
                             print(key + ' is ' +str(ivyMsg.to_dict()[key]))
@@ -420,7 +419,7 @@ class MainWindow(QtWidgets.QMainWindow):
                     currentTask = self.db.tasks[itemName]
                     for missID in currentTask.missions:
                         currentMission = self.db.findMissionById(missID)
-                        ivyMsg = currentMission.gen_mission_msg(AC_ID, self.db, InsertMode.Append, currentTask.id)
+                        ivyMsg = currentMission.gen_mission_msg(self.AC_ID, self.db, InsertMode.Append, currentTask.id)
                         self.ivySender(ivyMsg)
                         self.db.groundMissionStatus.add(currentMission)
 
@@ -468,7 +467,7 @@ class MainWindow(QtWidgets.QMainWindow):
         shiftingList = list()
         while insertIndex < len(insertList) or len(shiftingList) > 0:
             if insertIndex == 0:
-                ivyMsg = insertList[0].gen_mission_msg(AC_ID,self.db, InsertMode.ReplaceIndex, 0, replaceIndex)
+                ivyMsg = insertList[0].gen_mission_msg(self.AC_ID,self.db, InsertMode.ReplaceIndex, 0, replaceIndex)
                 self.ivySender(ivyMsg)
                 replaceIndex += 1
                 insertIndex += 1
@@ -480,13 +479,13 @@ class MainWindow(QtWidgets.QMainWindow):
                 currentMission = shiftingItem = shiftingList.pop(0)
 
             if replaceIndex < len(self.db.groundMissionStatus.lst):
-                ivyMsg = currentMission.gen_mission_msg(AC_ID,self.db, InsertMode.ReplaceIndex, 0, replaceIndex)
+                ivyMsg = currentMission.gen_mission_msg(self.AC_ID,self.db, InsertMode.ReplaceIndex, 0, replaceIndex)
                 shiftingList.append(self.db.groundMissionStatus.getFromIndex(replaceIndex))
                 self.ivySender(ivyMsg)
                 replaceIndex += 1
                 insertIndex += 1
             else:
-                ivyMsg = currentMission.gen_mission_msg(AC_ID,self.db, InsertMode.Append)
+                ivyMsg = currentMission.gen_mission_msg(self.AC_ID,self.db, InsertMode.Append)
                 self.ivySender(ivyMsg)
                 replaceIndex += 1
                 insertIndex += 1
@@ -511,18 +510,18 @@ class MainWindow(QtWidgets.QMainWindow):
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 if (itemName in self.db.allMissions):
                     currentMission = self.db.allMissions[itemName]
-                    ivyMsg = currentMission.gen_mission_msg(AC_ID,self.db, InsertMode.Append)
+                    ivyMsg = currentMission.gen_mission_msg(self.AC_ID,self.db, InsertMode.Append)
                     if len(insertList) == 0:
-                        ivyMsg = currentMission.gen_mission_msg(AC_ID,self.db, InsertMode.ReplaceAll)
+                        ivyMsg = currentMission.gen_mission_msg(self.AC_ID,self.db, InsertMode.ReplaceAll)
                     self.ivySender(ivyMsg)
                     insertList.append(currentMission)
                 else: #Task
                     currentTask = self.db.tasks[itemName]
                     for missID in currentTask.missions:
                         currentMission = self.db.findMissionById(missID)
-                        ivyMsg = currentMission.gen_mission_msg(AC_ID,self.db, InsertMode.Append)
+                        ivyMsg = currentMission.gen_mission_msg(self.AC_ID,self.db, InsertMode.Append)
                         if len(insertList) == 0:
-                            ivyMsg = currentMission.gen_mission_msg(AC_ID,self.db, InsertMode.ReplaceAll)
+                            ivyMsg = currentMission.gen_mission_msg(self.AC_ID,self.db, InsertMode.ReplaceAll)
                         self.ivySender(ivyMsg)
                         insertList.append(currentMission)
 
@@ -567,7 +566,7 @@ class MainWindow(QtWidgets.QMainWindow):
         missionObj = self.createMissionButtonAction()
         self.db.groundMissionStatus.add(missionObj)
         self.updateStagedMissionList()
-        ivyMsg = missionObj.gen_mission_msg(AC_ID, self.db,  InsertMode.Append)
+        ivyMsg = missionObj.gen_mission_msg(self.AC_ID, self.db,  InsertMode.Append)
         print(ivyMsg)
         self.ivySender(ivyMsg)
 
@@ -599,7 +598,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.updateUnstagedMissionList()
         self.db.groundMissionStatus.add(missionObj)
         self.updateStagedMissionList()
-        self.ivySender(missionObj.gen_mission_msg(AC_ID, self.db, InsertMode.Prepend))
+        self.ivySender(missionObj.gen_mission_msg(self.AC_ID, self.db, InsertMode.Prepend))
 
 
     def checkMissionTypeComboBox(self):

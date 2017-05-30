@@ -26,13 +26,13 @@ class BagOfSynchronizing(object):
         self.threadShutdown = True
 
     def runner(self):
-        while !(self.threadShutdown) :
+        while not(self.threadShutdown) :
             self.changedMissionEvent.wait()
             print("include code to fix this")
             self.changedMissionEvent.clear()
             print("Sync Thread is running")
-    
-    
+
+
     def updatedMission(self, mission):
         ''' Call this function is a waypoint has bee updated.
         If mission is in airMissionStatusMSG then the runner Thread will update'''

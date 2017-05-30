@@ -1,13 +1,15 @@
 from utils import *
 from config import *
-import flightblock
+from .flightblock import FlightBlockList
 import config
 import utm
 import logging
 import threading
-import mission
+#import mission
 from collections import OrderedDict
 from PyQt5.QtCore import QObject, pyqtSignal
+
+
 
 logg = logging.getLogger(__name__)
 
@@ -22,7 +24,7 @@ class BagOfHolding(object):
         self.groundMissionStatus = fancyList()
         self.remianingMissionTime = 0
         self.signals = dbSignals()
-        self.flightBlocks = flightblock.FlightBlockList()
+        self.flightBlocks = FlightBlockList()
 
     def updateTelemetry(self, msg):
         self.airplane.updateFromWaldo(msg)

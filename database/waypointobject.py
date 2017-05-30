@@ -132,10 +132,10 @@ class Waypoint(object):
         msg = pprzmsg("ground", "MOVE_WAYPOINT")
         msg['wp_id'] = str(int(self.wpID) - 2)
         msg['ac_id'] = ac_id
-        latlon = self.get_fancyLatLon()
-        msg['lat'] = 53.63835999806274
-        msg['long'] = -113.28607038001229
-        msg['alt'] = 122.2
+        
+        msg['lat'] = self.get_latlon()['lat']
+        msg['long'] = self.get_latlon()['lon']
+        msg['alt'] = self.get_latlon()['alt']
         return msg
 
     def addMission(self, mission):

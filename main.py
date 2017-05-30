@@ -11,7 +11,7 @@ import threading
 from config import *
 import ivylinker
 from ui import UI
-from xmlparser import *
+from database import importxml
 from md5checker import findMD5
 
 from interop.client import AsyncClient
@@ -62,6 +62,7 @@ class MissionCommander():
         """
         self.logger = logger
         self.foundXML = False
+        self.ac_id = None
         self.loadedXML = threading.Event()
         self.loadedXML.clear()
 
@@ -85,12 +86,11 @@ class MissionCommander():
         '''
         This is a dumb way to find out what MissionsAndTasks file we should use. But its easy to do.
         '''
-        print(self.db.waypoints['OrIgIn'].get_latlon())
 
         if (float(self.db.waypoints['OrIgIn'].get_latlon()['lat'])>49.0): #AKA the origin is in Canada
             return 'Bremner'
         else:
-            return ''
+            return 'Webster'
 
     def initiSync(self):
         from synchronizer import BagOfSynchronizing
@@ -115,7 +115,8 @@ class MissionCommander():
                     self.loadXMLs(filepath, ac_id)
                     self.foundXML = True
                     self.ivy_sender.AC_ID = ac_id
-                    self.ivy_sender.sendMessage(self.db.flightBlocks.getFlightBlock("Mission").gen_change_block_msg())
+                    self.ac_id = ac_id
+                    #self.ivy_sender.sendMessage(self.db.flightBlocks.getFlightBlock("Mission").gen_change_block_msg())
 
 if __name__ == '__main__':
     log.init()
@@ -131,7 +132,7 @@ if __name__ == '__main__':
 
     ivy_sender = ivylinker.IvySender(verbose=True)
     mc = MissionCommander(ivy_sender, logger)
-    ui = UI(mc.db, ivy_sender.sendMessage)
+    ui = UI(mc.db, ivy_sender.sendMessage, mc.ac_id)
 
     # Allow Ctrl+C to kill the program with no cleanup
     signal.signal(signal.SIGINT, signal.SIG_DFL)

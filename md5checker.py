@@ -5,7 +5,7 @@ def findMD5(airMD5, logging):
     foundpath = None
     aircraftFolder = os.path.join(*[PPRZ_SRC, 'var/aircrafts'])
     aircrafts = os.listdir(aircraftFolder)
-    
+
     airMD5 = airMD5.split(",")
     airMD5 = convert2Hex(airMD5)
 
@@ -15,8 +15,8 @@ def findMD5(airMD5, logging):
              md5 = open(md5File, 'r').readline().rstrip()
              if md5 == airMD5:
                  foundpath = os.path.join(*[aircraftFolder, aircraft])
-                 print("Found MD5. yea says victoria.")
-                 break                                    
+                 print("Found MD5 code.")
+                 break
         else:
             logging.warning('There is a problem with the Paparazzi Configuration. A generated aricraft is missing an md5 file')
     if foundpath == None:

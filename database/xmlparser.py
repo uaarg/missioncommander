@@ -3,9 +3,7 @@ import utm
 from datetime import datetime
 
 from config import *
-import waypointobject
-import mission
-import flightblock
+from database import *
 
 import logging
 logger = logging.getLogger(__name__)
