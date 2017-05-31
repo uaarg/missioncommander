@@ -36,7 +36,16 @@ class MissionInformation():
             logger.info(
                 "Received mission information from interop server: %s", missions
             )
-            self.mission_info = missions[0]
+            # Interop Server may have more than one
+            activeMissions = []
+            for mission in missions:
+                if mission.active:
+                    activeMissions.append(mission)
+            if len(activeMissions) is 1:
+                self.mission_info = activeMissions[0]
+            else:
+                logger.critical('Found ' + len(activeMissions) + ' active on the Interop Server. Which one should we use?')
+
         except InteropError as error:
             logger.error(error.message)
 
@@ -54,7 +63,7 @@ class MissionInformation():
         try:
             LKNwpt = db.waypoints['LKN']
             LKNwpt.update_latlon(self.mission_info.emergent_last_known_pos.latitude, self.mission_info.emergent_last_known_pos.longitude)
-            msg = LKNwpt.gen_move_waypoint_msg(5)
+            msg = LKNwpt.gen_move_waypoint_msg(ac_id)
 
             self.ivysender(msg)
             print('sent ' + str(msg) + ' over the ivy bus')

@@ -22,7 +22,7 @@ pprzmsg = PprzMessage
 urlDefault = "http://localhost:8000"
 usernameDefault = "testuser"
 passwordDefault = "testpass"
-AC_ID = 3
+#AC_ID = 3
 
 PI = math.pi
 UTM_NORTHERN_HEMISPHERE = True

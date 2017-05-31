@@ -130,9 +130,9 @@ class Waypoint(object):
         Returns an Ivy bus message for moving the waypoint.
         """
         msg = pprzmsg("ground", "MOVE_WAYPOINT")
-        msg['wp_id'] = str(int(self.wpID) - 2)
+        msg['wp_id'] = str(int(self.wpID))
         msg['ac_id'] = ac_id
-        
+
         msg['lat'] = self.get_latlon()['lat']
         msg['long'] = self.get_latlon()['lon']
         msg['alt'] = self.get_latlon()['alt']

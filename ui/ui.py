@@ -1,7 +1,7 @@
 # Form implementation generated from reading ui file 'main_ui_template.ui'
 # Created by: PyQt5 UI code generator 5.5.1
 
-import sys
+import sys, os
 from threading import Thread
 from time import sleep
 from PyQt5 import QtCore, QtGui, QtWidgets
@@ -12,7 +12,7 @@ translate = QtCore.QCoreApplication.translate
 
 RADIUS_DISABLED_TEXT = "Radius field (Disabled)"
 
-
+ICON_ABSOLUTE_PATH = os.path.join(PPRZ_SRC, 'sw', 'ext', 'missioncommander', 'data', 'icon')
 # No Operation (noop)
 def noop():
     pass
@@ -40,6 +40,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.db = database
         self.ivySender = send_ivy_message
         self.AC_ID = ac_id
+
+        self.currentFlightBlock = None
         ################################################
         ### START OF QT DESIGNER AUTO-GENERATED CODE ###
         ################################################
@@ -91,13 +93,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.ivyMessageTSLabel.setFont(font)
         self.ivyMessageTSLabel.setObjectName("ivyMessageTSLabel")
         self.ivyMessageTSLabel.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
-        self.RightPlane.addWidget(self.ivyMessageTSLabel, 2, 0, 1, 1)
+        self.RightPlane.addWidget(self.ivyMessageTSLabel, 1, 2, 1, 1)
         self.ivyMessageTSDisplay = QtWidgets.QLineEdit(self.scrollAreaWidgetContents)
         self.ivyMessageTSDisplay.setSizePolicy(sizePolicy)
         self.ivyMessageTSDisplay.setFont(font)
         self.ivyMessageTSDisplay.setObjectName("ivyMessageTSDisplay")
         self.ivyMessageTSDisplay.setReadOnly(True)
-        self.RightPlane.addWidget(self.ivyMessageTSDisplay, 2, 1, 1, 1)
+        self.RightPlane.addWidget(self.ivyMessageTSDisplay, 1, 3, 1, 1)
         self.bottomRightBottomPane = QtWidgets.QGridLayout()
         self.bottomRightBottomPane.setObjectName("bottomRightBottomPane")
         self.RightPlane.addLayout(self.bottomRightBottomPane, 3, 1, 1, 1)
@@ -221,6 +223,16 @@ class MainWindow(QtWidgets.QMainWindow):
         self.appendButton.setFont(font)
         self.appendButton.setObjectName("appendButton")
         self.buttonScrollPane.addWidget(self.appendButton, 1, 1, 1, 1)
+
+        self.missionBlockToggleButton = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        self.missionBlockToggleButton.setSizePolicy(sizePolicy)
+        self.missionBlockToggleButton.setFont(font)
+        self.missionBlockToggleButton.setObjectName('Mission Flight Block')
+        self.missionBlockToggleButton.setCheckable(True)
+        self.missionBlockToggleButton.setIcon(QtGui.QIcon(QtGui.QPixmap(os.path.join(ICON_ABSOLUTE_PATH, 'pilot-hat.png')))) #os.path.join('data','icon','pilot-hat.png')
+        #self.missionBlockToggleButton.setIconSize(QtCore.QSize(65,65))
+        self.RightPlane.addWidget(self.missionBlockToggleButton, 2, 2, 2, 1)
+
         spacerItem9 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
         self.buttonScrollPane.addItem(spacerItem9, 6, 1, 1, 1)
         self.upperPane.addLayout(self.buttonScrollPane, 1, 2, 1, 1)
@@ -317,6 +329,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sendMissionButton.clicked.connect(lambda: self.sendMissionButtonAction())
         self.createMissionButton.clicked.connect(lambda: self.createMissionButtonAction())
         self.derouteButton.clicked.connect(lambda: self.derouteButtonAction())
+        self.missionBlockToggleButton.clicked.connect(lambda: self.setActiveFlightBlockAction("Mission"))
 
         # Shortcuts
         self.actionExit_Program.setShortcut('Ctrl+Q')
@@ -621,6 +634,15 @@ class MainWindow(QtWidgets.QMainWindow):
         exportxml.bindDBandFilepath('data/', self.db)
         exportxml.writeXML()
 
+    def setActiveFlightBlockAction(self, flightBlockName):
+        '''
+        Sends Ivy Message to jump to 'flightBlockName'. Also toggles UI buttons so only 'flightBlockName' is selected.
+        '''
+
+        ivyMsg = self.db.flightBlocks.getFlightBlock(flightBlockName).gen_change_block_msg()
+        print(ivyMsg)
+        self.ivySender(ivyMsg)
+
     # Used by Main Window Constructor
     def translateUi(self):
         self.setWindowTitle(translate("mainWindow", "Mission Commander"))
@@ -646,3 +668,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImport.setText(translate("mainWindow", "Import Project"))
         self.actionClose_Project.setText(translate("mainWindow", "Close Project"))
         self.actionExit_Program.setText(translate("mainWindow", "Exit Program"))
+        self.missionBlockToggleButton.setText(translate("mainWindow", "Misson Flight Block"))
+        #self.missionBlockToggleButton.setIcon(QtGui.QIcon(os.path.join(ICON_ABSOLUTE_PATH, 'pilot-hat.png'))) #os.path.join('data','icon','pilot-hat.png')
+        #self.missionBlockToggleButton.setIconSize(QtCore.QSize(65,65))

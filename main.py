@@ -111,12 +111,10 @@ class MissionCommander():
             if (msg.name == "ALIVE"):
                 filepath = findMD5(msg.md5sum, self.logger)
                 if filepath != None:
-                    print(filepath)
                     self.loadXMLs(filepath, ac_id)
                     self.foundXML = True
                     self.ivy_sender.AC_ID = ac_id
                     self.ac_id = ac_id
-                    #self.ivy_sender.sendMessage(self.db.flightBlocks.getFlightBlock("Mission").gen_change_block_msg())
 
 if __name__ == '__main__':
     log.init()
@@ -141,7 +139,7 @@ if __name__ == '__main__':
         missionInfo = MissionInformation(interop, ivy_sender.sendMessage)
         missionInfo.getMissionInformation()
         missionInfo.sendIvyOffAxisShape()
-        missionInfo.sendIvyEmergentTarget(5,mc.db)
+        missionInfo.sendIvyEmergentTarget(mc.ac_id,mc.db)
 
         telem_thread = TelemetryThread(interop, mc.db.airplane)
         obstacle_thread = ObstacleThread(interop, ivy_sender.sendMessage)
