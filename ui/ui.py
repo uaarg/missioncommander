@@ -224,14 +224,41 @@ class MainWindow(QtWidgets.QMainWindow):
         self.appendButton.setObjectName("appendButton")
         self.buttonScrollPane.addWidget(self.appendButton, 1, 1, 1, 1)
 
-        self.missionBlockToggleButton = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
+        self.takeoffBlockToggleButton = QtWidgets.QPushButton(QtGui.QIcon(os.path.join(ICON_ABSOLUTE_PATH, 'pilot-hat.png')), 'Takeoff', self.scrollAreaWidgetContents)
+        self.takeoffBlockToggleButton.setSizePolicy(sizePolicy)
+        self.takeoffBlockToggleButton.setFont(font)
+        self.takeoffBlockToggleButton.setCheckable(True)
+        #self.takeoffBlockToggleButton.setIcon()) #os.path.join('data','icon','pilot-hat.png')
+        #self.takeoffBlockToggleButton.setIconSize(QtCore.QSize(65,65))
+        self.RightPlane.addWidget(self.takeoffBlockToggleButton, 2, 0, 2, 1)
+        self.standbyBlockToggleButton = QtWidgets.QPushButton('Standby', self.scrollAreaWidgetContents)
+        self.standbyBlockToggleButton.setSizePolicy(sizePolicy)
+        self.standbyBlockToggleButton.setFont(font)
+        self.standbyBlockToggleButton.setCheckable(True)
+        self.standbyBlockToggleButton.setIcon(QtGui.QIcon(QtGui.QPixmap(os.path.join(ICON_ABSOLUTE_PATH, 'planes-circling.png')))) #os.path.join('data','icon','pilot-hat.png')
+        #self.takeoffBlockToggleButton.setIconSize(QtCore.QSize(65,65))
+        self.RightPlane.addWidget(self.standbyBlockToggleButton, 2, 1, 2, 1)
+        self.missionBlockToggleButton = QtWidgets.QPushButton('Mission', self.scrollAreaWidgetContents)
         self.missionBlockToggleButton.setSizePolicy(sizePolicy)
         self.missionBlockToggleButton.setFont(font)
-        self.missionBlockToggleButton.setObjectName('Mission Flight Block')
         self.missionBlockToggleButton.setCheckable(True)
-        self.missionBlockToggleButton.setIcon(QtGui.QIcon(QtGui.QPixmap(os.path.join(ICON_ABSOLUTE_PATH, 'pilot-hat.png')))) #os.path.join('data','icon','pilot-hat.png')
+        self.missionBlockToggleButton.setIcon(QtGui.QIcon(QtGui.QPixmap(os.path.join(ICON_ABSOLUTE_PATH, 'departures.png'))))
         #self.missionBlockToggleButton.setIconSize(QtCore.QSize(65,65))
         self.RightPlane.addWidget(self.missionBlockToggleButton, 2, 2, 2, 1)
+        self.landingBlockToggleButton = QtWidgets.QPushButton('Landing', self.scrollAreaWidgetContents)
+        self.landingBlockToggleButton.setSizePolicy(sizePolicy)
+        self.landingBlockToggleButton.setFont(font)
+        self.landingBlockToggleButton.setCheckable(True)
+        self.landingBlockToggleButton.setIcon(QtGui.QIcon(QtGui.QPixmap(os.path.join(ICON_ABSOLUTE_PATH, 'arrivals.png')))) #os.path.join('data','icon','pilot-hat.png')
+        #self.takeoffBlockToggleButton.setIconSize(QtCore.QSize(65,65))
+        self.RightPlane.addWidget(self.landingBlockToggleButton, 2, 3, 2, 1)
+        self.killBlockToggleButton = QtWidgets.QPushButton('Absolute Termination', self.scrollAreaWidgetContents)
+        self.killBlockToggleButton.setSizePolicy(sizePolicy)
+        self.killBlockToggleButton.setFont(font)
+        self.killBlockToggleButton.setCheckable(True)
+        #self.killBlockToggleButton.setIcon(QtGui.QIcon(QtGui.QPixmap(os.path.join(ICON_ABSOLUTE_PATH, 'arrivals.png')))) #os.path.join('data','icon','pilot-hat.png')
+        #self.takeoffBlockToggleButton.setIconSize(QtCore.QSize(65,65))
+        self.RightPlane.addWidget(self.killBlockToggleButton, 4, 0, 2, 1)
 
         spacerItem9 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
         self.buttonScrollPane.addItem(spacerItem9, 6, 1, 1, 1)
@@ -329,8 +356,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.sendMissionButton.clicked.connect(lambda: self.sendMissionButtonAction())
         self.createMissionButton.clicked.connect(lambda: self.createMissionButtonAction())
         self.derouteButton.clicked.connect(lambda: self.derouteButtonAction())
-        self.missionBlockToggleButton.clicked.connect(lambda: self.setActiveFlightBlockAction("Mission"))
+        self.missionBlockToggleButton.clicked.connect(lambda: self.setActiveFlightBlockAction('Mission'))
+        self.takeoffBlockToggleButton.clicked.connect(lambda: self.setActiveFlightBlockAction('Takeoff'))
+        self.standbyBlockToggleButton.clicked.connect(lambda: self.setActiveFlightBlockAction('Standby'))
+        self.landingBlockToggleButton.clicked.connect(lambda: self.setActiveFlightBlockAction('InitAutoLanding'))
+        self.killBlockToggleButton.clicked.connect(lambda: self.setActiveFlightBlockAction('Failsafe.Absolute_Termination'))
 
+        # Flight Block List (so only the CURRENT flight block is toggled)
+        self.flightBlockDict = dict()
+        self.flightBlockDict['Takeoff'] = self.takeoffBlockToggleButton
+        self.flightBlockDict['Mission'] = self.missionBlockToggleButton
+        self.flightBlockDict['Standby'] = self.standbyBlockToggleButton
+        self.flightBlockDict['InitAutoLanding'] = self.landingBlockToggleButton
+        self.flightBlockDict['Failsafe.Absolute_Termination'] = self.killBlockToggleButton
         # Shortcuts
         self.actionExit_Program.setShortcut('Ctrl+Q')
         self.actionSave.setShortcut('Ctrl+S')
@@ -638,8 +676,15 @@ class MainWindow(QtWidgets.QMainWindow):
         '''
         Sends Ivy Message to jump to 'flightBlockName'. Also toggles UI buttons so only 'flightBlockName' is selected.
         '''
+        # Toggle things happen here!
+        for flightBlock in self.flightBlockDict.keys():
+            if flightBlock is flightBlockName:
+                self.flightBlockDict[flightBlock].setChecked(True)
+            else:
+                self.flightBlockDict[flightBlock].setChecked(False)
 
         ivyMsg = self.db.flightBlocks.getFlightBlock(flightBlockName).gen_change_block_msg()
+        print('Current Flight Block is now' + flightBlockName)
         print(ivyMsg)
         self.ivySender(ivyMsg)
 
@@ -668,6 +713,3 @@ class MainWindow(QtWidgets.QMainWindow):
         self.actionImport.setText(translate("mainWindow", "Import Project"))
         self.actionClose_Project.setText(translate("mainWindow", "Close Project"))
         self.actionExit_Program.setText(translate("mainWindow", "Exit Program"))
-        self.missionBlockToggleButton.setText(translate("mainWindow", "Misson Flight Block"))
-        #self.missionBlockToggleButton.setIcon(QtGui.QIcon(os.path.join(ICON_ABSOLUTE_PATH, 'pilot-hat.png'))) #os.path.join('data','icon','pilot-hat.png')
-        #self.missionBlockToggleButton.setIconSize(QtCore.QSize(65,65))
