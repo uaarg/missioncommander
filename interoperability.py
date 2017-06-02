@@ -13,11 +13,11 @@ from interop.interop_types import StationaryObstacle, MovingObstacle
 from pprzlink.message import PprzMessage
 from database import AirplaneTelemetry, Waypoint
 from obstacle import Obstacle
+from config import *
 
 import logging
 logger = logging.getLogger(__name__)
 
-feet2meter = 3.2808399
 
 class MissionInformation():
     """
@@ -60,7 +60,6 @@ class MissionInformation():
         Args:
             ac_id: The aircraft ID, an integer.
             emergent_waypoint_id: The id of the waypoint associated with the emergent target, an integer.
-            altitude: The desired MSL altitude for the emergent target waypoint, in metres.
         """
         try:
             LKNwpt = db.waypoints['LKN']
@@ -68,7 +67,7 @@ class MissionInformation():
             msg = LKNwpt.gen_move_waypoint_msg(ac_id)
 
             self.ivysender(msg)
-            print('sent ' + str(msg) + ' over the ivy bus')
+            print('Moved the LKN waypoint to Lat:'+str(self.mission_info.emergent_last_known_pos.latitude)+' Lon:'+str(self.mission_info.emergent_last_known_pos.longitude))
         except KeyError:
             logger.critical('LKN waypoint not found in list of Waypoints. Lask Known Location from Interop Server is '+ str(self.mission_info.emergent_last_known_pos.latitude) + ' ' + str(self.mission_info.emergent_last_known_pos.longitude))
 
@@ -99,11 +98,13 @@ class MissionInformation():
         Sends a group of waypoint moves over the Ivy bus as according to the interop-
         provided posistions. Currently supports the 'Operational Area', 'Search Area'
         and 'Waypoint Navigation'
+
         '''
 
         wptPrefix = None
         interopWaypointGroup = None
         newAltitude = None
+        GCSwaypoints = []
 
         if group == 'OpArea':
             wptPrefix = '_oparea'
@@ -117,10 +118,11 @@ class MissionInformation():
             wptPrefix = 'wp'
             hasAlt = True
             interopWaypointGroup = self.mission_info.mission_waypoints
+            print(interopWaypointGroup[1])
         else:
             raise AttributeError('Incorrect group called with moveGroupOfWaypoints')
 
-        GCSwaypoints = []
+
         for wptName in db.waypoints.keys():
             if wptName[0:len(wptPrefix)] == wptPrefix:
                 GCSwaypoints.append(wptName)
@@ -130,21 +132,22 @@ class MissionInformation():
             logger.critical('Interop Server has more'+group+' area points then the GCS. Moving the first ' +str(len(GCSsearchAreaWaypoints))+ ' waypoints into position')
 
         for index in range(0,len(GCSwaypoints)):
+            InteropIndex = index
+            while InteropIndex >= len(interopWaypointGroup):
+                InteropIndex = InteropIndex - len(interopWaypointGroup)
 
-            if index >= len(interopWaypointGroup):
-                InteropIndex = index - len(interopWaypointGroup)
-            else:
-                InteropIndex = index
-
-            if hasAlt:
-                newAltitude = interopWaypointGroup[InteropIndex].altitude_msl/feet2meter - Waypoint.flightParams['alt']
+            if hasAlt: # remember heiht info on the server is in ft msl
+                newAltitude = interopWaypointGroup[InteropIndex].altitude_msl/feetInOneMeter
+                if group == 'WptNav':
+                    print('InteropServer Alt '+str(interopWaypointGroup[InteropIndex].altitude_msl)+' ft msl')
+                    print('Converted Altitude '+str(newAltitude)+' m msl')
             else:
                 newAltitude = None
 
             db.waypoints[wptPrefix + str(index +1 )].update_latlon(interopWaypointGroup[InteropIndex].latitude, interopWaypointGroup[InteropIndex].longitude, None, newAltitude)
             msg = db.waypoints[wptPrefix + str(index +1)].gen_move_waypoint_msg(ac_id)
             self.ivysender(msg)
-            print('Moved ' +db.waypoints[wptPrefix + str(index+1)].name+ ' to the Interop server position for it.')
+            print('Moved ' +wptPrefix+str(index+1)+ ' to the Interop server position for it.')
 
 
 
@@ -164,6 +167,7 @@ class TelemetryThread(Thread):
             self.plane.teleAvail.wait()
             try:
                 t = self.plane.getTelemetry()
+
                 if t:
                     telem = Telemetry(t['latitude'], t['longitude'], t['altitude_msl'], t['uas_heading'])
                     r = self.interopclient.post_telemetry(telem).result()
@@ -209,9 +213,9 @@ class ObstacleThread(Thread):
         msg['lonarr'] = [int(obstacle.lon * 1e7)] * 2
         msg['radius'] = obstacle.geom_data['radius']
         if obstacle.shape == 'cylinder':
-            msg['text'] = "%.2fm" % (obstacle.geom_data['height'])
+            msg['text'] = "%.2fm" % (obstacle.geom_data['height']/feetInOneMeter - Waypoint.flightParams['alt'])
         if obstacle.shape == 'sphere':
-            msg['text'] = "%.2fm" % (obstacle.geom_data['altitude'])
+            msg['text'] = "%.2fm" % (obstacle.geom_data['altitude']/feetInOneMeter - Waypoint.flightParams['alt'])
 
         ivysender(msg)
 

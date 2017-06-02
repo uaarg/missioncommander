@@ -140,8 +140,6 @@ if __name__ == '__main__':
         missionInfo.getMissionInformation()
         missionInfo.sendIvyOffAxisShape()
         missionInfo.sendIvyEmergentTarget(mc.ac_id,mc.db)
-        missionInfo.sendIvySearchArea(mc.ac_id,mc.db)
-        missionInfo.sendOperationalArea(mc.ac_id,mc.db)
         missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'OpArea')
         missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'SearchArea')
         missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'WptNav')
