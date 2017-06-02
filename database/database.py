@@ -26,9 +26,6 @@ class BagOfHolding(object):
         self.signals = dbSignals()
         self.flightBlocks = FlightBlockList()
 
-        from .synchronizer import BagOfSynchronizing
-        self.sync = BagOfSynchronizing(self, self.groundMissionStatus)
-
     def groundMissionStatusUpdated(self):
         self.sync.missionUpdateSent()
 
@@ -51,8 +48,9 @@ class BagOfHolding(object):
                     mission_list.append(miss)
 
             self.airMissionStatus = mission_list
+            self.groundMissionStatus.replaceAll(mission_list)
 
-        self.sync.newMissionStatusMessage(self.airMissionStatus)
+        
         self.signals.updateUASinUI();
 
     def findMissionById(self, idStr):
