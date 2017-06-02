@@ -11,11 +11,13 @@ from interop.interop_types import Telemetry
 from interop.interop_types import StationaryObstacle, MovingObstacle
 
 from pprzlink.message import PprzMessage
-from database import AirplaneTelemetry
+from database import AirplaneTelemetry, Waypoint
 from obstacle import Obstacle
 
 import logging
 logger = logging.getLogger(__name__)
+
+feet2meter = 3.2808399
 
 class MissionInformation():
     """
@@ -91,6 +93,60 @@ class MissionInformation():
         msg['text'] = 'OAX'
 
         self.ivysender(msg)
+
+    def sendIvyGroupOfWaypoints(self,ac_id,db,group):
+        '''
+        Sends a group of waypoint moves over the Ivy bus as according to the interop-
+        provided posistions. Currently supports the 'Operational Area', 'Search Area'
+        and 'Waypoint Navigation'
+        '''
+
+        wptPrefix = None
+        interopWaypointGroup = None
+        newAltitude = None
+
+        if group == 'OpArea':
+            wptPrefix = '_oparea'
+            hasAlt = False
+            interopWaypointGroup = self.mission_info.fly_zones[0].boundary_pts
+        elif group == 'SearchArea':
+            wptPrefix = '_searchArea'
+            hasAlt = False
+            interopWaypointGroup = self.mission_info.search_grid_points
+        elif group == 'WptNav':
+            wptPrefix = 'wp'
+            hasAlt = True
+            interopWaypointGroup = self.mission_info.mission_waypoints
+        else:
+            raise AttributeError('Incorrect group called with moveGroupOfWaypoints')
+
+        GCSwaypoints = []
+        for wptName in db.waypoints.keys():
+            if wptName[0:len(wptPrefix)] == wptPrefix:
+                GCSwaypoints.append(wptName)
+        assert type(GCSwaypoints) is list
+
+        if len(GCSwaypoints) < len(interopWaypointGroup):
+            logger.critical('Interop Server has more'+group+' area points then the GCS. Moving the first ' +str(len(GCSsearchAreaWaypoints))+ ' waypoints into position')
+
+        for index in range(0,len(GCSwaypoints)):
+
+            if index >= len(interopWaypointGroup):
+                InteropIndex = index - len(interopWaypointGroup)
+            else:
+                InteropIndex = index
+
+            if hasAlt:
+                newAltitude = interopWaypointGroup[InteropIndex].altitude_msl/feet2meter - Waypoint.flightParams['alt']
+            else:
+                newAltitude = None
+
+            db.waypoints[wptPrefix + str(index +1 )].update_latlon(interopWaypointGroup[InteropIndex].latitude, interopWaypointGroup[InteropIndex].longitude, None, newAltitude)
+            msg = db.waypoints[wptPrefix + str(index +1)].gen_move_waypoint_msg(ac_id)
+            self.ivysender(msg)
+            print('Moved ' +db.waypoints[wptPrefix + str(index+1)].name+ ' to the Interop server position for it.')
+
+
 
 class TelemetryThread(Thread):
     """
