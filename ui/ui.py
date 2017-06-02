@@ -253,6 +253,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.landingBlockToggleButton.setIcon(QtGui.QIcon(QtGui.QPixmap(os.path.join(ICON_ABSOLUTE_PATH, 'arrivals.png')))) #os.path.join('data','icon','pilot-hat.png')
         #self.takeoffBlockToggleButton.setIconSize(QtCore.QSize(65,65))
         self.RightPlane.addWidget(self.landingBlockToggleButton, 2, 3, 2, 1)
+        '''
         self.killBlockToggleButton = QtWidgets.QPushButton('Absolute Termination', self.scrollAreaWidgetContents)
         self.killBlockToggleButton.setSizePolicy(sizePolicy)
         self.killBlockToggleButton.setFont(font)
@@ -260,7 +261,7 @@ class MainWindow(QtWidgets.QMainWindow):
         #self.killBlockToggleButton.setIcon(QtGui.QIcon(QtGui.QPixmap(os.path.join(ICON_ABSOLUTE_PATH, 'arrivals.png')))) #os.path.join('data','icon','pilot-hat.png')
         #self.takeoffBlockToggleButton.setIconSize(QtCore.QSize(65,65))
         self.RightPlane.addWidget(self.killBlockToggleButton, 4, 0, 2, 1)
-
+        '''
         spacerItem9 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
         self.buttonScrollPane.addItem(spacerItem9, 6, 1, 1, 1)
         self.upperPane.addLayout(self.buttonScrollPane, 1, 2, 1, 1)
@@ -361,7 +362,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.takeoffBlockToggleButton.clicked.connect(lambda: self.setActiveFlightBlockAction('Takeoff'))
         self.standbyBlockToggleButton.clicked.connect(lambda: self.setActiveFlightBlockAction('Standby'))
         self.landingBlockToggleButton.clicked.connect(lambda: self.setActiveFlightBlockAction('InitAutoLanding'))
-        self.killBlockToggleButton.clicked.connect(lambda: self.setActiveFlightBlockAction('Failsafe.Absolute_Termination'))
+        #self.killBlockToggleButton.clicked.connect(lambda: self.setActiveFlightBlockAction('Failsafe.Absolute_Termination'))
 
         # Flight Block List (so only the CURRENT flight block is toggled)
         self.flightBlockDict = dict()
@@ -369,7 +370,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.flightBlockDict['Mission'] = self.missionBlockToggleButton
         self.flightBlockDict['Standby'] = self.standbyBlockToggleButton
         self.flightBlockDict['InitAutoLanding'] = self.landingBlockToggleButton
-        self.flightBlockDict['Failsafe.Absolute_Termination'] = self.killBlockToggleButton
+        #self.flightBlockDict['Failsafe.Absolute_Termination'] = self.killBlockToggleButton
+
         # Shortcuts
         self.actionExit_Program.setShortcut('Ctrl+Q')
         self.actionSave.setShortcut('Ctrl+S')
