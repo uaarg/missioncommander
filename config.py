@@ -25,8 +25,8 @@ passwordDefault = "testpass"
 #AC_ID = 3
 
 PI = math.pi
+feetInOneMeter = 3.2808399
 UTM_NORTHERN_HEMISPHERE = True
-
 DEBUG = False
 TELEM_DEBUG = False
 WP_DEBUG = False # Paparazzi needs to be running

@@ -1,11 +1,11 @@
 from utils import *
 from config import *
 from .flightblock import FlightBlockList
+from .waypointobject import Waypoint
 import config
 import utm
 import logging
 import threading
-#import mission
 from collections import OrderedDict
 from PyQt5.QtCore import QObject, pyqtSignal
 
@@ -96,6 +96,9 @@ class AirplaneTelemetry(object):
     This is meant to be updated from the Ivybus and updating the Interop Server
     when any value is updated.
     We need to submit at a minimum of 1 Hz to the server to recieve points
+
+    Note the interop server REQUIRES position in Lat/Lon and height in ft msl
+    (feet above mean sea level). Conversion is done here and saved in the server's units.
     '''
 
     def __init__(self):
@@ -109,8 +112,8 @@ class AirplaneTelemetry(object):
         self.headingFlag = False
 
     def updateFromWaldo(self, msg):
-        easting = float(msg.fieldvalues[4]) / 100
-        northing = float(msg.fieldvalues[5]) / 100
+        easting = float(msg.fieldvalues[4]) / 100 # cm to m
+        northing = float(msg.fieldvalues[5]) / 100 # cm to m
         zone_num = int(msg.fieldvalues[6])
         try:
             self.position = utm.to_latlon(easting, northing, zone_num, northern=UTM_NORTHERN_HEMISPHERE)
@@ -118,7 +121,7 @@ class AirplaneTelemetry(object):
             logg.warning('Out Of Range Error, GPS is probably disconnected. Defaulting to NULL ISLAND (0,0) \n GPS Easting: ' +str(easting)+ ' Northing: ' + str(northing))
             self.position = ('0', '0') #Plane defaults to NULL ISLAND in the Atlantic Ocean
 
-        self.altitude = str(float(msg.fieldvalues[10]))
+        self.altitude = str((float(msg.fieldvalues[10]) + Waypoint.flightParams['alt'])*feetInOneMeter)
         if (float(self.altitude) < 0):
             logg.warning('Altitude reported as negative. Flipping Altitude:' + self.altitude + ' to prevent further errors')
             self.altitude = str(-1*float(self.altitude))
@@ -128,7 +131,7 @@ class AirplaneTelemetry(object):
         if TELEM_DEBUG:
             print(self.position)
 
-    # Updates each variable
+    # Updates each variable individually. This isint really used, can we discard?
     def newPosition(self, newPos):
         if (self.position != newPos):
             self.position = newPos
