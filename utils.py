@@ -1,39 +1,43 @@
-class fancyList(object):
+class fancyList(list):
     '''
     Fancy list object that is fancy
     '''
     def __init__(self):
-        self.lst = list()
+        super().__init__()
 
     def add(self, wp):
-        self.lst.append(wp)
+        self.append(wp)
     
     def prepend(self, wp):
-        self.lst.insert(0, wp)
+        self.insert(0, wp)
 
-    def addToIndex(self, wp):
-        ind = wp.index
-        while (len(self.lst) <= ind):
-            self.lst.append(None)
-        self.lst[ind] = wp
+    def addToIndex(self, wp, ind):
+        while (len(self) <= ind):
+            self.append(None)
+        self[ind] = wp
 
     def replace(self, wp, index):
         try:
-            self.lst[index:index + 1] = wp
+            self[index] = wp
             return True
         except:
             print("The WP Index is out of Range!! Use add or addToIndex")
             return False
     
     def replaceAll(self, wps):
-        if type(wps).__name__ == 'list':
-            self.lst = wps
+        if type(wps).__name__ == 'fancyList':
+            self.clear()
+            for e in wps:
+                self.append(e)
         else:
-            print("Cannot fancify something that is not a list")
+            raise NameError('Cannot fancify something that is not fancy')
 
     def getFromIndex(self, ind):
         try:
-            return self.lst[ind]
+            return self[ind]
         except:
             print("The WP Index is out of Range!! Use add or addToIndex")
             return None
+
+    def getLength(self):
+        return len(self)

@@ -26,6 +26,12 @@ class BagOfHolding(object):
         self.signals = dbSignals()
         self.flightBlocks = FlightBlockList()
 
+        from .synchronizer import BagOfSynchronizing
+        self.sync = BagOfSynchronizing(self, self.groundMissionStatus)
+
+    def groundMissionStatusUpdated(self):
+        self.sync.missionUpdateSent()
+
     def updateTelemetry(self, msg):
         self.airplane.updateFromWaldo(msg)
 
@@ -34,7 +40,7 @@ class BagOfHolding(object):
 
         if(msg.fieldvalues[1].split(",")[0] != 0):
             mission_array = msg.fieldvalues[1].split(",")
-            mission_list = list()
+            mission_list = fancyList()
 
             task_array = msg.fieldvalues[2].split(",")
 
@@ -44,8 +50,9 @@ class BagOfHolding(object):
                 if miss != None :
                     mission_list.append(miss)
 
-            self.airMissionStatus.replaceAll(mission_list)
+            self.airMissionStatus = mission_list
 
+        self.sync.newMissionStatusMessage(self.airMissionStatus)
         self.signals.updateUASinUI();
 
     def findMissionById(self, idStr):

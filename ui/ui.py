@@ -7,6 +7,7 @@ from time import sleep
 from PyQt5 import QtCore, QtGui, QtWidgets
 from database import  InsertMode, NavPattern, Mission, exportxml
 from config import *
+from utils import *
 
 translate = QtCore.QCoreApplication.translate
 
@@ -381,8 +382,9 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
     def updateUavListViewList(self):
+        self.updateStagedMissionList()
         uavlistViewModel = QtGui.QStandardItemModel(self.upperPane)
-        for airMission in self.db.airMissionStatus.lst:
+        for airMission in self.db.airMissionStatus:
             item = QtGui.QStandardItem(airMission.name)
             item.setEditable(False)
             uavlistViewModel.appendRow(item)
@@ -390,7 +392,7 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def updateStagedMissionList(self):
         stagedlistViewModel = QtGui.QStandardItemModel(self.upperPane)
-        for stagedMission in self.db.groundMissionStatus.lst:
+        for stagedMission in self.db.groundMissionStatus:
             item = QtGui.QStandardItem(stagedMission.name)
             item.setEditable(False)
             stagedlistViewModel.appendRow(item)
@@ -439,6 +441,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         self.ivySender(ivyMsg)
                         self.db.groundMissionStatus.prepend(currentMission)
 
+        self.db.groundMissionStatusUpdated()
         self.updateStagedMissionList()
         self.updateUnstagedMissionList()
 
@@ -473,7 +476,8 @@ class MainWindow(QtWidgets.QMainWindow):
                         ivyMsg = currentMission.gen_mission_msg(self.AC_ID, self.db, InsertMode.Append, currentTask.id)
                         self.ivySender(ivyMsg)
                         self.db.groundMissionStatus.add(currentMission)
-
+        
+        self.db.groundMissionStatusUpdated()
         self.updateStagedMissionList()
         self.updateUnstagedMissionList()
 
@@ -492,7 +496,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print('Select one and only one mission')
             return
 
-        insertList = list()
+        insertList = fancyList()
 
         ## TODO: cannot replace with Tasks
 
@@ -515,7 +519,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print(insertList)
         givenReplaceIndex = replaceIndex
         insertIndex = 0
-        shiftingList = list()
+        shiftingList = fancyList()
         while insertIndex < len(insertList) or len(shiftingList) > 0:
             if insertIndex == 0:
                 ivyMsg = insertList[0].gen_mission_msg(self.AC_ID,self.db, InsertMode.ReplaceIndex, 0, replaceIndex)
@@ -529,7 +533,7 @@ class MainWindow(QtWidgets.QMainWindow):
             else:
                 currentMission = shiftingItem = shiftingList.pop(0)
 
-            if replaceIndex < len(self.db.groundMissionStatus.lst):
+            if replaceIndex < len(self.db.groundMissionStatus):
                 ivyMsg = currentMission.gen_mission_msg(self.AC_ID,self.db, InsertMode.ReplaceIndex, 0, replaceIndex)
                 shiftingList.append(self.db.groundMissionStatus.getFromIndex(replaceIndex))
                 self.ivySender(ivyMsg)
@@ -542,6 +546,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 insertIndex += 1
 
         self.db.groundMissionStatus.replace(insertList, givenReplaceIndex)
+        self.db.groundMissionStatusUpdated()
         self.updateStagedMissionList()
         self.updateUnstagedMissionList()
 
@@ -551,7 +556,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print('List of Selected Missions')
         model = self.unstagedListView.model()
 
-        insertList = list()
+        insertList = fancyList()
 
         # Find Checkboxed Items
         for index in range(model.rowCount()):
@@ -577,6 +582,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         insertList.append(currentMission)
 
         self.db.groundMissionStatus.replaceAll(insertList)
+        self.db.groundMissionStatusUpdated()
         self.updateStagedMissionList()
         self.updateUnstagedMissionList()
 
