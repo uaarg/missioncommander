@@ -8,11 +8,23 @@
     <go wp="ENDURANCE2" mID="2"/>
     <go wp="ENDURANCE3" mID="3"/>
     <go wp="ENDURANCE4" mID="4"/>
-
+    <go wp="wp1" mID="5"/>
+    <go wp="wp2" mID="6"/>
+    <go wp="wp3" mID="7"/>
+    <go wp="wp4" mID="8"/>
+    <go wp="wp5" mID="9"/>
+    <go wp="wp6" mID="10"/>
+    <go wp="wp7" mID="11"/>
+    <path approaching_time= "3" wpts="wp1, wp2" mID="12"/>
+    <path approaching_time= "3" wpts="wp2, wp3" mID="13"/>
+    <path approaching_time= "3" wpts="wp3, wp4" mID="14"/>
+    <path approaching_time= "3" wpts="wp4, wp5" mID="15"/>
+    <path approaching_time= "3" wpts="wp5, wp6" mID="16"/> 
+    <path approaching_time= "0" wpts="wp6, wp7" mID="17"/>
   </missions>
 
   <tasks>
-
+    <task name="Auto Nav" mID="5, 12, 13, 14, 15, 16, 17"/>
     <task name="EnduranceLoop" mID="1, 2, 3, 4"/>
 
     <task mID="20"/>

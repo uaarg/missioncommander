@@ -136,11 +136,8 @@ class MissionInformation():
             while InteropIndex >= len(interopWaypointGroup):
                 InteropIndex = InteropIndex - len(interopWaypointGroup)
 
-            if hasAlt: # remember heiht info on the server is in ft msl
+            if hasAlt: # remember height info on the server is in ft msl
                 newAltitude = interopWaypointGroup[InteropIndex].altitude_msl/feetInOneMeter
-                if group == 'WptNav':
-                    print('InteropServer Alt '+str(interopWaypointGroup[InteropIndex].altitude_msl)+' ft msl')
-                    print('Converted Altitude '+str(newAltitude)+' m msl')
             else:
                 newAltitude = None
 
@@ -167,7 +164,6 @@ class TelemetryThread(Thread):
             self.plane.teleAvail.wait()
             try:
                 t = self.plane.getTelemetry()
-
                 if t:
                     telem = Telemetry(t['latitude'], t['longitude'], t['altitude_msl'], t['uas_heading'])
                     r = self.interopclient.post_telemetry(telem).result()
@@ -213,9 +209,9 @@ class ObstacleThread(Thread):
         msg['lonarr'] = [int(obstacle.lon * 1e7)] * 2
         msg['radius'] = obstacle.geom_data['radius']
         if obstacle.shape == 'cylinder':
-            msg['text'] = "%.2fm" % (obstacle.geom_data['height']/feetInOneMeter - Waypoint.flightParams['alt'])
+            msg['text'] = "%.2fm" % (obstacle.geom_data['height'] - Waypoint.flightParams['ground_alt'])
         if obstacle.shape == 'sphere':
-            msg['text'] = "%.2fm" % (obstacle.geom_data['altitude']/feetInOneMeter - Waypoint.flightParams['alt'])
+            msg['text'] = "%.2fm" % (obstacle.geom_data['altitude'] - Waypoint.flightParams['ground_alt'])
 
         ivysender(msg)
 

@@ -50,7 +50,7 @@ class BagOfHolding(object):
             self.airMissionStatus = mission_list
             self.groundMissionStatus.replaceAll(mission_list)
 
-        
+
         self.signals.updateUASinUI();
 
     def findMissionById(self, idStr):
@@ -120,8 +120,8 @@ class AirplaneTelemetry(object):
         except utm.error.OutOfRangeError:
             logg.warning('Out Of Range Error, GPS is probably disconnected. Defaulting to NULL ISLAND (0,0) \n GPS Easting: ' +str(easting)+ ' Northing: ' + str(northing))
             self.position = ('0', '0') #Plane defaults to NULL ISLAND in the Atlantic Ocean
-
-        self.altitude = str((float(msg.fieldvalues[10]) + Waypoint.flightParams['alt'])*feetInOneMeter)
+            
+        self.altitude = str((float(msg.fieldvalues[10]) + Waypoint.flightParams['ground_alt'])*feetInOneMeter)
         if (float(self.altitude) < 0):
             logg.warning('Altitude reported as negative. Flipping Altitude:' + self.altitude + ' to prevent further errors')
             self.altitude = str(-1*float(self.altitude))
