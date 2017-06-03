@@ -61,37 +61,44 @@ class MissionInformation():
             ac_id: The aircraft ID, an integer.
             emergent_waypoint_id: The id of the waypoint associated with the emergent target, an integer.
         """
-        try:
-            LKNwpt = db.waypoints['LKN']
-            LKNwpt.update_latlon(self.mission_info.emergent_last_known_pos.latitude, self.mission_info.emergent_last_known_pos.longitude)
-            msg = LKNwpt.gen_move_waypoint_msg(ac_id)
+        if db.waypoints['LKN'] is not None:
+            if self.mission_info.emergent_last_known_pos is not None:
+                LKNwpt = db.waypoints['LKN']
+                LKNwpt.update_latlon(self.mission_info.emergent_last_known_pos.latitude, self.mission_info.emergent_last_known_pos.longitude)
+                msg = LKNwpt.gen_move_waypoint_msg(ac_id)
 
-            self.ivysender(msg)
-            print('Moved the LKN waypoint to Lat:'+str(self.mission_info.emergent_last_known_pos.latitude)+' Lon:'+str(self.mission_info.emergent_last_known_pos.longitude))
-        except KeyError:
+                self.ivysender(msg)
+                print('Moved the LKN waypoint to Lat:'+str(self.mission_info.emergent_last_known_pos.latitude)+' Lon:'+str(self.mission_info.emergent_last_known_pos.longitude))
+            else:
+                logger.critical('LKN waypoint not found on Interop server.')
+        else:
             logger.critical('LKN waypoint not found in list of Waypoints. Lask Known Location from Interop Server is '+ str(self.mission_info.emergent_last_known_pos.latitude) + ' ' + str(self.mission_info.emergent_last_known_pos.longitude))
 
     def sendIvyOffAxisShape(self):
         """
         Sends a message displaying the shape information for the off-axis target.
         """
-        msg = PprzMessage("ground", "SHAPE")
-        msg['id'] = 99
-        msg['linecolor'] = 'white'
-        msg['fillcolor'] = 'blue'
-        msg['opacity'] = 2
-        msg['shape'] = 0
-        msg['status'] = 0
-        msg['latarr'] = [int(
-            self.mission_info.off_axis_target_pos.latitude * 1e7
-        )] * 2
-        msg['lonarr'] = [int(
-            self.mission_info.off_axis_target_pos.longitude * 1e7
-        )] * 2
-        msg['radius'] = 10
-        msg['text'] = 'OAX'
+        if self.mission_info.off_axis_target_pos is not None:
 
-        self.ivysender(msg)
+            msg = PprzMessage("ground", "SHAPE")
+            msg['id'] = 99
+            msg['linecolor'] = 'white'
+            msg['fillcolor'] = 'blue'
+            msg['opacity'] = 2
+            msg['shape'] = 0
+            msg['status'] = 0
+            msg['latarr'] = [int(
+                self.mission_info.off_axis_target_pos.latitude * 1e7
+            )] * 2
+            msg['lonarr'] = [int(
+                self.mission_info.off_axis_target_pos.longitude * 1e7
+            )] * 2
+            msg['radius'] = 10
+            msg['text'] = 'OAX'
+
+            self.ivysender(msg)
+        else:
+            logger.critical('Interop server does not have an OAX target.')
 
     def sendIvyGroupOfWaypoints(self,ac_id,db,group):
         '''
@@ -109,16 +116,27 @@ class MissionInformation():
         if group == 'OpArea':
             wptPrefix = '_oparea'
             hasAlt = False
-            interopWaypointGroup = self.mission_info.fly_zones[0].boundary_pts
+            if self.mission_info.fly_zones[0].boundary_pts is not None:
+                interopWaypointGroup = self.mission_info.fly_zones[0].boundary_pts
+            else:
+                logging.critical('Interop server does not have a fly zone with operational boundary points.')
+                return False
         elif group == 'SearchArea':
             wptPrefix = '_searchArea'
             hasAlt = False
-            interopWaypointGroup = self.mission_info.search_grid_points
+            if self.mission_info.search_grid_points is not None:
+                interopWaypointGroup = self.mission_info.search_grid_points
+            else:
+                logging.critical('Interop server does not have a search area with boundary points.')
+                return False
         elif group == 'WptNav':
             wptPrefix = 'wp'
             hasAlt = True
-            interopWaypointGroup = self.mission_info.mission_waypoints
-            print(interopWaypointGroup[1])
+            if self.mission_info.mission_waypoints is not None:
+                interopWaypointGroup = self.mission_info.mission_waypoints
+            else:
+                logging.critical('Interop server does not have a waypoint navigation route.')
+                return False
         else:
             raise AttributeError('Incorrect group called with moveGroupOfWaypoints')
 
