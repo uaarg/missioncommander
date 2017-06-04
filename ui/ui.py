@@ -478,7 +478,7 @@ class MainWindow(QtWidgets.QMainWindow):
                         ivyMsg = currentMission.gen_mission_msg(self.AC_ID, self.db, InsertMode.Append, currentTask.id)
                         self.ivySender(ivyMsg)
                         self.db.groundMissionStatus.add(currentMission)
-        
+
         self.db.groundMissionStatusUpdated()
         self.updateStagedMissionList()
         self.updateUnstagedMissionList()
@@ -692,7 +692,7 @@ class MainWindow(QtWidgets.QMainWindow):
                 self.flightBlockDict[flightBlock].setChecked(False)
 
         ivyMsg = self.db.flightBlocks.getFlightBlock(flightBlockName).gen_change_block_msg()
-        print('Current Flight Block is now' + flightBlockName)
+        print('Current Flight Block is now ' + flightBlockName)
         print(ivyMsg)
         self.ivySender(ivyMsg)
 

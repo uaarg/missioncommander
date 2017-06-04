@@ -46,8 +46,8 @@ class MissionInformation():
             if len(activeMissions) is 1:
                 self.mission_info = activeMissions[0]
             else:
-                logger.critical('Found ' + len(activeMissions) + ' active on the Interop Server. Which one should we use?')
-
+                logger.critical('Found ' + str(len(activeMissions)) + ' active on the Interop Server. Which one should we use?')
+                self.mission_info = None
         except InteropError as error:
             logger.error(error.message)
 
