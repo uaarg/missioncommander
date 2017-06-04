@@ -22,7 +22,6 @@ pprzmsg = PprzMessage
 urlDefault = "http://localhost:8000"
 usernameDefault = "testuser"
 passwordDefault = "testpass"
-#AC_ID = 3
 
 PI = math.pi
 feetInOneMeter = 3.2808399

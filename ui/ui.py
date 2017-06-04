@@ -7,13 +7,14 @@ from time import sleep
 from PyQt5 import QtCore, QtGui, QtWidgets
 from database import  InsertMode, NavPattern, Mission, exportxml
 from config import *
-from utils import *
+from utils import fancyList
 
 translate = QtCore.QCoreApplication.translate
 
 RADIUS_DISABLED_TEXT = "Radius field (Disabled)"
 
 ICON_ABSOLUTE_PATH = os.path.join(PPRZ_SRC, 'sw', 'ext', 'missioncommander', 'data', 'icon')
+
 # No Operation (noop)
 def noop():
     pass
@@ -40,9 +41,7 @@ class MainWindow(QtWidgets.QMainWindow):
         super().__init__()
         self.db = database
         self.ivySender = send_ivy_message
-        self.AC_ID = ac_id
-
-        self.currentFlightBlock = None
+        self.ac_id = ac_id
         ################################################
         ### START OF QT DESIGNER AUTO-GENERATED CODE ###
         ################################################
@@ -229,39 +228,26 @@ class MainWindow(QtWidgets.QMainWindow):
         self.takeoffBlockToggleButton.setSizePolicy(sizePolicy)
         self.takeoffBlockToggleButton.setFont(font)
         self.takeoffBlockToggleButton.setCheckable(True)
-        #self.takeoffBlockToggleButton.setIcon()) #os.path.join('data','icon','pilot-hat.png')
-        #self.takeoffBlockToggleButton.setIconSize(QtCore.QSize(65,65))
         self.RightPlane.addWidget(self.takeoffBlockToggleButton, 2, 0, 2, 1)
         self.standbyBlockToggleButton = QtWidgets.QPushButton('Standby', self.scrollAreaWidgetContents)
         self.standbyBlockToggleButton.setSizePolicy(sizePolicy)
         self.standbyBlockToggleButton.setFont(font)
         self.standbyBlockToggleButton.setCheckable(True)
-        self.standbyBlockToggleButton.setIcon(QtGui.QIcon(QtGui.QPixmap(os.path.join(ICON_ABSOLUTE_PATH, 'planes-circling.png')))) #os.path.join('data','icon','pilot-hat.png')
-        #self.takeoffBlockToggleButton.setIconSize(QtCore.QSize(65,65))
+        self.standbyBlockToggleButton.setIcon(QtGui.QIcon(QtGui.QPixmap(os.path.join(ICON_ABSOLUTE_PATH, 'planes-circling.png'))))
         self.RightPlane.addWidget(self.standbyBlockToggleButton, 2, 1, 2, 1)
         self.missionBlockToggleButton = QtWidgets.QPushButton('Mission', self.scrollAreaWidgetContents)
         self.missionBlockToggleButton.setSizePolicy(sizePolicy)
         self.missionBlockToggleButton.setFont(font)
         self.missionBlockToggleButton.setCheckable(True)
         self.missionBlockToggleButton.setIcon(QtGui.QIcon(QtGui.QPixmap(os.path.join(ICON_ABSOLUTE_PATH, 'departures.png'))))
-        #self.missionBlockToggleButton.setIconSize(QtCore.QSize(65,65))
         self.RightPlane.addWidget(self.missionBlockToggleButton, 2, 2, 2, 1)
         self.landingBlockToggleButton = QtWidgets.QPushButton('Landing', self.scrollAreaWidgetContents)
         self.landingBlockToggleButton.setSizePolicy(sizePolicy)
         self.landingBlockToggleButton.setFont(font)
         self.landingBlockToggleButton.setCheckable(True)
-        self.landingBlockToggleButton.setIcon(QtGui.QIcon(QtGui.QPixmap(os.path.join(ICON_ABSOLUTE_PATH, 'arrivals.png')))) #os.path.join('data','icon','pilot-hat.png')
-        #self.takeoffBlockToggleButton.setIconSize(QtCore.QSize(65,65))
+        self.landingBlockToggleButton.setIcon(QtGui.QIcon(QtGui.QPixmap(os.path.join(ICON_ABSOLUTE_PATH, 'arrivals.png'))))
         self.RightPlane.addWidget(self.landingBlockToggleButton, 2, 3, 2, 1)
-        '''
-        self.killBlockToggleButton = QtWidgets.QPushButton('Absolute Termination', self.scrollAreaWidgetContents)
-        self.killBlockToggleButton.setSizePolicy(sizePolicy)
-        self.killBlockToggleButton.setFont(font)
-        self.killBlockToggleButton.setCheckable(True)
-        #self.killBlockToggleButton.setIcon(QtGui.QIcon(QtGui.QPixmap(os.path.join(ICON_ABSOLUTE_PATH, 'arrivals.png')))) #os.path.join('data','icon','pilot-hat.png')
-        #self.takeoffBlockToggleButton.setIconSize(QtCore.QSize(65,65))
-        self.RightPlane.addWidget(self.killBlockToggleButton, 4, 0, 2, 1)
-        '''
+
         spacerItem9 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
         self.buttonScrollPane.addItem(spacerItem9, 6, 1, 1, 1)
         self.upperPane.addLayout(self.buttonScrollPane, 1, 2, 1, 1)
@@ -362,7 +348,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.takeoffBlockToggleButton.clicked.connect(lambda: self.setActiveFlightBlockAction('Takeoff'))
         self.standbyBlockToggleButton.clicked.connect(lambda: self.setActiveFlightBlockAction('Standby'))
         self.landingBlockToggleButton.clicked.connect(lambda: self.setActiveFlightBlockAction('InitAutoLanding'))
-        #self.killBlockToggleButton.clicked.connect(lambda: self.setActiveFlightBlockAction('Failsafe.Absolute_Termination'))
 
         # Flight Block List (so only the CURRENT flight block is toggled)
         self.flightBlockDict = dict()
@@ -370,7 +355,6 @@ class MainWindow(QtWidgets.QMainWindow):
         self.flightBlockDict['Mission'] = self.missionBlockToggleButton
         self.flightBlockDict['Standby'] = self.standbyBlockToggleButton
         self.flightBlockDict['InitAutoLanding'] = self.landingBlockToggleButton
-        #self.flightBlockDict['Failsafe.Absolute_Termination'] = self.killBlockToggleButton
 
         # Shortcuts
         self.actionExit_Program.setShortcut('Ctrl+Q')
@@ -384,9 +368,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
 
     def updateUavListViewList(self):
-        self.updateStagedMissionList()
         uavlistViewModel = QtGui.QStandardItemModel(self.upperPane)
-        for airMission in self.db.airMissionStatus:
+        for airMission in list(self.db.airMissionStatus):
             item = QtGui.QStandardItem(airMission.name)
             item.setEditable(False)
             uavlistViewModel.appendRow(item)
@@ -432,18 +415,17 @@ class MainWindow(QtWidgets.QMainWindow):
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 if (itemName in self.db.allMissions):
                     currentMission = self.db.allMissions[itemName]
-                    ivyMsg = currentMission.gen_mission_msg(self.AC_ID, self.db, InsertMode.Prepend)
+                    ivyMsg = currentMission.gen_mission_msg(self.ac_id, self.db, InsertMode.Prepend)
                     self.ivySender(ivyMsg)
                     self.db.groundMissionStatus.prepend(currentMission)
                 else:
                     currentTask = self.db.tasks[itemName]
                     for missID in reversed(currentTask.missions):
-                        currentMission = self.db.findMissionById(missID)
-                        ivyMsg = currentMission.gen_mission_msg(self.AC_ID, self.db, InsertMode.Prepend, currentTask.id)
+                        #currentMission = self.db.findMissionById(missID)
+                        ivyMsg = currentMission.gen_mission_msg(self.ac_id, self.db, InsertMode.Prepend, currentTask.id)
                         self.ivySender(ivyMsg)
                         self.db.groundMissionStatus.prepend(currentMission)
 
-        self.db.groundMissionStatusUpdated()
         self.updateStagedMissionList()
         self.updateUnstagedMissionList()
 
@@ -463,8 +445,8 @@ class MainWindow(QtWidgets.QMainWindow):
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 if (itemName in self.db.allMissions):
                     currentMission = self.db.allMissions[itemName]
-                    ivyMsg = currentMission.gen_mission_msg(self.AC_ID, self.db, InsertMode.Append)
-                    if WP_DEBUG:
+                    ivyMsg = currentMission.gen_mission_msg(self.ac_id, self.db, InsertMode.Append)
+                    if DEBUG:
                         print(ivyMsg)
                         for key in ivyMsg.to_dict().keys():
                             print(key + ' is ' +str(ivyMsg.to_dict()[key]))
@@ -475,18 +457,16 @@ class MainWindow(QtWidgets.QMainWindow):
                     currentTask = self.db.tasks[itemName]
                     for missID in currentTask.missions:
                         currentMission = self.db.findMissionById(missID)
-                        ivyMsg = currentMission.gen_mission_msg(self.AC_ID, self.db, InsertMode.Append, currentTask.id)
+                        ivyMsg = currentMission.gen_mission_msg(self.ac_id, self.db, InsertMode.Append, currentTask.id)
                         self.ivySender(ivyMsg)
                         self.db.groundMissionStatus.add(currentMission)
 
-        self.db.groundMissionStatusUpdated()
         self.updateStagedMissionList()
         self.updateUnstagedMissionList()
 
     def replaceButtonAction(self):
         print('Replace button Pressed')
         model = self.unstagedListView.model()
-
         #Find selected row
         print('Replace mission:')
         selectedIndexes = self.stagedlistView.selectedIndexes()
@@ -498,7 +478,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print('Select one and only one mission')
             return
 
-        insertList = fancyList()
+        insertList = list()
 
         ## TODO: cannot replace with Tasks
 
@@ -516,15 +496,13 @@ class MainWindow(QtWidgets.QMainWindow):
                     currentTask = self.db.tasks[itemName]
                     for missID in currentTask.missions:
                         insertList.append(self.db.findMissionById(missID))
-
         print('replaceList')
-        print(insertList)
         givenReplaceIndex = replaceIndex
         insertIndex = 0
-        shiftingList = fancyList()
+        shiftingList = list()
         while insertIndex < len(insertList) or len(shiftingList) > 0:
             if insertIndex == 0:
-                ivyMsg = insertList[0].gen_mission_msg(self.AC_ID,self.db, InsertMode.ReplaceIndex, 0, replaceIndex)
+                ivyMsg = insertList[0].gen_mission_msg(self.ac_id,self.db, InsertMode.ReplaceIndex, 0, replaceIndex)
                 self.ivySender(ivyMsg)
                 replaceIndex += 1
                 insertIndex += 1
@@ -536,22 +514,20 @@ class MainWindow(QtWidgets.QMainWindow):
                 currentMission = shiftingItem = shiftingList.pop(0)
 
             if replaceIndex < len(self.db.groundMissionStatus):
-                ivyMsg = currentMission.gen_mission_msg(self.AC_ID,self.db, InsertMode.ReplaceIndex, 0, replaceIndex)
+                ivyMsg = currentMission.gen_mission_msg(self.ac_id,self.db, InsertMode.ReplaceIndex, 0, replaceIndex)
                 shiftingList.append(self.db.groundMissionStatus.getFromIndex(replaceIndex))
                 self.ivySender(ivyMsg)
                 replaceIndex += 1
                 insertIndex += 1
             else:
-                ivyMsg = currentMission.gen_mission_msg(self.AC_ID,self.db, InsertMode.Append)
+                ivyMsg = currentMission.gen_mission_msg(self.ac_id,self.db, InsertMode.Append)
                 self.ivySender(ivyMsg)
                 replaceIndex += 1
                 insertIndex += 1
 
         self.db.groundMissionStatus.replace(insertList, givenReplaceIndex)
-        self.db.groundMissionStatusUpdated()
         self.updateStagedMissionList()
         self.updateUnstagedMissionList()
-
 
     def replaceAllButtonAction(self):
         print('replace all button pressed')
@@ -568,23 +544,22 @@ class MainWindow(QtWidgets.QMainWindow):
                 print('Index %s with Mission: %s' % (item.row(), itemName))
                 if (itemName in self.db.allMissions):
                     currentMission = self.db.allMissions[itemName]
-                    ivyMsg = currentMission.gen_mission_msg(self.AC_ID,self.db, InsertMode.Append)
+                    ivyMsg = currentMission.gen_mission_msg(self.ac_id,self.db, InsertMode.Append)
                     if len(insertList) == 0:
-                        ivyMsg = currentMission.gen_mission_msg(self.AC_ID,self.db, InsertMode.ReplaceAll)
+                        ivyMsg = currentMission.gen_mission_msg(self.ac_id,self.db, InsertMode.ReplaceAll)
                     self.ivySender(ivyMsg)
                     insertList.append(currentMission)
                 else: #Task
                     currentTask = self.db.tasks[itemName]
                     for missID in currentTask.missions:
                         currentMission = self.db.findMissionById(missID)
-                        ivyMsg = currentMission.gen_mission_msg(self.AC_ID,self.db, InsertMode.Append)
+                        ivyMsg = currentMission.gen_mission_msg(self.ac_id,self.db, InsertMode.Append)
                         if len(insertList) == 0:
-                            ivyMsg = currentMission.gen_mission_msg(self.AC_ID,self.db, InsertMode.ReplaceAll)
+                            ivyMsg = currentMission.gen_mission_msg(self.ac_id,self.db, InsertMode.ReplaceAll)
                         self.ivySender(ivyMsg)
                         insertList.append(currentMission)
 
         self.db.groundMissionStatus.replaceAll(insertList)
-        self.db.groundMissionStatusUpdated()
         self.updateStagedMissionList()
         self.updateUnstagedMissionList()
 
@@ -625,7 +600,7 @@ class MainWindow(QtWidgets.QMainWindow):
         missionObj = self.createMissionButtonAction()
         self.db.groundMissionStatus.add(missionObj)
         self.updateStagedMissionList()
-        ivyMsg = missionObj.gen_mission_msg(self.AC_ID, self.db,  InsertMode.Append)
+        ivyMsg = missionObj.gen_mission_msg(self.ac_id, self.db,  InsertMode.Append)
         print(ivyMsg)
         self.ivySender(ivyMsg)
 
@@ -657,7 +632,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.updateUnstagedMissionList()
         self.db.groundMissionStatus.add(missionObj)
         self.updateStagedMissionList()
-        self.ivySender(missionObj.gen_mission_msg(self.AC_ID, self.db, InsertMode.Prepend))
+        self.ivySender(missionObj.gen_mission_msg(self.ac_id, self.db, InsertMode.Prepend))
 
 
     def checkMissionTypeComboBox(self):
@@ -684,7 +659,7 @@ class MainWindow(QtWidgets.QMainWindow):
         '''
         Sends Ivy Message to jump to 'flightBlockName'. Also toggles UI buttons so only 'flightBlockName' is selected.
         '''
-        # Toggle things happen here!
+
         for flightBlock in self.flightBlockDict.keys():
             if flightBlock is flightBlockName:
                 self.flightBlockDict[flightBlock].setChecked(True)
@@ -695,6 +670,7 @@ class MainWindow(QtWidgets.QMainWindow):
         print('Current Flight Block is now ' + flightBlockName)
         print(ivyMsg)
         self.ivySender(ivyMsg)
+
 
     # Used by Main Window Constructor
     def translateUi(self):
