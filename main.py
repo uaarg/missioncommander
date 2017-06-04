@@ -125,7 +125,7 @@ if __name__ == '__main__':
     try:
         interop = AsyncClient(argDict['url'], argDict['username'], argDict['password'])
     except Exception as e:
-        logging.critical('Interop failed to initialize due to: \n'+str(e)+'.\nOperation of Interop threads are supressed.\n')
+        logging.critical('Failed to connect to interop server due to: \n'+str(e)+'.\nOperation of Interop threads are supressed.\n')
         serverIsUp = False
 
     ivy_sender = ivylinker.IvySender(verbose=True)
@@ -138,27 +138,33 @@ if __name__ == '__main__':
     if serverIsUp:
         missionInfo = MissionInformation(interop, ivy_sender.sendMessage)
         missionInfo.getMissionInformation()
-        missionInfo.sendIvyOffAxisShape()
-        missionInfo.sendIvyEmergentTarget(mc.ac_id,mc.db)
-        missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'OpArea')
-        missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'SearchArea')
-        missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'WptNav')
+        if missionInfo.mission_info is None:
+            logging.critical('Failed to recieve unique mission information.')
+        else:
+            missionInfo.sendIvyOffAxisShape()
+            missionInfo.sendIvyEmergentTarget(mc.ac_id,mc.db)
 
+            missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'OpArea')
+            missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'SearchArea')
+            missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'WptNav')
+
+            obstacle_thread = ObstacleThread(interop, ivy_sender.sendMessage)
+
+            obstacle_thread.start()
         telem_thread = TelemetryThread(interop, mc.db.airplane)
-        obstacle_thread = ObstacleThread(interop, ivy_sender.sendMessage)
-
         telem_thread.start()
-        obstacle_thread.start()
 
     ui.run() # Finishes when UI window is closed
     print('Shutting down...')
 
     if serverIsUp:
-        obstacle_thread.stop()
         telem_thread.stop()
+        if not(missionInfo.mission_info is None):
+            obstacle_thread.stop()
 
     ivy_sender.shutdown()
 
     if serverIsUp:
-        obstacle_thread.join()
         telem_thread.join()
+        if not(missionInfo.mission_info is None):
+            obstacle_thread.join()
