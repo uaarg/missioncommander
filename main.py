@@ -73,7 +73,6 @@ class MissionCommander():
 
         self.loadedXML.wait()
 
-
     def loadXMLs(self, filepath, ac_id):
         importxml.bindDBandFilepath(os.path.join(*[filepath, 'flight_plan.xml']), self.db, ac_id)
         importxml.parseXML()
@@ -84,13 +83,18 @@ class MissionCommander():
 
     def determineFlightPlan(self):
         '''
-        This is a dumb way to find out what MissionsAndTasks file we should use. But its easy to do.
+        This is a dumb way to find out what MissionsAndTasks file we should use, but it works
         '''
 
-        if (float(self.db.waypoints['OrIgIn'].get_latlon()['lat'])>49.0): #AKA the origin is in Canada
+        homePosition = self.db.waypoints['OrIgIn'].get_latlon()
+        print(homePosition)
+        if ((str(homePosition['lat'])[0:6] == '53.638') and (str(homePosition['lon'])[0:8] == '-113.286')):
             return 'Bremner'
-        else:
+        if ((str(homePosition['lat'])[0:6] == '38.144') and (str(homePosition['lon'])[0:7] == '-76.427')):
             return 'Webster'
+        else:
+            logger.critical('Did not find MissionsAndTasks file - should make one presently')
+            return ''
 
     def initiSync(self):
         from synchronizer import BagOfSynchronizing
@@ -98,6 +102,7 @@ class MissionCommander():
         self.sync.startThread()
 
     def ivyMsgHandler(self, ac_id, msg):
+
         if self.foundXML:
             if (msg.name == "WALDO_MSG"):
                 self.db.updateTelemetry(msg)
@@ -107,6 +112,10 @@ class MissionCommander():
 
             if (msg.name == "MISSION_STATUS"):
                 self.db.updateAirMissionStatus(msg)
+
+            if (msg.name == "NAVIGATION"):
+                self.db.updateCurrentFlightBlock(msg.cur_block)
+
         else:
             if (msg.name == "ALIVE"):
                 filepath = findMD5(msg.md5sum, self.logger)

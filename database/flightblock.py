@@ -16,11 +16,15 @@ class FlightBlock(object):
         return msg
 
 class FlightBlockList(list):
-    """class to make flight block"""
+    """Class of List of Flight Blocks"""
     def add(self, block):
         self.append((block.name, block))
 
-    def getFlightBlock(self, FlightBlockName):
+    def getFlightBlockByName(self, FlightBlockName):
         for block in self:
-            if block[0] == FlightBlockName:
+            if (str(block[0]) == str(FlightBlockName)):
                 return block[1]
+
+    def getFlightBlockByID(self, flightBlockID):
+
+        return self[int(flightBlockID)][1]

@@ -25,6 +25,7 @@ class BagOfHolding(object):
         self.remianingMissionTime = 0
         self.signals = dbSignals()
         self.flightBlocks = FlightBlockList()
+        self.currentFlightBlock = None
 
     def groundMissionStatusUpdated(self):
         pass
@@ -88,7 +89,6 @@ class BagOfHolding(object):
                     if wp.name == committedWaypoint:
                         self.signals.resendMissions()
 
-
     def getWaypoint(self, index):
         return self.waypoints.get(index)
 
@@ -97,6 +97,17 @@ class BagOfHolding(object):
 
     def addTask(self, taskTuple):
         self.tasks.update(taskTuple)
+
+    def updateCurrentFlightBlock(self, currentBlockID):
+        '''
+        Sends the signal to UI to update to the selected flight block
+        '''
+        newBlock = self.flightBlocks.getFlightBlockByID(currentBlockID)
+
+        if (newBlock != self.currentFlightBlock):
+            print("inside the thing")
+            self.currentFlightBlock =  newBlock
+            self.signals.updateCurrentBlock()
 
 
 class AirplaneTelemetry(object):
@@ -202,7 +213,7 @@ class dbSignals(QObject):
     uas_update = pyqtSignal()
     stagedListUpdate = pyqtSignal()
     resendMissionstoUI = pyqtSignal()
-
+    updateFlightBlock = pyqtSignal()
 
     def __init__(self):
         # Initialize as a QObject
@@ -216,3 +227,6 @@ class dbSignals(QObject):
 
     def resendMissions(self):
         self.resendMissionstoUI.emit()
+
+    def updateCurrentBlock(self):
+        self.updateFlightBlock.emit()

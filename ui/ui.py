@@ -365,6 +365,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.db.signals.uas_update.connect(lambda: self.updateUavListViewList())
         self.db.signals.stagedListUpdate.connect(lambda: self.updateStagedMissionList())
         self.db.signals.resendMissionstoUI.connect(lambda: self.resendMissions())
+        self.db.signals.updateFlightBlock.connect(lambda: self.setActiveFlightBlockAction())
 
         QtCore.QMetaObject.connectSlotsByName(self)
 
@@ -667,21 +668,25 @@ class MainWindow(QtWidgets.QMainWindow):
         exportxml.bindDBandFilepath('data/', self.db)
         exportxml.writeXML()
 
-    def setActiveFlightBlockAction(self, flightBlockName):
+    def setActiveFlightBlockAction(self, flightBlockName = 'checkDatabase'):
         '''
         Sends Ivy Message to jump to 'flightBlockName'. Also toggles UI buttons so only 'flightBlockName' is selected.
         '''
 
+        if flightBlockName == 'checkDatabase': # Then its from main and only needs to update toggle
+            flightBlockName = self.db.currentFlightBlock.name
+        else:
+            ivyMsg = self.db.flightBlocks.getFlightBlockByName(flightBlockName).gen_change_block_msg()
+            print('Current Flight Block is now ' + flightBlockName)
+            print(ivyMsg)
+            self.ivySender(ivyMsg)
+            
         for flightBlock in self.flightBlockDict.keys():
-            if flightBlock is flightBlockName:
+            if flightBlock == flightBlockName:
                 self.flightBlockDict[flightBlock].setChecked(True)
             else:
                 self.flightBlockDict[flightBlock].setChecked(False)
 
-        ivyMsg = self.db.flightBlocks.getFlightBlock(flightBlockName).gen_change_block_msg()
-        print('Current Flight Block is now ' + flightBlockName)
-        print(ivyMsg)
-        self.ivySender(ivyMsg)
 
 
     # Used by Main Window Constructor
