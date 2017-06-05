@@ -116,27 +116,15 @@ class MissionInformation():
         if group == 'OpArea':
             wptPrefix = '_oparea'
             hasAlt = False
-            if self.mission_info.fly_zones[0].boundary_pts is not None:
-                interopWaypointGroup = self.mission_info.fly_zones[0].boundary_pts
-            else:
-                logging.critical('Interop server does not have a fly zone with operational boundary points.')
-                return False
+            interopWaypointGroup = self.mission_info.fly_zones[0].boundary_pts
         elif group == 'SearchArea':
             wptPrefix = '_searchArea'
             hasAlt = False
-            if self.mission_info.search_grid_points is not None:
-                interopWaypointGroup = self.mission_info.search_grid_points
-            else:
-                logging.critical('Interop server does not have a search area with boundary points.')
-                return False
+            interopWaypointGroup = self.mission_info.search_grid_points
         elif group == 'WptNav':
             wptPrefix = 'wp'
             hasAlt = True
-            if self.mission_info.mission_waypoints is not None:
-                interopWaypointGroup = self.mission_info.mission_waypoints
-            else:
-                logging.critical('Interop server does not have a waypoint navigation route.')
-                return False
+            interopWaypointGroup = self.mission_info.mission_waypoints
         else:
             raise AttributeError('Incorrect group called with moveGroupOfWaypoints')
 

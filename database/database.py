@@ -27,14 +27,14 @@ class BagOfHolding(object):
         self.flightBlocks = FlightBlockList()
 
     def groundMissionStatusUpdated(self):
-        self.sync.missionUpdateSent()
+        pass
+        #self.sync.missionUpdateSent()
 
     def updateTelemetry(self, msg):
         self.airplane.updateFromWaldo(msg)
 
     def updateAirMissionStatus(self, msg):
         self.remianingMissionTime = msg.fieldvalues[0]
-
         if(msg.fieldvalues[1].split(",")[0] != 0):
             mission_array = msg.fieldvalues[1].split(",")
             mission_list = fancyList()
@@ -47,11 +47,14 @@ class BagOfHolding(object):
                 if miss != None :
                     mission_list.append(miss)
 
+            if (len(mission_list)>0)and(len(self.airMissionStatus)>0)and(mission_list[0].name != self.airMissionStatus[0].name):
+                self.signals.updateStagedMissionsinUI()
+
             self.airMissionStatus = mission_list
             self.groundMissionStatus.replaceAll(mission_list)
 
 
-        self.signals.updateUASinUI();
+        self.signals.updateUASinUI()
 
     def findMissionById(self, idStr):
         for miss in self.allMissions.items():
@@ -68,10 +71,8 @@ class BagOfHolding(object):
         alt = msg.fieldvalues[3]
         zone = msg.fieldvalues[4]
         wp = list(self.waypoints.items())[int(msg.fieldvalues[0])][1]
-        if wp != None:
+        if (wp != None)and((east != wp.east)or(north != wp.north)or(alt != wp.alt)):
             tmpest = str(wp.east)
-            wp.update_utm(east, north, zone, northern=True, alt=alt, name=None)
-
             if (tmpest !=  str(wp.east)) and (WP_DEBUG):
                 print(str(msg.fieldvalues[0]))
                 print(wp.name)
@@ -79,6 +80,14 @@ class BagOfHolding(object):
                 print("New Easting is :" + tmpest)
                 print("Old Easting is :" + str(wp.east))
                 print('------------------------------------------------------')
+
+            wp.update_utm(east, north, zone, northern=True, alt=alt, name=None)
+            #Waypoint has updated, check if it is part of a comitted mission
+            for mission in self.groundMissionStatus :
+                for committedWaypoint in mission.waypoints:
+                    if wp.name == committedWaypoint:
+                        self.signals.resendMissions()
+
 
     def getWaypoint(self, index):
         return self.waypoints.get(index)
@@ -120,7 +129,7 @@ class AirplaneTelemetry(object):
         except utm.error.OutOfRangeError:
             logg.warning('Out Of Range Error, GPS is probably disconnected. Defaulting to NULL ISLAND (0,0) \n GPS Easting: ' +str(easting)+ ' Northing: ' + str(northing))
             self.position = ('0', '0') #Plane defaults to NULL ISLAND in the Atlantic Ocean
-            
+
         self.altitude = str((float(msg.fieldvalues[10]) + Waypoint.flightParams['ground_alt'])*feetInOneMeter)
         if (float(self.altitude) < 0):
             logg.warning('Altitude reported as negative. Flipping Altitude:' + self.altitude + ' to prevent further errors')
@@ -191,6 +200,9 @@ class AirplaneTelemetry(object):
 class dbSignals(QObject):
     '''This class is to be used to create QT signal objects which can then be connected to the UI'''
     uas_update = pyqtSignal()
+    stagedListUpdate = pyqtSignal()
+    resendMissionstoUI = pyqtSignal()
+
 
     def __init__(self):
         # Initialize as a QObject
@@ -198,3 +210,9 @@ class dbSignals(QObject):
 
     def updateUASinUI(self):
         self.uas_update.emit()
+
+    def updateStagedMissionsinUI(self):
+        self.stagedListUpdate.emit()
+
+    def resendMissions(self):
+        self.resendMissionstoUI.emit()

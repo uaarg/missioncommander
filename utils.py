@@ -1,3 +1,6 @@
+import logging
+logger = logging.getLogger(__name__)
+
 class fancyList(list):
     '''
     Fancy list object that is fancy
@@ -33,7 +36,10 @@ class fancyList(list):
             if i < index: # Not reached replace
                 pass
             elif i == index: # Replace time
-                self[index] = wp[0]
+                if type(wp) is type([]):
+                    self[index] = wp[0]
+                else:
+                    self[index] = wp
             else: # i > index
                 self.insert(i, wp[i-index])
 

@@ -138,19 +138,16 @@ if __name__ == '__main__':
     if serverIsUp:
         missionInfo = MissionInformation(interop, ivy_sender.sendMessage)
         missionInfo.getMissionInformation()
-        if missionInfo.mission_info is None:
-            logging.critical('Failed to recieve unique mission information.')
-        else:
+        try:
             missionInfo.sendIvyOffAxisShape()
             missionInfo.sendIvyEmergentTarget(mc.ac_id,mc.db)
-
             missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'OpArea')
             missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'SearchArea')
             missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'WptNav')
-
             obstacle_thread = ObstacleThread(interop, ivy_sender.sendMessage)
-
             obstacle_thread.start()
+        except Exception as e:
+            logging.critical('Failed to plot interop details (OAX, LKN, OpArea, SearchArea, WptNav and Obstacles) because of \n' + str(e))
         telem_thread = TelemetryThread(interop, mc.db.airplane)
         telem_thread.start()
 

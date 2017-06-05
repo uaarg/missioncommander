@@ -363,9 +363,10 @@ class MainWindow(QtWidgets.QMainWindow):
         # Signals
         self.missionTypeComboBox.currentIndexChanged.connect(lambda: self.checkMissionTypeComboBox())
         self.db.signals.uas_update.connect(lambda: self.updateUavListViewList())
+        self.db.signals.stagedListUpdate.connect(lambda: self.updateStagedMissionList())
+        self.db.signals.resendMissionstoUI.connect(lambda: self.resendMissions())
 
         QtCore.QMetaObject.connectSlotsByName(self)
-
 
     def updateUavListViewList(self):
         uavlistViewModel = QtGui.QStandardItemModel(self.upperPane)
@@ -559,10 +560,21 @@ class MainWindow(QtWidgets.QMainWindow):
                         self.ivySender(ivyMsg)
                         insertList.append(currentMission)
 
-        self.db.groundMissionStatus.replaceAll(insertList)
+        #self.db.groundMissionStatus.replaceAll(insertList)
         self.updateStagedMissionList()
         self.updateUnstagedMissionList()
 
+    def resendMissions(self):
+        '''
+        Resends all the missions currently on the plane to update a moved waypoint or changed mission.
+        '''
+
+        self.ivySender(self.db.groundMissionStatus[0].gen_mission_msg(self.ac_id, self.db, InsertMode.ReplaceAll))
+        for index in range(1,len(self.db.groundMissionStatus)):
+            self.ivySender(self.db.groundMissionStatus[index].gen_mission_msg(self.ac_id, self.db, InsertMode.Append))
+
+        self.updateStagedMissionList()
+        self.updateUnstagedMissionList()
 
     def updateListViews(self):
         print("Needs to be completed")
