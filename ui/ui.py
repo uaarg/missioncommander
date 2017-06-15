@@ -297,6 +297,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menuBar.addAction(self.menuMission.menuAction())
         self.menuBar.addAction(self.menuHelp.menuAction())
 
+        self.insertAction = QtWidgets.QAction("Insert", self)
+
+
         # Translate text for all labels
         self.translateUi()
 
@@ -333,9 +336,6 @@ class MainWindow(QtWidgets.QMainWindow):
                 missionComboBoxModel.appendRow(item)
         self.missionTypeComboBox.setModel(missionComboBoxModel)
 
-        # Action Bindings (for clickable objects in the menu bar)
-        self.actionSave.triggered.connect(lambda: self.saveMissionState())
-
         # Button Bindings
         self.appendButton.clicked.connect(lambda: self.appendButtonAction())
         self.prependButton.clicked.connect(lambda: self.prependButtonAction())
@@ -355,10 +355,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.flightBlockDict['Mission'] = self.missionBlockToggleButton
         self.flightBlockDict['Standby'] = self.standbyBlockToggleButton
         self.flightBlockDict['InitAutoLanding'] = self.landingBlockToggleButton
-
         # Shortcuts
         self.actionExit_Program.setShortcut('Ctrl+Q')
         self.actionSave.setShortcut('Ctrl+S')
+        self.appendButton.setShortcut('Ctrl+A')
+        self.prependButton.setShortcut('Ctrl+P')
+
+        self.insertAction.setShortcut('Ctrl+I')
 
         # Signals
         self.missionTypeComboBox.currentIndexChanged.connect(lambda: self.checkMissionTypeComboBox())
@@ -367,6 +370,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.db.signals.resendMissionstoUI.connect(lambda: self.resendMissions())
         self.db.signals.updateFlightBlock.connect(lambda: self.setActiveFlightBlockAction())
 
+
+        # Action Bindings
+        self.actionSave.triggered.connect(lambda: self.saveMissionState())
+        self.insertAction.triggered.connect(lambda: self.insertMissions())
         QtCore.QMetaObject.connectSlotsByName(self)
 
     def updateUavListViewList(self):
@@ -565,6 +572,40 @@ class MainWindow(QtWidgets.QMainWindow):
         self.updateStagedMissionList()
         self.updateUnstagedMissionList()
 
+    def insertMissions(self):
+        '''
+        Inserts checked missions just after the selested staged mission.
+        '''
+        # Find selected mission
+        print('Insert action Triggered')
+        model = self.unstagedListView.model()
+        #Find selected row
+        print('Keep mission:')
+        selectedIndexes = self.stagedlistView.selectedIndexes()
+        if len(selectedIndexes) == 1:
+            replaceIndex = selectedIndexes[0].row()
+            print(selectedIndexes[0].data())
+            print(replaceIndex)
+        else:
+            print('Select one and only one mission')
+            return
+
+
+        print('List of Selected Missions')
+        for index in range(model.rowCount()):
+            item = model.item(index)
+            if item.isCheckable() and item.checkState() == QtCore.Qt.Checked:
+                itemName = item.index().data()
+                print('Index %s with Mission: %s' % (item.row(), itemName))
+                if itemName in self.db.allMissions:
+                    current_mission = self.db.allMissions[itemName]
+                    insertList.append(current_mission)
+                else:#Tasks
+                    currentTask = self.db.tasks[itemName]
+                    for missID in currentTask.missions:
+                        insertList.append(self.db.findMissionById(missID))
+        print('replaceList')
+        insertList = []
     def resendMissions(self):
         '''
         Resends all the missions currently on the plane to update a moved waypoint or changed mission.
@@ -680,7 +721,7 @@ class MainWindow(QtWidgets.QMainWindow):
             print('Current Flight Block is now ' + flightBlockName)
             print(ivyMsg)
             self.ivySender(ivyMsg)
-            
+
         for flightBlock in self.flightBlockDict.keys():
             if flightBlock == flightBlockName:
                 self.flightBlockDict[flightBlock].setChecked(True)
