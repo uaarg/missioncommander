@@ -105,7 +105,7 @@ class BagOfHolding(object):
         newBlock = self.flightBlocks.getFlightBlockByID(currentBlockID)
 
         if (newBlock != self.currentFlightBlock):
-            print("inside the thing")
+
             self.currentFlightBlock =  newBlock
             self.signals.updateCurrentBlock()
 

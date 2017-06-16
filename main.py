@@ -87,7 +87,7 @@ class MissionCommander():
         '''
 
         homePosition = self.db.waypoints['OrIgIn'].get_latlon()
-        print(homePosition)
+
         if ((str(homePosition['lat'])[0:6] == '53.638') and (str(homePosition['lon'])[0:8] == '-113.286')):
             return 'Bremner'
         if ((str(homePosition['lat'])[0:6] == '38.144') and (str(homePosition['lon'])[0:7] == '-76.427')):

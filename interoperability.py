@@ -135,7 +135,7 @@ class MissionInformation():
         assert type(GCSwaypoints) is list
 
         if len(GCSwaypoints) < len(interopWaypointGroup):
-            logger.critical('Interop Server has more'+group+' area points then the GCS. Moving the first ' +str(len(GCSsearchAreaWaypoints))+ ' waypoints into position')
+            logger.critical('Interop Server has more '+group+' area points then the GCS. Moving the first ' +str(len(GCSwaypoints))+ ' waypoints into position')
 
         for index in range(0,len(GCSwaypoints)):
             InteropIndex = index
