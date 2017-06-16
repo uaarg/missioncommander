@@ -21,12 +21,12 @@ pprzmsg = PprzMessage
 #Startup Arguement Defaults
 #urlDefault = "http://10.42.0.1:8000" #SEBASTIAN's server over the network
 #urlDefault = "http://10.42.0.1:8000" #localhosted server over network
-#urlDefault = "http://localhost:8000" # localhosted server
-urlDefault = "http://10.10.130.10:80"
-usernameDefault = "alberta"
-#usernameDefault = "testuser"
-#passwordDefault = "testpass"
-passwordDefault = "2771408451"
+urlDefault = "http://localhost:8000" # localhosted server
+#urlDefault = "http://10.10.130.10:80" # AUVSI COMP SERVER
+#usernameDefault = "alberta" # AUVSI COMP SERVER
+usernameDefault = "testuser"
+passwordDefault = "testpass"
+#passwordDefault = "2771408451" # AUVSI COMP SERVER
 
 PI = math.pi
 feetInOneMeter = 3.2808399

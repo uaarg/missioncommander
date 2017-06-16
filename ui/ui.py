@@ -202,7 +202,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.replaceAllButton = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
         self.replaceAllButton.setFont(font)
         self.replaceAllButton.setObjectName("replaceAllButton")
-        self.buttonScrollPane.addWidget(self.replaceAllButton, 7, 1, 1, 1)
+        self.buttonScrollPane.addWidget(self.replaceAllButton, 9, 1, 1, 1)
         spacerItem5 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
         self.buttonScrollPane.addItem(spacerItem5, 2, 1, 1, 1)
         self.prependButton = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
@@ -212,7 +212,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.replaceButton = QtWidgets.QPushButton(self.scrollAreaWidgetContents)
         self.replaceButton.setFont(font)
         self.replaceButton.setObjectName("replaceButton")
-        self.buttonScrollPane.addWidget(self.replaceButton, 5, 1, 1, 1)
+        self.buttonScrollPane.addWidget(self.replaceButton, 7, 1, 1, 1)
+        self.insertButton = QtWidgets.QPushButton("Insert", self.scrollAreaWidgetContents)
+        self.insertButton.setFont(font)
+        self.buttonScrollPane.addWidget(self.insertButton, 5, 1, 1, 1)
         spacerItem6 = QtWidgets.QSpacerItem(20, 40, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
         self.buttonScrollPane.addItem(spacerItem6, 4, 1, 1, 1)
         spacerItem7 = QtWidgets.QSpacerItem(20, 39, QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Maximum)
@@ -297,7 +300,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.menuBar.addAction(self.menuMission.menuAction())
         self.menuBar.addAction(self.menuHelp.menuAction())
 
-        self.insertAction = QtWidgets.QAction("Insert", self)
+
 
 
         # Translate text for all labels
@@ -340,6 +343,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.appendButton.clicked.connect(lambda: self.appendButtonAction())
         self.prependButton.clicked.connect(lambda: self.prependButtonAction())
         self.replaceButton.clicked.connect(lambda: self.replaceButtonAction())
+        self.insertButton.clicked.connect(lambda: self.insertMissions())
         self.replaceAllButton.clicked.connect(lambda: self.replaceAllButtonAction())
         self.sendMissionButton.clicked.connect(lambda: self.sendMissionButtonAction())
         self.createMissionButton.clicked.connect(lambda: self.createMissionButtonAction())
@@ -361,7 +365,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.appendButton.setShortcut('Ctrl+A')
         self.prependButton.setShortcut('Ctrl+P')
 
-        self.insertAction.setShortcut('Ctrl+I')
+        self.insertButton.setShortcut('Ctrl+I')
 
         # Signals
         self.missionTypeComboBox.currentIndexChanged.connect(lambda: self.checkMissionTypeComboBox())
@@ -373,7 +377,6 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # Action Bindings
         self.actionSave.triggered.connect(lambda: self.saveMissionState())
-        self.insertAction.triggered.connect(lambda: self.insertMissions())
         QtCore.QMetaObject.connectSlotsByName(self)
 
     def updateUavListViewList(self):
@@ -574,10 +577,10 @@ class MainWindow(QtWidgets.QMainWindow):
 
     def insertMissions(self):
         '''
-        Inserts checked missions just after the selested staged mission.
+        Inserts checked missions just after the selected staged mission.
         '''
         # Find selected mission
-        print('Insert action Triggered')
+        print('Insert Button Pressed')
         model = self.unstagedListView.model()
         #Find selected row
         print('Keep mission:')
@@ -589,8 +592,7 @@ class MainWindow(QtWidgets.QMainWindow):
         else:
             print('Select one and only one mission')
             return
-
-
+        insertList = [self.db.allMissions[selectedIndexes[0].data()]]
         print('List of Selected Missions')
         for index in range(model.rowCount()):
             item = model.item(index)
@@ -605,7 +607,39 @@ class MainWindow(QtWidgets.QMainWindow):
                     for missID in currentTask.missions:
                         insertList.append(self.db.findMissionById(missID))
         print('replaceList')
-        insertList = []
+
+        givenReplaceIndex = replaceIndex
+        insertIndex = 0
+        shiftingList = list()
+        while insertIndex < len(insertList) or len(shiftingList) > 0:
+            if insertIndex == 0:
+                ivyMsg = insertList[0].gen_mission_msg(self.ac_id,self.db, InsertMode.ReplaceIndex, 0, replaceIndex)
+                self.ivySender(ivyMsg)
+                replaceIndex += 1
+                insertIndex += 1
+                continue
+
+            if insertIndex < len(insertList):
+                currentMission = insertList[insertIndex]
+            else:
+                currentMission = shiftingItem = shiftingList.pop(0)
+
+            if replaceIndex < len(self.db.groundMissionStatus):
+                ivyMsg = currentMission.gen_mission_msg(self.ac_id,self.db, InsertMode.ReplaceIndex, 0, replaceIndex)
+                shiftingList.append(self.db.groundMissionStatus.getFromIndex(replaceIndex))
+                self.ivySender(ivyMsg)
+                replaceIndex += 1
+                insertIndex += 1
+            else:
+                ivyMsg = currentMission.gen_mission_msg(self.ac_id,self.db, InsertMode.Append)
+                self.ivySender(ivyMsg)
+                replaceIndex += 1
+                insertIndex += 1
+
+        self.db.groundMissionStatus.replace(insertList, givenReplaceIndex)
+        self.updateStagedMissionList()
+        self.updateUnstagedMissionList()
+
     def resendMissions(self):
         '''
         Resends all the missions currently on the plane to update a moved waypoint or changed mission.

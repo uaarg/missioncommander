@@ -68,7 +68,7 @@ class MissionInformation():
                 msg = LKNwpt.gen_move_waypoint_msg(ac_id)
 
                 self.ivysender(msg)
-                print('Moved the LKN waypoint to Lat:'+str(self.mission_info.emergent_last_known_pos.latitude)+' Lon:'+str(self.mission_info.emergent_last_known_pos.longitude))
+                logger.info('Moved the LKN waypoint to Lat:'+str(self.mission_info.emergent_last_known_pos.latitude)+' Lon:'+str(self.mission_info.emergent_last_known_pos.longitude))
             else:
                 logger.critical('LKN waypoint not found on Interop server.')
         else:
@@ -149,7 +149,7 @@ class MissionInformation():
             db.waypoints[wptPrefix + str(index +1 )].update_latlon(interopWaypointGroup[InteropIndex].latitude, interopWaypointGroup[InteropIndex].longitude, None, newAltitude)
             msg = db.waypoints[wptPrefix + str(index +1)].gen_move_waypoint_msg(ac_id)
             self.ivysender(msg)
-            print('Moved ' +wptPrefix+str(index+1)+ ' to the Interop server position for it.')
+            logger.info('Moved ' +wptPrefix+str(index+1)+ ' to the Interop server position for it.')
 
 
 
