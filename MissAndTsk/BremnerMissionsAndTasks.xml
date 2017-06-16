@@ -15,16 +15,27 @@
     <go wp="wp5" mID="9"/>
     <go wp="wp6" mID="10"/>
     <go wp="wp7" mID="11"/>
+
+    <go mID="18" wp="r1" />
+    <go mID="19" wp="PATHWP1" />
+    <go mID="23" wp="one" />
     <path approaching_time= "3" wpts="wp1, wp2" mID="12"/>
     <path approaching_time= "3" wpts="wp2, wp3" mID="13"/>
     <path approaching_time= "3" wpts="wp3, wp4" mID="14"/>
     <path approaching_time= "3" wpts="wp4, wp5" mID="15"/>
-    <path approaching_time= "3" wpts="wp5, wp6" mID="16"/> 
+    <path approaching_time= "3" wpts="wp5, wp6" mID="16"/>
     <path approaching_time= "0" wpts="wp6, wp7" mID="17"/>
+
+
+    <path mID="20" wpts="r1, r2" />
+    <path mID="21" wpts="r2, r3" />
+    <path mID="22" wpts="r3, r4" />
+
   </missions>
 
   <tasks>
     <task name="Auto Nav" mID="5, 12, 13, 14, 15, 16, 17"/>
+    <task name="Search Flyby Loop" mID="18, 19, 23, 20, 21, 22"/>
     <task name="EnduranceLoop" mID="1, 2, 3, 4"/>
 
     <task mID="20"/>

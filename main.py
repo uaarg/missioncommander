@@ -87,7 +87,6 @@ class MissionCommander():
         '''
 
         homePosition = self.db.waypoints['OrIgIn'].get_latlon()
-
         if ((str(homePosition['lat'])[0:6] == '53.638') and (str(homePosition['lon'])[0:8] == '-113.286')):
             return 'Bremner'
         if ((str(homePosition['lat'])[0:6] == '38.144') and (str(homePosition['lon'])[0:7] == '-76.427')):
@@ -132,7 +131,7 @@ if __name__ == '__main__':
 
     serverIsUp = True
     try:
-        interop = AsyncClient(argDict['url'], argDict['username'], argDict['password'])
+        interop = AsyncClient(argDict['url'], argDict['username'], argDict['password'],  timeout = 1000)
     except Exception as e:
         logging.critical('Failed to connect to interop server due to: \n'+str(e)+'.\nOperation of Interop threads are supressed.\n')
         serverIsUp = False
@@ -150,9 +149,9 @@ if __name__ == '__main__':
         try:
             missionInfo.sendIvyOffAxisShape()
             missionInfo.sendIvyEmergentTarget(mc.ac_id,mc.db)
-            missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'OpArea')
-            missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'SearchArea')
-            missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'WptNav')
+            #missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'OpArea')
+            #missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'SearchArea')
+            #missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'WptNav')
             obstacle_thread = ObstacleThread(interop, ivy_sender.sendMessage)
             obstacle_thread.start()
         except Exception as e:

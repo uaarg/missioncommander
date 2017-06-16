@@ -79,7 +79,7 @@ class MissionInformation():
         Sends a message displaying the shape information for the off-axis target.
         """
         if self.mission_info.off_axis_target_pos is not None:
-
+            logger.info('Off Axis Target is at' +str(self.mission_info.off_axis_target_pos))
             msg = PprzMessage("ground", "SHAPE")
             msg['id'] = 99
             msg['linecolor'] = 'white'
@@ -105,7 +105,6 @@ class MissionInformation():
         Sends a group of waypoint moves over the Ivy bus as according to the interop-
         provided posistions. Currently supports the 'Operational Area', 'Search Area'
         and 'Waypoint Navigation'
-
         '''
 
         wptPrefix = None
@@ -136,7 +135,6 @@ class MissionInformation():
 
         if len(GCSwaypoints) < len(interopWaypointGroup):
             logger.critical('Interop Server has more '+group+' area points then the GCS. Moving the first ' +str(len(GCSwaypoints))+ ' waypoints into position')
-
         for index in range(0,len(GCSwaypoints)):
             InteropIndex = index
             while InteropIndex >= len(interopWaypointGroup):
@@ -243,13 +241,15 @@ class ObstacleThread(Thread):
             try:
                 async_future = self.interopclient.get_obstacles()
                 stationary, moving = async_future.result()
+                logger.info('Stationary Obstacles '+str(stationary))
+                logger.info('Moving Obstacles '+str(moving))
                 ob_list = []
                 for interop_ob in stationary + moving:
                     ob_list.append(Obstacle(interop_ob))
                 self.obstacles = ob_list
-
                 obstacle_id = 1
                 for obstacle in self.obstacles:
+
                     self.sendIvyShapeMessage(
                         obstacle_id, obstacle, self.ivysender
                     )

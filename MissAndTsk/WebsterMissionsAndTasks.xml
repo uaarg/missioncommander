@@ -25,9 +25,34 @@
     <go wp="wp3"   mID="19"/>
     <go wp="wp4"   mID="20"/>
     <go wp="wp5"   mID="21"/>
-    <path wpts=" wp6, swp1" mID="22"/>
+    <go wp="swp4" mID="35"/>
+    <go wp="swp5" mID="36"/>
+    <go wp="swp6" mID="37"/>
+    <go wp="swp7" mID="38"/>
+    <go wp="swp8" mID="39" />
+    <go wp="swp9" mID="40"/>
+    <go wp="swp10" mID="41"/>
+    <go wp="swp11" mID="42"/>
+    <go wp="swp12" mID="43"/>
+    <go wp="swp13" mID="44"/>
+    <go wp="swp14" mID="45"/>
+    <go wp="swp15" mID="46"/>
+    <go wp="swp16" mID="47"/>
+    <go wp="swp17" mID="48"/>
+    <go wp="swp18" mID="49"/>
+    <path wpts=" wp6, swp1"  mID="22"/>
     <path wpts=" swp1, swp2" mID="23"/>
     <path wpts=" swp2, swp3" mID="24"/>
+    <path wpts=" wp1, bwp2"  mID="26"/>
+    <path wpts=" bwp2, wp2"  mID="27"/>
+    <path wpts=" wp2 , bwp3" mID="28"/>
+    <path wpts=" bwp3 , wp3" mID="29"/>
+    <path wpts=" wp3 , awp3" mID="30"/>
+    <path wpts=" awp3, bwp4" mID="31"/>
+    <path wpts=" bwp4, wp4"  mID="32"/>
+    <path wpts=" wp4, wp5"   mID="33"/>
+    <path wpts=" wp5, wp6"   mID="34"/>
+
     <circle radius="60" wp="HOME" mID="25"/>
 
   </missions>
@@ -35,9 +60,9 @@
   <tasks>
     <task name="search_survey" mID="4, 5, 2, 3, 1, 6, 17, 18, 19"/>
 
-    <task name="Waypoint Sweep" mID="20, 21, 22, 23, 24"/>
+    <task name="Waypoint Sweep" mID="26, 27, 28, 29, 30, 31, 32, 33"/>
+    <task name="Search Sweep" mID="22, 23, 24, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49"/>
 
-    <task mID="20"/>
   </tasks>
 
 </lol>
