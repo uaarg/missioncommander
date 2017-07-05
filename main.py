@@ -56,7 +56,6 @@ class MissionCommander():
         """
         Initializes a MissionCommander object.
         Args:
-            current_flight_plan: ???
             ivy_sender: An ivylinker.IvySender object to which a
             message handler can be bound.
         """
@@ -103,9 +102,6 @@ class MissionCommander():
     def ivyMsgHandler(self, ac_id, msg):
 
         if self.foundXML:
-            if (msg.name == "WALDO_MSG"):
-                self.db.updateTelemetry(msg)
-
             if (msg.name == "WP_MOVED"):
                 self.db.updateWaypoint(msg)
 
@@ -129,47 +125,16 @@ if __name__ == '__main__':
     argDict = argParser()
     logger = logging.getLogger(__name__)
 
-    serverIsUp = True
-    try:
-        interop = AsyncClient(argDict['url'], argDict['username'], argDict['password'],  timeout = 1000)
-    except Exception as e:
-        logging.critical('Failed to connect to interop server due to: \n'+str(e)+'.\nOperation of Interop threads are supressed.\n')
-        serverIsUp = False
-
     ivy_sender = ivylinker.IvySender(verbose=True)
+    
+    # run interIvy as submprocess!!
     mc = MissionCommander(ivy_sender, logger)
     ui = UI(mc.db, ivy_sender.sendMessage, mc.ac_id)
 
     # Allow Ctrl+C to kill the program with no cleanup
     signal.signal(signal.SIGINT, signal.SIG_DFL)
 
-    if serverIsUp:
-        missionInfo = MissionInformation(interop, ivy_sender.sendMessage)
-        missionInfo.getMissionInformation()
-        try:
-            missionInfo.sendIvyOffAxisShape()
-            missionInfo.sendIvyEmergentTarget(mc.ac_id,mc.db)
-            #missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'OpArea')
-            #missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'SearchArea')
-            #missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'WptNav')
-            obstacle_thread = ObstacleThread(interop, ivy_sender.sendMessage)
-            obstacle_thread.start()
-        except Exception as e:
-            logging.critical('Failed to plot interop details (OAX, LKN, OpArea, SearchArea, WptNav and Obstacles) because of \n' + str(e))
-        telem_thread = TelemetryThread(interop, mc.db.airplane)
-        telem_thread.start()
-
     ui.run() # Finishes when UI window is closed
     print('Shutting down...')
 
-    if serverIsUp:
-        telem_thread.stop()
-        if not(missionInfo.mission_info is None):
-            obstacle_thread.stop()
-
     ivy_sender.shutdown()
-
-    if serverIsUp:
-        telem_thread.join()
-        if not(missionInfo.mission_info is None):
-            obstacle_thread.join()

@@ -2,8 +2,9 @@
 Queries interoperability server for relevant information,
 then passes that information to the rest of the program.
 """
-from threading import Thread
+from threading import Thread, Event
 from time import sleep
+import utm
 
 from interop.client import AsyncClient
 from interop.exceptions import InteropError
@@ -11,7 +12,7 @@ from interop.interop_types import Telemetry
 from interop.interop_types import StationaryObstacle, MovingObstacle
 
 from pprzlink.message import PprzMessage
-from database import AirplaneTelemetry, Waypoint
+from database import Waypoint
 from obstacle import Obstacle
 from config import *
 
@@ -156,9 +157,9 @@ class TelemetryThread(Thread):
     """
     Thread to send telemetry information.
     """
-    def __init__(self, interopclient, plane):
+    def __init__(self, interopclient):
         super(TelemetryThread, self).__init__()
-        self.plane = plane
+        self.plane = AirplaneTelemetry()
         self.interopclient = interopclient
         self.running = False
 
@@ -184,6 +185,109 @@ class TelemetryThread(Thread):
     def stop(self):
         self.plane.teleAvail.set()
         self.running = False
+
+
+    def updateTelemetry(self, msg):
+        self.plane.updateFromWaldo(msg)
+
+
+class AirplaneTelemetry(object):
+    '''
+    Stores the airplane's position, altitude and current heading.
+    This is meant to be updated from the Ivybus and updating the Interop Server
+    when any value is updated.
+    We need to submit at a minimum of 1 Hz to the server to recieve points
+
+    Note the interop server REQUIRES position in Lat/Lon and height in ft msl
+    (feet above mean sea level). Conversion is done here and saved in the server's units.
+    '''
+
+    def __init__(self):
+        self.position = (0, 0) # Tuple of lat-lon
+        self.altitude = 0
+        self.heading = 0
+        self.teleAvail = Event() # threading event initialization
+        self.teleAvail.clear()
+        self.positionFlag = False
+        self.altitudeFlag = False
+        self.headingFlag = False
+
+    def updateFromWaldo(self, msg):
+        easting = float(msg.fieldvalues[4]) / 100 # cm to m
+        northing = float(msg.fieldvalues[5]) / 100 # cm to m
+        zone_num = int(msg.fieldvalues[6])
+        try:
+            self.position = utm.to_latlon(easting, northing, zone_num, northern=UTM_NORTHERN_HEMISPHERE)
+        except utm.error.OutOfRangeError:
+            logg.warning('Out Of Range Error, GPS is probably disconnected. Defaulting to NULL ISLAND (0,0) \n GPS Easting: ' +str(easting)+ ' Northing: ' + str(northing))
+            self.position = ('0', '0') #Plane defaults to NULL ISLAND in the Atlantic Ocean
+
+        self.altitude = str((float(msg.fieldvalues[10]) + Waypoint.flightParams['ground_alt'])*feetInOneMeter)
+        if (float(self.altitude) < 0):
+            logg.warning('Altitude reported as negative. Flipping Altitude:' + self.altitude + ' to prevent further errors')
+            self.altitude = str(-1*float(self.altitude))
+
+        self.heading = float(msg.fieldvalues[1]) * 180 / PI + 90
+        self.teleAvail.set()
+        if TELEM_DEBUG:
+            print(self.position)
+
+    # Updates each variable individually. This isint really used, can we discard?
+    def newPosition(self, newPos):
+        if (self.position != newPos):
+            self.position = newPos
+            self.positionFlag = True
+            return True
+        else:
+            return False
+
+    def newAltitude(self, newAlt):
+        if (self.altitude != newAlt):
+            self.altitude = newAlt
+            self.altitudeFlag = True
+            return True
+        else:
+            return False
+
+    def newHeading(self, newHead):
+        newHead = self.checkHeading(newHead)
+        if (self.heading != newHead):
+            self.heading = newHead
+            self.headingFlag = True
+            return True
+        else:
+            return False
+
+    def checkHeading(self, value):
+        '''
+        Ensures heading is a value the interop server accepts.
+        '''
+        counter = 0
+        while (value > 360.0) or (value < 0.0):
+            if (value > 360.0):
+                value = value - 360.0
+            else:
+                value = value + 360.0
+
+            counter = counter + 1
+            if counter > 1000:
+                logger. critical('Breaking infinite loop of heading checker')
+                break
+
+        return value
+
+    # Interop server code will call this when new data is recieved
+    def getTelemetry(self):
+        self.teleAvail.clear()
+        self.newHeading(self.heading) # probably a better way to do this, but I want to be sure were sending a valid heading
+
+        tele = {
+            'latitude':float(self.position[0]),
+            'longitude':float(self.position[1]),
+            'altitude_msl':float(self.altitude),
+            'uas_heading':float(self.heading)
+        }
+        return tele
 
 class ObstacleThread(Thread):
     """
@@ -263,8 +367,6 @@ class ObstacleThread(Thread):
 
     def stop(self):
         self.running = False
-
-
 
 def main():
     config = {
