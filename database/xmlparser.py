@@ -52,11 +52,9 @@ class importXML(object):
             self.flightParams['northing0'] = float(utmHome[1])
             self.flightParams['utmZoneNumber0'] = utmHome[2]
             self.flightParams['utmZoneLetter0'] = utmHome[3]
-
             waypointobject.Waypoint.flightParams = self.flightParams
             originWpObj = waypointobject.Waypoint('OrIgIn', '0','utm',self.flightParams['lat0'], self.flightParams['lon0'], self.flightParams['utmZoneNumber0'], True, self.flightParams['easting0'], self.flightParams['northing0'], self.flightParams['alt'])
             self.db.addWaypoint([(originWpObj.name, originWpObj)])
-
 
 
             for wpt in self.root.iter('waypoint'):

@@ -7,7 +7,6 @@ import argparse
 import signal
 import threading
 
-
 from config import *
 import ivylinker
 from ui import UI
@@ -126,7 +125,7 @@ if __name__ == '__main__':
     logger = logging.getLogger(__name__)
 
     ivy_sender = ivylinker.IvySender(verbose=True)
-    
+
     # run interIvy as submprocess!!
     mc = MissionCommander(ivy_sender, logger)
     ui = UI(mc.db, ivy_sender.sendMessage, mc.ac_id)

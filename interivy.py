@@ -3,11 +3,14 @@
 import log, logging
 import argparse
 import signal
+import threading
+import os
 
 from config import *
 import ivylinker
 
 from md5checker import findMD5
+from database import importxml
 from interop.client import AsyncClient
 from interoperability import MissionInformation, TelemetryThread, ObstacleThread
 
@@ -53,10 +56,23 @@ class interIvy():
         self.TelemetryThread = TelemetryThread
         self.logger = logger
         self.ac_id = None
+        self.loadedXML = threading.Event()
+        self.loadedXML.clear()
+
+        from database import BagOfHolding
+        self.db = BagOfHolding()
+        self.ivy_sender = ivySender
+        self.ivy_sender.bindMessageHandler(self.ivyMsgHandler)
+
         self.foundAC_ID = False
-        print(ivySender)
-        self.ivySender = ivySender
-        self.ivySender.bindMessageHandler(self.ivyMsgHandler)
+
+        self.loadedXML.wait()
+
+
+    def loadXMLs(self, filepath, ac_id):
+        importxml.bindDBandFilepath(os.path.join(*[filepath, 'flight_plan.xml']), self.db, ac_id)
+        importxml.parseXML()
+        self.loadedXML.set()
 
     def ivyMsgHandler(self, ac_id, msg):
         if self.foundAC_ID:
@@ -67,8 +83,9 @@ class interIvy():
             if (msg.name == "ALIVE"):
                 filepath = findMD5(msg.md5sum, self.logger)
                 if filepath != None:
+                    self.loadXMLs(filepath, ac_id)
                     self.foundAC_ID = True
-                    self.ivySender.AC_ID = ac_id
+                    self.ivy_sender.AC_ID = ac_id
                     self.ac_id = ac_id
 
 def mainInterop():
@@ -101,10 +118,10 @@ def mainInterop():
         missionInfo.getMissionInformation()
         try:
             missionInfo.sendIvyOffAxisShape()
-            missionInfo.sendIvyEmergentTarget(mc.ac_id,mc.db)
-            #missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'OpArea')
-            #missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'SearchArea')
-            #missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'WptNav')
+            missionInfo.sendIvyEmergentTarget(II.ac_id,II.db)
+            missionInfo.sendIvyGroupOfWaypoints(II.ac_id,II.db, 'OpArea')
+            missionInfo.sendIvyGroupOfWaypoints(II.ac_id,II.db, 'SearchArea')
+            missionInfo.sendIvyGroupOfWaypoints(II.ac_id,II.db, 'WptNav')
             obstacle_thread = ObstacleThread(interop, ivy_sender.sendMessage)
             obstacle_thread.start()
         except Exception as e:
