@@ -39,8 +39,8 @@ class BagOfHolding(object):
         if(msg.fieldvalues[1].split(",")[0] != 0):
             mission_array = msg.fieldvalues[1].split(",")
             mission_list = fancyList()
-
-            task_array = msg.fieldvalues[2].split(",")
+#--------------------------------------------------------------------------------[6/9/2018]----------------
+            #task_array = msg.fieldvalues[2].split(",")
 
             # Parse Missions and Task
             for iv_miss_id in mission_array:

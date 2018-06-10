@@ -78,8 +78,8 @@ class MissionInformation():
         """
         Sends a message displaying the shape information for the off-axis target.
         """
-        if self.mission_info.off_axis_target_pos is not None:
-            logger.info('Off Axis Target is at' +str(self.mission_info.off_axis_target_pos))
+        if self.mission_info.off_axis_odlc_pos is not None:
+            logger.info('Off Axis Target is at' +str(self.mission_info.off_axis_odlc_pos))
             msg = PprzMessage("ground", "SHAPE")
             msg['id'] = 99
             msg['linecolor'] = 'white'
@@ -88,10 +88,10 @@ class MissionInformation():
             msg['shape'] = 0
             msg['status'] = 0
             msg['latarr'] = [int(
-                self.mission_info.off_axis_target_pos.latitude * 1e7
+                self.mission_info.off_axis_odlc_pos.latitude * 1e7
             )] * 2
             msg['lonarr'] = [int(
-                self.mission_info.off_axis_target_pos.longitude * 1e7
+                self.mission_info.off_axis_odlc_pos.longitude * 1e7
             )] * 2
             msg['radius'] = 10
             msg['text'] = 'OAX'
