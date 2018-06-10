@@ -160,6 +160,12 @@ if __name__ == '__main__':
         telem_thread.start()
 
     #ui.run() # Finishes when UI window is closed
+    quit = False
+    if quit == False:
+        choice = input('Press Q to Quit')
+        if choice == "Q" or choice == "q":
+            break
+    
     print('Shutting down...')
 
     if serverIsUp:
