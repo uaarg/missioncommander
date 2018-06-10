@@ -10,7 +10,7 @@ import threading
 
 from config import *
 import ivylinker
-from ui import UI
+#from ui import UI
 from database import importxml
 from md5checker import findMD5
 
@@ -138,7 +138,7 @@ if __name__ == '__main__':
 
     ivy_sender = ivylinker.IvySender(verbose=True)
     mc = MissionCommander(ivy_sender, logger)
-    ui = UI(mc.db, ivy_sender.sendMessage, mc.ac_id)
+    #ui = UI(mc.db, ivy_sender.sendMessage, mc.ac_id)
 
     # Allow Ctrl+C to kill the program with no cleanup
     signal.signal(signal.SIGINT, signal.SIG_DFL)
@@ -159,7 +159,7 @@ if __name__ == '__main__':
         telem_thread = TelemetryThread(interop, mc.db.airplane)
         telem_thread.start()
 
-    ui.run() # Finishes when UI window is closed
+    #ui.run() # Finishes when UI window is closed
     print('Shutting down...')
 
     if serverIsUp:
