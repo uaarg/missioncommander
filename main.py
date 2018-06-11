@@ -149,6 +149,7 @@ if __name__ == '__main__':
         try:
             missionInfo.sendIvyOffAxisShape()
             missionInfo.sendIvyEmergentTarget(mc.ac_id,mc.db)
+            missionInfo.sendIvySearchArea(mc.ac_id, mc.db)
             #missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'OpArea')
             #missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'SearchArea')
             #missionInfo.sendIvyGroupOfWaypoints(mc.ac_id,mc.db, 'WptNav')
@@ -164,7 +165,7 @@ if __name__ == '__main__':
     if quit == False:
         choice = input('Press Q to Quit')
         if choice == "Q" or choice == "q":
-            break
+            quit = True
     
     print('Shutting down...')
 

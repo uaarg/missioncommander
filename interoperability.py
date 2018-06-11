@@ -53,6 +53,43 @@ class MissionInformation():
 
             self.mission_info = None
 
+
+    def sendIvySearchArea(self, ac_id, db):
+        """
+        Sends updated information about the location of the emergent target.
+        This is dependent on there being an existing waypoint in the flight plan that can be used for the emergent target task.
+        Args:
+            ac_id: The aircraft ID, an integer.
+            emergent_waypoint_id: The id of the waypoint associated with the emergent target, an integer.
+        """
+        if db.waypoints['_searchArea1'] is not None:
+            print("got serach area 1")
+            print(db.waypoints['_searchArea1'])
+
+        print(self.mission_info.search_grid_points)
+        count = 1
+        last_interop_wp = None
+        for wp in self.mission_info.search_grid_points:
+            sa_wp = db.waypoints['_searchArea' + str(count)]
+            sa_wp.update_latlon(wp.latitude, wp.longitude)
+            msg = sa_wp.gen_move_waypoint_msg(ac_id)
+            print(wp.order)
+            self.ivysender(msg)
+            count = count + 1
+            last_interop_wp = wp
+        
+        if count =< 10:
+            sa_wp = db.waypoints['_searchArea' + str(count)]
+            sa_wp.update_latlon(last_interop_wp.latitude, last_interop_wp.longitude)
+            msg = sa_wp.gen_move_waypoint_msg(ac_id)
+            self.ivysender(msg)
+            count = count + count
+
+
+
+        #parse this data above into actual coordinates. 
+
+
     def sendIvyEmergentTarget(self, ac_id, db):
         """
         Sends updated information about the location of the emergent target.
