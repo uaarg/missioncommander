@@ -62,6 +62,7 @@ class MissionInformation():
             ac_id: The aircraft ID, an integer.
             emergent_waypoint_id: The id of the waypoint associated with the emergent target, an integer.
         """
+
         if db.waypoints['_searchArea1'] is not None:
             print("got serach area 1")
             print(db.waypoints['_searchArea1'])
@@ -73,22 +74,19 @@ class MissionInformation():
             sa_wp = db.waypoints['_searchArea' + str(count)]
             sa_wp.update_latlon(wp.latitude, wp.longitude)
             msg = sa_wp.gen_move_waypoint_msg(ac_id)
+
             print(wp.order)
             self.ivysender(msg)
             count = count + 1
             last_interop_wp = wp
         
-        if count =< 10:
+        while count <= 10:
             sa_wp = db.waypoints['_searchArea' + str(count)]
             sa_wp.update_latlon(last_interop_wp.latitude, last_interop_wp.longitude)
             msg = sa_wp.gen_move_waypoint_msg(ac_id)
             self.ivysender(msg)
-            count = count + count
-
-
-
+            count = count + 1
         #parse this data above into actual coordinates. 
-
 
     def sendIvyEmergentTarget(self, ac_id, db):
         """
